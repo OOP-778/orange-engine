@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+
+}
+
+group 'com.oop.orangeEngine'
+version 'v1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compileOnly "org.spigotmc:spigot:1.12.2"
+    compile project(":Engine")
+    compile project(":Message")
+    compile project(":File")
+    compile project(":EventsSubscription")
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+}
+
+
+shadowJar {
+
+    minimize()
+    relocate("com.oop.orangeEngine", "com.oop.bossesExpansion.engine")
+    archiveName = "TestingPlugin.jar"
+
+    destinationDirectory = file('target')
+}

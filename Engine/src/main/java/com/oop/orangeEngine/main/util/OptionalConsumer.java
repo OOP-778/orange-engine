@@ -1,0 +1,50 @@
+package com.oop.orangeEngine.main.util;
+
+import java.util.Optional;
+import java.util.function.Consumer;
+
+public class OptionalConsumer<T> implements Consumer<Optional<T>> {
+    private Optional<T> optional;
+
+    private OptionalConsumer(Optional<T> optional) {
+        this.optional = optional;
+    }
+
+    public static <T> OptionalConsumer<T> of(Optional<T> optional) {
+        return new OptionalConsumer<>(optional);
+    }
+
+    public OptionalConsumer<T> ifPresent(Consumer<T> c) {
+        optional.ifPresent(c);
+        return this;
+    }
+
+    public void ifPresentOrElse(Consumer<T> ifPresent, Runnable orElse) {
+        if(optional.isPresent())
+            ifPresent.accept(optional.get());
+
+        else
+            orElse.run();
+
+    }
+
+    public OptionalConsumer<T> ifNotPresent(Runnable r) {
+        if (!optional.isPresent()) {
+            r.run();
+        }
+        return this;
+    }
+
+    public <T> T get() {
+        return (T) optional.get();
+    }
+
+    @Override
+    public void accept(Optional<T> t) {
+        optional = t;
+    }
+
+    public boolean isPresent() {
+        return optional.isPresent();
+    }
+}

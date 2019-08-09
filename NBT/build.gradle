@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+}
+
+group 'com.oop.orangeEngine'
+version 'v1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile files("lib/nbt.jar")
+}
+
+
+shadowJar {
+    
+    relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeEngine.nbt")
+    archiveName = "nbt.jar"
+
+    destinationDirectory = file('target')
+}

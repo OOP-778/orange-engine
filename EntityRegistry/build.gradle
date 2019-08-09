@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+}
+
+group 'com.oop.orangeEngine'
+version 'v1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenLocal()
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url "https://jitpack.io" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://mvnrepository.com/artifact/net.sf.json-lib/json-lib" }
+    maven { url "https://mvnrepository.com/artifact/mysql/mysql-connector-java" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://mvnrepository.com/artifact/org.apache.commons/commons-math3" }
+    maven { url "https://mvnrepository.com/artifact/org.apache.commons/commons-lang3" }
+    maven { url 'https://mvnrepository.com/artifact/com.google.inject/guice' }
+    maven { url 'https://mvnrepository.com/artifact/org.projectlombok/lombok' }
+    maven { url 'https://mvnrepository.com/artifact/commons-io/commons-io' }
+}
+
+dependencies {
+
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly group: 'org.spigotmc', name: 'spigot', version: '1.12.2'
+    compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.3-SNAPSHOT'
+    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    compileOnly files("lib/spigot-1.13.2.jar")
+
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile "de.ruedigermoeller:fst:2.56"
+
+}
