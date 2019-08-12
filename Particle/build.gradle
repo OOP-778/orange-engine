@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group 'com.oop.orangeEngine'
+version 'v1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compileOnly files("lib/spigot-1.13.2.jar")
+}
