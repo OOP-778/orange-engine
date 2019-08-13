@@ -2,9 +2,11 @@ package com.oop.orangeEngine.file;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -81,10 +83,9 @@ public class JarUtil {
         File out = new File(destFolder, outName == null ? fileName : outName);
         File in;
         try {
-            in = new File(source.getClassLoader().getResource(fileName).toURI());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return;
+            in = findFile(fileName, source);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to find file by name: " + fileName);
         }
 
         if(out.exists() && copyOption == CopyOption.COPY_IF_NOT_EXIST) return;
@@ -132,6 +133,24 @@ public class JarUtil {
         }
 
         return null;
+    }
+
+    private static File findFile(String name, Class klass) throws IOException {
+        File actualFile = getFullPath(klass);
+        final JarFile jar = new JarFile(actualFile);
+
+        final Enumeration<JarEntry> entries = jar.entries();
+        while(entries.hasMoreElements()) {
+
+            JarEntry entry = entries.nextElement();
+            if(entry.getName().startsWith(name))
+                return new File(entry.getName());
+
+        }
+
+        jar.close();
+        return null;
+
     }
 
     public static void copyFileFromJar(String fileName, File destFolder, CopyOption copyOption, Class<?> source) {

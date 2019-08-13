@@ -14,4 +14,5 @@ repositories {
 
 dependencies {
     implementation project(":File")
+    implementation project(":Reflection")
 }

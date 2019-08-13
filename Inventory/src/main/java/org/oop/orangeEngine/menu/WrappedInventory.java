@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.oop.orangeEngine.menu.button.AMenuButton;
 import org.oop.orangeEngine.menu.button.impl.BukkitItem;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -33,8 +34,8 @@ public class WrappedInventory {
             if (itemStack == null || itemStack.getType() == Material.AIR)
                 buttons[slot] = BukkitItem.newAir(slot);
 
-            else
-                buttons[slot] = new BukkitItem(itemStack, slot);
+            //else
+                //buttons[slot] = new BukkitItem(itemStack, slot);
 
         }
 
@@ -44,9 +45,11 @@ public class WrappedInventory {
     }
 
     public Set<AMenuButton> getButtons() {
+        return new HashSet<>();
     }
 
     public Set<AMenuButton> getItems() {
+        return new HashSet<>();
     }
 
 

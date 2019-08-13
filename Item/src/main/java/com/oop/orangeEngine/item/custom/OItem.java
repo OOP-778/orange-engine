@@ -91,7 +91,7 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
 
     @Override
     public String getSectionName(OItem object) {
-        return ""
+        return "";
     }
 
     private void asListString(List list, Consumer<List<String>> consumer) {

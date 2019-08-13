@@ -25,7 +25,6 @@ repositories {
 
 dependencies {
 
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     compile "de.ruedigermoeller:fst:2.56"
     compile files("lib/nbt.jar")
     

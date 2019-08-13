@@ -3,6 +3,7 @@ package com.oop.orangeEngine.yaml;
 import com.oop.orangeEngine.file.OFile;
 import com.oop.orangeEngine.main.Engine;
 import com.oop.orangeEngine.main.util.OptionalConsumer;
+import com.oop.orangeEngine.main.util.pair.OPair;
 import com.oop.orangeEngine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeEngine.yaml.mapper.section.ConfigurationSerializable;
 import com.oop.orangeEngine.yaml.util.ConfigurationUtil;
@@ -12,7 +13,6 @@ import com.oop.orangeEngine.yaml.util.UnreadString;
 import com.oop.orangeEngine.yaml.value.AConfigurationValue;
 import com.oop.orangeEngine.yaml.value.ConfigurationList;
 import com.oop.orangeEngine.yaml.value.ConfigurationValue;
-import org.apache.commons.math3.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -101,10 +101,10 @@ public class OConfiguration implements Valuable {
 
                             //Is list
                             List<UnreadString> listValues = looper.nextValuesThatMatches(us -> us.value().contains("-"), true);
-                            Pair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
-                            ConfigurationList value = new ConfigurationList(parsedKey.getKey(), listValues.stream().map(UnreadString::value).map(string -> ConfigurationUtil.parse(ConfigurationUtil.parse(string).getKey().substring(1)).getKey()).collect(toList()));
+                            OPair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
+                            ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> ConfigurationUtil.parse(ConfigurationUtil.parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
 
-                            value.setSpaces(parsedKey.getValue());
+                            value.setSpaces(parsedKey.getSecond());
                             value.description(description);
                             value.setSpaces(0);
 
@@ -118,11 +118,18 @@ public class OConfiguration implements Valuable {
                     } else {
 
                         if (ConfigurationUtil.findSpaces(split[0]) >= 2) continue;
+                        OPair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
 
-                        Pair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
-                        ConfigurationValue value = new ConfigurationValue(parsedKey.getKey(), ObjectsMapper.mapObject(ConfigurationUtil.parse(split[1]).getKey()));
+                        AConfigurationValue value;
 
-                        value.setSpaces(parsedKey.getValue());
+                        //Check for list
+                        if(split[1].trim().startsWith("[]"))
+                            value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
+
+                        else
+                            value = new ConfigurationValue(parsedKey.getFirst(), ObjectsMapper.mapObject(ConfigurationUtil.parse(split[1]).getFirst()));
+
+                        value.setSpaces(parsedKey.getSecond());
                         value.description(description);
                         value.setSpaces(0);
 

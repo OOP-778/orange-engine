@@ -1,11 +1,12 @@
 package com.oop.orangeEngine.yaml.util;
 
+import com.oop.orangeEngine.main.util.pair.OPair;
 import com.oop.orangeEngine.yaml.ConfigurationSection;
 import com.oop.orangeEngine.yaml.OConfiguration;
 import com.oop.orangeEngine.yaml.mapper.ObjectsMapper;
+import com.oop.orangeEngine.yaml.value.AConfigurationValue;
 import com.oop.orangeEngine.yaml.value.ConfigurationList;
 import com.oop.orangeEngine.yaml.value.ConfigurationValue;
-import org.apache.commons.math3.util.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,13 +34,13 @@ public class ConfigurationUtil {
 
         for (int index = sectionStart; index < array.length; index++) {
 
-            Pair<String, Integer> line = parse(array[index].value());
+            OPair<String, Integer> line = parse(array[index].value());
             if (startingSpaces == -1) {
-                startingSpaces = line.getValue();
+                startingSpaces = line.getSecond();
                 continue;
             }
 
-            if (line.getValue() <= startingSpaces && line.getKey().replaceAll("\\s+", "").length() > 0)
+            if (line.getSecond() <= startingSpaces && line.getFirst().replaceAll("\\s+", "").length() > 0)
                 return index - 1;
 
             lastIndex = index;
@@ -75,10 +76,10 @@ public class ConfigurationUtil {
 
                         //IS LIST
                         List<UnreadString> listValues = iterator.nextValuesThatMatches(us -> us.value().contains("-"), true);
-                        Pair<String, Integer> parsedKey = parse(split[0]);
-                        ConfigurationList value = new ConfigurationList(parsedKey.getKey(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getKey().substring(1)).getKey()).collect(toList()));
+                        OPair<String, Integer> parsedKey = parse(split[0]);
+                        ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
 
-                        value.setSpaces(parsedKey.getValue());
+                        value.setSpaces(parsedKey.getSecond());
                         value.description(description);
 
                         if (currentSection != null) {
@@ -105,8 +106,8 @@ public class ConfigurationUtil {
                     } else {
 
                         //IS SECTION
-                        Pair<String, Integer> pair = parse(split[0]);
-                        ConfigurationSection newSection = new ConfigurationSection(configuration, pair.getKey(), pair.getValue());
+                        OPair<String, Integer> pair = parse(split[0]);
+                        ConfigurationSection newSection = new ConfigurationSection(configuration, pair.getFirst(), pair.getSecond());
                         newSection.description(description);
 
                         if (leadSection == null) leadSection = newSection;
@@ -118,10 +119,18 @@ public class ConfigurationUtil {
 
                 } else {
 
-                    Pair<String, Integer> parsedKey = parse(split[0]);
-                    ConfigurationValue value = new ConfigurationValue(parsedKey.getKey(), ObjectsMapper.mapObject(parse(split[1]).getKey()));
+                    OPair<String, Integer> parsedKey = parse(split[0]);
+                    AConfigurationValue value;
 
-                    value.setSpaces(parsedKey.getValue());
+                    //Check for list
+                    if(split[1].trim().startsWith("[]"))
+                        value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
+
+                    else
+                        value = new ConfigurationValue(parsedKey.getFirst(), ObjectsMapper.mapObject(ConfigurationUtil.parse(split[1]).getFirst()));
+
+
+                    value.setSpaces(parsedKey.getSecond());
                     value.description(description);
 
                     if (currentSection != null) {
@@ -150,7 +159,7 @@ public class ConfigurationUtil {
             } else {
 
                 if (line.value().contains("#")) {
-                    description.add(parse(line.value()).getKey());
+                    description.add(parse(line.value()).getFirst());
                 } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add(line.value());
 
             }
@@ -190,7 +199,7 @@ public class ConfigurationUtil {
 
     }
 
-    public static Pair<String, Integer> parse(String key) {
+    public static OPair<String, Integer> parse(String key) {
 
         int spaces = 0;
         StringBuilder builder = new StringBuilder();
@@ -212,7 +221,7 @@ public class ConfigurationUtil {
 
         }
 
-        return new Pair<>(builder.toString(), spaces);
+        return new OPair<>(builder.toString(), spaces);
 
     }
 
@@ -229,10 +238,10 @@ public class ConfigurationUtil {
             T value = array[index];
             if (value.toString().contains("#") || value.toString().trim().length() == 0) continue;
 
-            if (parse(value.toString()).getKey().contains(":")) return false;
+            if (parse(value.toString()).getFirst().contains(":")) return false;
 
             boolean toReturn = filter.test(value);
-            if (toReturn && parse(value.toString()).getKey().contains(":")) return false;
+            if (toReturn && parse(value.toString()).getFirst().contains(":")) return false;
             if (toReturn) return true;
 
         }
@@ -247,7 +256,7 @@ public class ConfigurationUtil {
 
             UnreadString value = array[index];
 
-            //We have to test the getValue if it starts with '-' after all setSpaces is removed.
+            //We have to test the getSecond if it starts with '-' after all setSpaces is removed.
             //If it starts not with '-' it's not a list, but we must ignore white setSpaces & comments
 
             //Checking if string is a white space
@@ -259,7 +268,7 @@ public class ConfigurationUtil {
             //Checking if it's a comment if so continueing
             if (firstChar.equalsIgnoreCase("#")) continue;
 
-            //We have found a list getValue!
+            //We have found a list getSecond!
             return firstChar.equalsIgnoreCase("-");
 
         }

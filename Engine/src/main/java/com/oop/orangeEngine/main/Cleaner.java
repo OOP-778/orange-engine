@@ -12,7 +12,7 @@ public class Cleaner extends AEngineComponent {
 
     private HashMap<Class<?>, Set<Field>> toClean = new HashMap<>();
 
-    protected Cleaner() {
+    Cleaner() {
         super();
 
         //Init clean method onDisable
