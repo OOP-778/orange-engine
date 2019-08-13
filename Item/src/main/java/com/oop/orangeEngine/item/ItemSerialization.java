@@ -1,21 +1,22 @@
 package com.oop.orangeEngine.item;
 
 import com.oop.orangeEngine.item.custom.OBanner;
-import com.oop.orangeEngine.item.custom.OPotion;
-import com.oop.orangeEngine.item.custom.OSkull;
-import com.oop.orangeEngine.yaml.mapper.section.ConfigurationSerializable;
+import com.oop.orangeEngine.item.custom.OItem;
+import com.oop.orangeEngine.main.component.AEngineComponent;
+import com.oop.orangeEngine.yaml.OConfiguration;
 
-import java.util.HashSet;
-import java.util.Set;
+public class ItemSerialization extends AEngineComponent {
 
-public class ItemSerialization implements ConfigurationSerializable<ItemBuilder> {
+    public ItemSerialization(){
+        super();
 
-    private static final Set<ItemBuilder> TYPES = new HashSet<ItemBuilder>(){{
-        add(new OBanner());
-        add(new OPotion());
-        add(new OSkull());
-    }};
+        OConfiguration.registerDefaultSerializer(OItem.class);
+        OConfiguration.registerDefaultSerializer(OBanner.class);
 
+    }
 
-
+    @Override
+    public String getName() {
+        return "Item Serialization";
+    }
 }

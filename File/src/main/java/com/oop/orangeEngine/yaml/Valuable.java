@@ -9,7 +9,7 @@ public interface Valuable {
     AConfigurationValue getValue(String path);
 
     default Object getValueAsObject(String path) {
-        AConfigurationValue value =  getValue(path);
+        AConfigurationValue value = getValue(path);
         if(value == null)
             return null;
         else

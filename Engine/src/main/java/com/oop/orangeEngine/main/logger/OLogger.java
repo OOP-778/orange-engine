@@ -64,4 +64,8 @@ public class OLogger {
         send("");
 
     }
+
+    public void throwError(String message) {
+        throw new IllegalStateException(message);
+    }
 }

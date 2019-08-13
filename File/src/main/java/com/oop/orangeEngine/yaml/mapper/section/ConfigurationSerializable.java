@@ -3,22 +3,24 @@ package com.oop.orangeEngine.yaml.mapper.section;
 import com.oop.orangeEngine.yaml.mapper.section.loader.ILoader;
 import com.oop.orangeEngine.yaml.mapper.section.saver.ISaver;
 
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 public interface ConfigurationSerializable<T> extends ILoader<T>, ISaver<T> {
 
     String getType();
 
-    default Class<T> getJavaClass() {
-        try {
+    String getSectionName(T object);
 
-            String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName();
-            Class<?> clazz = Class.forName(className);
-            return (Class<T>) clazz;
-
-        } catch (Exception e) {
-            throw new IllegalStateException("Class is not parametrized with generic configType!!! Please use extends <> ");
+    default Class<T> getGenericClass() {
+        for (Type type : getClass().getGenericInterfaces()) {
+            try {
+                return  (Class<T>) Class.forName(type.getTypeName().substring(2, type.getTypeName().length() - 1));
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
+
+        return null;
     }
 
 }

@@ -7,4 +7,9 @@ public class OBanner extends OItem {
     public OBanner(ItemStack item) {
         super(item);
     }
+
+    @Override
+    public String getType() {
+        return "banner";
+    }
 }

@@ -1,6 +1,8 @@
 package com.oop.orangeEngine.yaml;
 
 import com.oop.orangeEngine.file.OFile;
+import com.oop.orangeEngine.main.Engine;
+import com.oop.orangeEngine.main.util.OptionalConsumer;
 import com.oop.orangeEngine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeEngine.yaml.mapper.section.ConfigurationSerializable;
 import com.oop.orangeEngine.yaml.util.ConfigurationUtil;
@@ -17,20 +19,24 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.oop.orangeEngine.yaml.util.ConfigurationUtil.isValidIndex;
 import static java.util.stream.Collectors.toList;
 
 public class OConfiguration implements Valuable {
 
+    private static Set<Class<? extends ConfigurationSerializable>> defaultSerializers = new HashSet<>();
+
     private OFile oFile;
     private Map<String, AConfigurationValue> values = new HashMap<>();
     private Map<String, ConfigurationSection> sections = new HashMap<>();
     private List<String> header = new ArrayList<>();
 
-    private Set<ConfigurationSerializable> serializableSet = new HashSet<>();
+    private Set<Class<? extends ConfigurationSerializable>> serializableSet = new HashSet<>();
 
     public OConfiguration(File file) {
+        serializableSet.addAll(defaultSerializers);
         try {
 
             this.oFile = new OFile(file);
@@ -393,8 +399,10 @@ public class OConfiguration implements Valuable {
             for (int index = 0; index < split.length - 1; index++) {
 
                 String key = split[index];
-                if (parent == null) parent = getSections().get(key);
-                else parent = parent.sections().get(key);
+                if (parent == null)
+                    parent = getSections().get(key);
+                else
+                    parent = parent.sections().get(key);
 
             }
 
@@ -415,8 +423,49 @@ public class OConfiguration implements Valuable {
         this.header.add(string);
     }
 
-    public void registerSerializer(ConfigurationSerializable serializable) {
+    public void registerSerializer(Class<? extends ConfigurationSerializable> serializable) {
         this.serializableSet.add(serializable);
+    }
+
+    public static void registerDefaultSerializer(Class<? extends ConfigurationSerializable> serializable) {
+        defaultSerializers.add(serializable);
+    }
+
+    Object wrapSection(ConfigurationSection section) {
+        assert section != null;
+        assert section.isPresentValue("_type_");
+
+        AtomicReference<Object> object = new AtomicReference<>(null);
+        String type = section.getValueAsReq("_type_");
+
+        OptionalConsumer.of(serializableSet.stream()
+                .map(clazz -> {
+                    try {
+                        return clazz.newInstance();
+                    } catch (InstantiationException | IllegalAccessException ignored) {}
+                    return null;
+                })
+                .filter(serializer -> serializer != null && serializer.getType().equalsIgnoreCase(type))
+                .findFirst())
+                .ifPresentOrElse(wrapper -> object.set(wrapper.load(section)), () -> Engine.getInstance().getLogger().throwError("Failed to find a section wrapper for type: " + type));
+
+        return object.get();
+    }
+
+    public Object wrapSection(String path) {
+        ConfigurationSection section = getSection(path);
+        return wrapSection(section);
+    }
+
+    public <T> T wrapSection(String path, Class<T> type) {
+        return type.cast(wrapSection(path));
+    }
+
+    private Class getSerializer(Class klass) {
+        return serializableSet.stream()
+                .filter(serializer -> serializer.isAssignableFrom(klass) || serializer.getSuperclass() == klass)
+                .findFirst()
+                .orElse(null);
     }
 
 }

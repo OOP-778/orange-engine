@@ -252,4 +252,12 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
     }
 
+    public Object wrap() {
+        return getConfiguration().wrapSection(this);
+    }
+
+    public <T> T wrap(Class<T> type) {
+        return type.cast(wrap());
+    }
+
 }

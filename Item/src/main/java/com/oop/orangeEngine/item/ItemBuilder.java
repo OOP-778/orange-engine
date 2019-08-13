@@ -5,6 +5,8 @@ import com.oop.orangeEngine.main.util.pair.OPair;
 import com.oop.orangeEngine.material.OMaterial;
 import com.oop.orangeEngine.nbt.NBTItem;
 import com.oop.orangeEngine.yaml.Typeable;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 public abstract class ItemBuilder implements Typeable {
 
+    @Getter @Setter
     private ItemStack itemStack;
 
     public ItemBuilder(ItemStack item) {
@@ -178,7 +181,7 @@ public abstract class ItemBuilder implements Typeable {
     }
 
     public String getDisplayName() {
-        return getItemMeta().getDisplayName();
+        return getItemMeta().hasDisplayName() ? getItemMeta().getDisplayName() : "";
     }
 
     public List<String> getLore() {
@@ -205,4 +208,5 @@ public abstract class ItemBuilder implements Typeable {
     public Material getMaterial() {
         return itemStack.getType();
     }
+
 }
