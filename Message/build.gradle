@@ -9,7 +9,6 @@ sourceCompatibility = 1.8
 
 dependencies {
     
-    implementation project(":Engine")
     implementation project(":File")
     
 }
