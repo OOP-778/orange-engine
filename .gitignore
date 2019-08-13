@@ -6,5 +6,4 @@ out/
 *.lock
 .idea/
 gradle/
-*.jar
 target/
