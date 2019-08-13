@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
 group 'com.oop.orangeEngine'
@@ -16,6 +15,7 @@ dependencies {
     compile files("lib/nbt.jar")
 }
 
+apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
     

@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
 group 'engine'
@@ -25,22 +24,9 @@ repositories {
 }
 
 dependencies {
-    
-    compileOnly group: 'org.spigotmc', name: 'spigot', version: '1.12.2'
-    
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     compile "de.ruedigermoeller:fst:2.56"
     compile files("lib/nbt.jar")
     
-}
-
-shadowJar {
-
-    minimize()
-    archiveName = "OrangeEngine-Main.jar"
-
-    destinationDirectory = file('target')
 }

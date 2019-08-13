@@ -2,6 +2,7 @@ package com.oop.orangeEngine.yaml;
 
 import com.oop.orangeEngine.file.OFile;
 import com.oop.orangeEngine.yaml.mapper.ObjectsMapper;
+import com.oop.orangeEngine.yaml.mapper.section.ConfigurationSerializable;
 import com.oop.orangeEngine.yaml.util.ConfigurationUtil;
 import com.oop.orangeEngine.yaml.util.CustomWriter;
 import com.oop.orangeEngine.yaml.util.OIterator;
@@ -26,6 +27,8 @@ public class OConfiguration implements Valuable {
     private Map<String, AConfigurationValue> values = new HashMap<>();
     private Map<String, ConfigurationSection> sections = new HashMap<>();
     private List<String> header = new ArrayList<>();
+
+    private Set<ConfigurationSerializable> serializableSet = new HashSet<>();
 
     public OConfiguration(File file) {
         try {
@@ -95,9 +98,9 @@ public class OConfiguration implements Valuable {
                             Pair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
                             ConfigurationList value = new ConfigurationList(parsedKey.getKey(), listValues.stream().map(UnreadString::value).map(string -> ConfigurationUtil.parse(ConfigurationUtil.parse(string).getKey().substring(1)).getKey()).collect(toList()));
 
-                            value.spaces(parsedKey.getValue());
+                            value.setSpaces(parsedKey.getValue());
                             value.description(description);
-                            value.spaces(0);
+                            value.setSpaces(0);
 
                             values.put(value.getKey(), value);
 
@@ -113,9 +116,9 @@ public class OConfiguration implements Valuable {
                         Pair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
                         ConfigurationValue value = new ConfigurationValue(parsedKey.getKey(), ObjectsMapper.mapObject(ConfigurationUtil.parse(split[1]).getKey()));
 
-                        value.spaces(parsedKey.getValue());
+                        value.setSpaces(parsedKey.getValue());
                         value.description(description);
-                        value.spaces(0);
+                        value.setSpaces(0);
 
                         values.put(value.getKey(), value);
 
@@ -128,7 +131,7 @@ public class OConfiguration implements Valuable {
 
                 int startingIndex = Arrays.asList(array).indexOf(headSection);
                 int endIndex = ConfigurationUtil.findSectionEnd(startingIndex, looper);
-                ConfigurationSection section = ConfigurationUtil.loadSection(new OIterator(ConfigurationUtil.copy(array, startingIndex, endIndex)));
+                ConfigurationSection section = ConfigurationUtil.loadSection(this, new OIterator(ConfigurationUtil.copy(array, startingIndex, endIndex)));
 
                 sections.put(section.getKey(), section);
 
@@ -216,7 +219,9 @@ public class OConfiguration implements Valuable {
         if (!path.contains(".")) {
             if (value == null) value = AConfigurationValue.fromObject(path, object);
             values.put(path, value);
+            value.setConfiguration(this);
             return value;
+
         } else {
 
             String[] split = path.split("\\.");
@@ -230,14 +235,17 @@ public class OConfiguration implements Valuable {
                 if (section == null) {
                     if (sections.containsKey(key)) {
                         section = sections.get(key);
+
                     } else {
-                        section = new ConfigurationSection(key, currentSpaces);
+                        section = new ConfigurationSection(this, key, currentSpaces);
                         sections.put(key, section);
                     }
                 } else {
-                    if (section.sections().containsKey(key)) section = section.sections().get(key);
+                    if (section.sections().containsKey(key))
+                        section = section.sections().get(key);
+
                     else {
-                        ConfigurationSection section2 = new ConfigurationSection(key, section.getSpaces());
+                        ConfigurationSection section2 = new ConfigurationSection(this, key, section.getSpaces());
                         section.assignSection(section2);
                         section = section2;
                     }
@@ -247,11 +255,9 @@ public class OConfiguration implements Valuable {
 
             }
 
-            if (section != null) {
-                section.getValues().put(split[split.length - 1], value);
-                value.spaces(value.spaces() <= 0 ? section.getSpaces() + 2 : value.spaces());
-                value.parent(section);
-            }
+            if (section != null)
+                section.assignValue(value);
+
             return value;
 
         }
@@ -329,7 +335,7 @@ public class OConfiguration implements Valuable {
 
             for (AConfigurationValue value : getValues().values()) {
 
-                value.writeDescription(bw, value.spaces());
+                value.writeDescription(bw, value.getSpaces());
                 value.write(bw);
 
             }
@@ -373,8 +379,10 @@ public class OConfiguration implements Valuable {
     public ConfigurationSection createNewSection(String path) {
 
         if (!path.contains(".")) {
+            if(sections.containsKey(path))
+                return sections.get(path);
 
-            ConfigurationSection section = new ConfigurationSection(path, 0);
+            ConfigurationSection section = new ConfigurationSection(this, path, 0);
             sections.put(path, section);
             return section;
 
@@ -393,7 +401,7 @@ public class OConfiguration implements Valuable {
             if (parent != null) {
                 String sectionName = split[split.length - 1];
                 int spaces = parent.getSpaces() + 2;
-                ConfigurationSection section = new ConfigurationSection(sectionName, spaces);
+                ConfigurationSection section = new ConfigurationSection(this, sectionName, spaces);
                 parent.assignSection(section);
                 return section;
             }
@@ -405,6 +413,10 @@ public class OConfiguration implements Valuable {
 
     public void appendHeader(String string) {
         this.header.add(string);
+    }
+
+    public void registerSerializer(ConfigurationSerializable serializable) {
+        this.serializableSet.add(serializable);
     }
 
 }

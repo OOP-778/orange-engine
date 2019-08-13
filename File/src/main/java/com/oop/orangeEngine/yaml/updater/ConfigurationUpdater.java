@@ -46,14 +46,14 @@ public class ConfigurationUpdater {
                 //First check for which mode is on
                 if (method == UpdateType.BLACKLISTED) {
 
-                    if (listedValues.stream().anyMatch(key -> v.key().contains(key))) return;
+                    if (listedValues.stream().anyMatch(key -> v.getKey().contains(key))) return;
                     if (listedKeys.stream().anyMatch(key -> v.path().contains(key))) return;
 
                     toUpdate.add(v);
 
                 } else {
 
-                    if (listedValues.stream().noneMatch(key -> v.key().contains(key))) return;
+                    if (listedValues.stream().noneMatch(key -> v.getKey().contains(key))) return;
                     if (listedKeys.stream().noneMatch(key -> v.path().contains(key))) return;
 
                     toUpdate.add(v);

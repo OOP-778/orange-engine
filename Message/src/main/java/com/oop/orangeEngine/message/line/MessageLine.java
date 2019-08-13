@@ -62,7 +62,7 @@ public class MessageLine {
 
         if (centered) {
 
-            //Okay so we need to gather spaces
+            //Okay so we need to gather setSpaces
             StringBuilder builder = new StringBuilder();
             contentList.forEach(c -> {
 
@@ -98,11 +98,11 @@ public class MessageLine {
                 } else spaceCount++;
             }
 
-            //Append start spaces
+            //Append start setSpaces
             StringBuilder startBuilder = new StringBuilder();
             IntStream.range(1, startSpaces).forEach(s -> startBuilder.append(" "));
 
-            //Append end spaces
+            //Append end setSpaces
             StringBuilder endBuilder = new StringBuilder();
             IntStream.range(1, endSpaces).forEach(s -> endBuilder.append(" "));
 

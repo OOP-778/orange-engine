@@ -1,8 +1,3 @@
-plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '5.1.0'
-
-}
 
 group 'com.oop.orangeEngine'
 version 'v1'
@@ -23,7 +18,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }
-
 
 shadowJar {
 

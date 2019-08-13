@@ -1,6 +1,7 @@
 package com.oop.orangeEngine.yaml.util;
 
 import com.oop.orangeEngine.yaml.ConfigurationSection;
+import com.oop.orangeEngine.yaml.OConfiguration;
 import com.oop.orangeEngine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeEngine.yaml.value.ConfigurationList;
 import com.oop.orangeEngine.yaml.value.ConfigurationValue;
@@ -49,7 +50,7 @@ public class ConfigurationUtil {
 
     }
 
-    public static ConfigurationSection loadSection(OIterator<UnreadString> iterator) {
+    public static ConfigurationSection loadSection(OConfiguration configuration, OIterator<UnreadString> iterator) {
 
         ConfigurationSection leadSection = null;
         ConfigurationSection currentSection = null;
@@ -77,14 +78,14 @@ public class ConfigurationUtil {
                         Pair<String, Integer> parsedKey = parse(split[0]);
                         ConfigurationList value = new ConfigurationList(parsedKey.getKey(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getKey().substring(1)).getKey()).collect(toList()));
 
-                        value.spaces(parsedKey.getValue());
+                        value.setSpaces(parsedKey.getValue());
                         value.description(description);
 
                         if (currentSection != null) {
 
                             if (currentSection.getSpaces() >= value.getSpaces()) {
 
-                                //We need to find parent that has less spaces and the different is between 1-4
+                                //We need to find setParent that has less setSpaces and the different is between 1-4
                                 ConfigurationSection section = currentSection.getAllParents().stream().
                                         filter(s -> s.getSpaces() < value.getSpaces()).
                                         filter(s -> (value.getSpaces() - s.getSpaces()) <= 4).findFirst().orElse(null);
@@ -105,7 +106,7 @@ public class ConfigurationUtil {
 
                         //IS SECTION
                         Pair<String, Integer> pair = parse(split[0]);
-                        ConfigurationSection newSection = new ConfigurationSection(pair.getKey(), pair.getValue());
+                        ConfigurationSection newSection = new ConfigurationSection(configuration, pair.getKey(), pair.getValue());
                         newSection.description(description);
 
                         if (leadSection == null) leadSection = newSection;
@@ -120,14 +121,14 @@ public class ConfigurationUtil {
                     Pair<String, Integer> parsedKey = parse(split[0]);
                     ConfigurationValue value = new ConfigurationValue(parsedKey.getKey(), ObjectsMapper.mapObject(parse(split[1]).getKey()));
 
-                    value.spaces(parsedKey.getValue());
+                    value.setSpaces(parsedKey.getValue());
                     value.description(description);
 
                     if (currentSection != null) {
 
                         if (currentSection.getSpaces() >= value.getSpaces()) {
 
-                            //We need to find parent that has less spaces and the different is between 1-4
+                            //We need to find setParent that has less setSpaces and the different is between 1-4
                             ConfigurationSection section = currentSection.getAllParents().stream().
                                     filter(s -> s.getSpaces() < value.getSpaces()).
                                     filter(s -> (value.getSpaces() - s.getSpaces()) <= 4).findFirst().orElse(null);
@@ -246,13 +247,13 @@ public class ConfigurationUtil {
 
             UnreadString value = array[index];
 
-            //We have to test the getValue if it starts with '-' after all spaces is removed.
-            //If it starts not with '-' it's not a list, but we must ignore white spaces & comments
+            //We have to test the getValue if it starts with '-' after all setSpaces is removed.
+            //If it starts not with '-' it's not a list, but we must ignore white setSpaces & comments
 
             //Checking if string is a white space
             if (value.value().trim().length() == 0) continue;
 
-            //Getting the first character after all the spaces
+            //Getting the first character after all the setSpaces
             String firstChar = firstCharsAfterSpaces(value.toString(), 1);
 
             //Checking if it's a comment if so continueing

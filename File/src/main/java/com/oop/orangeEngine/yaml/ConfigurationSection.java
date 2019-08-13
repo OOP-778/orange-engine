@@ -15,18 +15,20 @@ import java.util.stream.Collectors;
 @Getter
 public class ConfigurationSection extends Descriptionable implements Valuable {
 
+    private OConfiguration configuration;
     private String key;
     private ConfigurationSection parent;
     private Map<String, AConfigurationValue> values = new HashMap<>();
     private Map<String, ConfigurationSection> sections = new HashMap<>();
     private int spaces;
 
-    public ConfigurationSection(String key, int spaces) {
+    public ConfigurationSection(OConfiguration configuration, String key, int spaces) {
+        this.configuration = configuration;
         this.key = key;
         this.spaces = spaces;
     }
 
-    ConfigurationSection parent(ConfigurationSection parent) {
+   private ConfigurationSection setParent(ConfigurationSection parent) {
         parent.sections.put(key, this);
         this.parent = parent;
         return this;
@@ -49,14 +51,15 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
     }
 
     public void assignSection(ConfigurationSection section) {
-        section.parent(this);
+        section.setParent(this);
         sections.put(section.getKey(), section);
     }
 
     public void assignValue(AConfigurationValue value) {
-        value.parent(this);
-        value.spaces(spaces + 2);
-        values.put(value.key(), value);
+        value.setParent(this);
+        value.setSpaces(spaces + 2);
+        values.put(value.getKey(), value);
+        value.setConfiguration(getConfiguration());
     }
 
     public List<ConfigurationSection> getAllParents() {
@@ -120,14 +123,13 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
     }
 
-
     void write(CustomWriter bw) throws IOException {
 
         bw.write(ConfigurationUtil.stringWithSpaces(spaces) + key + ":");
 
         for (AConfigurationValue value : values.values().stream().filter(o -> o instanceof ConfigurationValue).collect(Collectors.toList())) {
 
-            value.writeDescription(bw, value.spaces());
+            value.writeDescription(bw, value.getSpaces());
             value.write(bw);
 
         }
@@ -135,7 +137,7 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
         for (AConfigurationValue value : values.values().stream().filter(o -> o instanceof ConfigurationList).collect(Collectors.toList())) {
 
-            value.writeDescription(bw, value.spaces());
+            value.writeDescription(bw, value.getSpaces());
             value.write(bw);
 
         }
@@ -218,10 +220,10 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
     public ConfigurationSection findAcceptableParent(ConfigurationSection newSection) {
 
-        //Check one if createNewSection and this getSection spaces are equal
+        //Check one if createNewSection and this getSection setSpaces are equal
         if (newSection.spaces == spaces) return parent;
 
-        //If this getSection spaces are more than createNewSection spaces
+        //If this getSection setSpaces are more than createNewSection setSpaces
         if (newSection.spaces < spaces) return parent.findAcceptableParent(newSection);
 
         return this;
@@ -243,7 +245,7 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
     public ConfigurationSection createNewSection(String path) {
 
-        ConfigurationSection configurationSection = new ConfigurationSection(path, spaces + 2);
+        ConfigurationSection configurationSection = new ConfigurationSection(configuration, path, spaces + 2);
         assignSection(configurationSection);
 
         return configurationSection;

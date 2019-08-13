@@ -70,7 +70,7 @@ public interface Configurable {
                         if (!SectionMappers.isMapperPresent(reqProductType))
                             throw new IllegalStateException("Failed to find Section Mapper for class " + reqProductType.getTypeName());
 
-                        //Great we've got the mapper, now we have to find getSection getSections of the parent one.
+                        //Great we've got the mapper, now we have to find getSection getSections of the setParent one.
                         //if no getSections are found, or some failed to build, we will provide empty list (null safety)
                         ConfigurationSection section = configuration.getSection(sectionValue.path());
 
@@ -93,7 +93,7 @@ public interface Configurable {
                         if (!SectionMappers.isMapperPresent(reqProductType))
                             throw new IllegalStateException("Failed to find Section Mapper for class " + reqProductType.getTypeName());
 
-                        //Great we've got the mapper, now we have to find getSection getSections of the parent one.
+                        //Great we've got the mapper, now we have to find getSection getSections of the setParent one.
                         //if no getSections are found, or some failed to build, we will provide empty list (null safety)
                         ConfigurationSection section = configuration.getSection(sectionValue.path());
 

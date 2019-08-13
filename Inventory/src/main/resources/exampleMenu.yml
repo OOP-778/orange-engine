@@ -1,0 +1,39 @@
+menu1:
+
+  _type_: paged menu
+  title: "&eExample Menu Title"
+
+  layout:
+    - "XXXXXXXXX"
+    - ""
+    - ""
+    - "XXXPXNXXX"
+
+  buttons:
+    "X":
+      _type_: filler button
+      material: YELLOW_STAINED_GLASS_PANE
+
+    "next page":
+      _type_: swappable button
+      layout id: "N"
+      material: arrow
+      display name: "&e>>"
+      on swap:
+        material: black_stained_glass_pane
+
+    "previous page":
+      _type_: swappable button
+      layout id: "P"
+      material: arrow
+      display name: "&e<<"
+      on swap:
+        material: black_stained_class_pane
+
+    "show player":
+      _type_: normal button
+      layout id: "Q"
+      material: player_head
+      on click:
+        open: "player modification"
+

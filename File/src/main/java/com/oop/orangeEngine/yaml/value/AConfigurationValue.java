@@ -1,9 +1,11 @@
 package com.oop.orangeEngine.yaml.value;
 
 import com.oop.orangeEngine.yaml.ConfigurationSection;
+import com.oop.orangeEngine.yaml.OConfiguration;
 import com.oop.orangeEngine.yaml.util.CustomWriter;
 import com.oop.orangeEngine.yaml.util.Descriptionable;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,17 +14,25 @@ import java.util.List;
 @Getter
 public abstract class AConfigurationValue extends Descriptionable {
 
+    @Setter
     private String key;
     private ConfigurationSection parent;
+    @Setter
+    private OConfiguration configuration;
+    @Setter
     private int spaces = 0;
 
     public AConfigurationValue(String key, ConfigurationSection parent) {
         this.key = key;
         this.parent = parent;
+        if(parent != null)
+            this.configuration = parent.getConfiguration();
     }
 
-    public AConfigurationValue(String key) {
-        this(key, null);
+    public AConfigurationValue(String key, OConfiguration configuration) {
+        this.key = key;
+        this.configuration = configuration;
+        this.parent = null;
     }
 
     public static AConfigurationValue fromObject(String key, Object obj) {
@@ -38,30 +48,13 @@ public abstract class AConfigurationValue extends Descriptionable {
 
     }
 
-    public int spaces() {
-        return spaces;
-    }
-
-    public AConfigurationValue spaces(int spaces) {
-        this.spaces = spaces;
-        return this;
-    }
-
-    public ConfigurationSection parent() {
-        return parent;
-    }
-
-    public AConfigurationValue parent(ConfigurationSection section) {
+    public AConfigurationValue setParent(ConfigurationSection section) {
         this.parent = section;
         return this;
     }
 
     public String path() {
-        return parent == null ? key() : parent.getKey() + "." + key();
-    }
-
-    public String key() {
-        return key;
+        return parent == null ? getKey() : parent.getKey() + "." + getKey();
     }
 
     public abstract Object getValue();

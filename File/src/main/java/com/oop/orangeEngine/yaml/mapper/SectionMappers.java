@@ -1,32 +1,25 @@
 package com.oop.orangeEngine.yaml.mapper;
 
 import com.oop.orangeEngine.yaml.ConfigurationSection;
-import com.oop.orangeEngine.yaml.mapper.section.loader.SectionLoader;
+import com.oop.orangeEngine.yaml.mapper.section.loader.ILoader;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SectionMappers {
 
-    private static Map<Class, SectionLoader> mappers = new HashMap<>();
+    private static Map<Class<?>, ILoader<?>> mappers = new HashMap<>();
 
     public static <T> T map(ConfigurationSection section, Class<T> to) {
 
         if (!mappers.containsKey(to)) return null;
 
-        SectionLoader mapper = mappers.get(to);
-        if (!mapper.accepts(section)) return null;
+        ILoader mapper = mappers.get(to);
 
-        return (T) mapper.map(section);
-
-    }
-
-    public static void register(SectionLoader mapper) {
-
-        if (mappers.containsKey(mapper.productClass)) return;
-        mappers.put(mapper.productClass, mapper);
+        return (T) mapper.load(section);
 
     }
+
 
     public static boolean isMapperPresent(Class clazz) {
         return mappers.containsKey(clazz);

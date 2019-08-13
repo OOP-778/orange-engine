@@ -1238,7 +1238,7 @@ public enum OMaterial {
      * Checks if the item is duplicated for a different purpose in new versions from {@link #DUPLICATED}.
      *
      * @param name the name of the material.
-     * @return the other Material (key or getValue) of the Material (key or getValue) which the name was equals to.
+     * @return the other Material (getKey or getValue) of the Material (getKey or getValue) which the name was equals to.
      * @see #matchMaterial(String, byte)
      */
     @Nullable

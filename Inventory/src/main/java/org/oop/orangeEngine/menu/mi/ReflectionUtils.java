@@ -120,7 +120,7 @@ public final class ReflectionUtils {
         CB_GENERATOR(CB, "generator"),
         CB_HELP(CB, "help"),
         CB_INVENTORY(CB, "inventory"),
-        CB_MAP(CB, "map"),
+        CB_MAP(CB, "load"),
         CB_METADATA(CB, "metadata"),
         CB_POTION(CB, "potion"),
         CB_PROJECTILES(CB, "projectiles"),

@@ -1,10 +1,66 @@
-plugins {
-    id 'java'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
+    }
 }
 
 group 'com.oop.orangeEngine'
 version 'v1'
 
-sourceCompatibility = 1.8
+String[] blacklistedProjects_COMPILE = ["Testing", "NBT"]
+String[] blacklistedProjects_SPIGOT = ["Particle"]
 
+allprojects {
 
+    repositories {
+
+        maven { url 'https://repo.codemc.org/repository/nms/' }
+        maven { url 'https://plugins.gradle.org/m2/' }
+        jcenter()
+        mavenLocal()
+
+    }
+
+}
+
+allprojects {
+
+    if (!blacklistedProjects_COMPILE.contains(project.name)) {
+        
+        apply plugin: 'com.github.johnrengelman.shadow'
+        apply plugin: 'java'
+
+        dependencies {
+
+            //Don't require Engine in Engine lmfao
+            if (!project.name.equalsIgnoreCase("Engine")) {
+                compileOnly project(":Engine")
+            }
+
+            if (!blacklistedProjects_SPIGOT.contains(project.name))
+                compileOnly "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
+
+            compileOnly 'org.projectlombok:lombok:1.18.8'
+            annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
+        }
+
+        apply plugin: "com.github.johnrengelman.shadow"
+
+        if (!blacklistedProjects_COMPILE.contains(project.name)) {
+
+            shadowJar {
+
+                minimize()
+                archiveName = "OrangeEngine-${project.name}.jar"
+
+                destinationDirectory = file('target')
+            }
+
+        }
+        
+    }
+}
