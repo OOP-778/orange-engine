@@ -49,4 +49,7 @@ public class OReflection {
 
     }
 
+    public static OReflection getInstance() {
+        return INSTANCE;
+    }
 }

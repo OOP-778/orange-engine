@@ -2,7 +2,6 @@ plugins {
     id 'java'
 }
 
-group 'eventsSubscription'
 version 'v1'
 
 sourceCompatibility = 1.8

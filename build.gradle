@@ -7,6 +7,8 @@ buildscript {
     }
 }
 
+defaultTasks 'clean', 'build', 'publish'
+
 group 'com.oop.orangeengine'
 version 'v1'
 
@@ -32,8 +34,10 @@ allprojects {
 
         apply plugin: 'com.github.johnrengelman.shadow'
         apply plugin: 'java'
+        apply plugin: 'maven-publish'
 
-        group = rootProject.name
+        group = "com.oop.orangeengine"
+        version = "1.0"
 
         dependencies {
 
@@ -49,8 +53,7 @@ allprojects {
             annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
         }
-
-        apply plugin: "com.github.johnrengelman.shadow"
+        
 
         if (!blacklistedProjects_COMPILE.contains(project.name)) {
 
@@ -62,14 +65,28 @@ allprojects {
                 destinationDirectory = file('../target')
             }
 
-            apply plugin: 'maven-publish'
+            jar {
+                dependsOn shadowJar
+                dependsOn publish
+            }
+
+            task sourcesJar(type: Jar) {
+                from sourceSets.main.allJava
+            }
+
+            artifacts {
+                archives sourcesJar
+            }
 
             publishing {
                 publications {
                     mavenJava(MavenPublication) {
+                        from components.java
+                        artifact sourcesJar
 
-                        artifact file("OrangeEngine-${project.name}.jar")
+                        group = project.group
                         artifactId = project.name
+                        version = project.version
 
                         pom {
                             url = 'oopdevelopment.com'
