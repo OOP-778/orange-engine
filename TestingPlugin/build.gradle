@@ -1,5 +1,5 @@
 
-group 'com.oop.orangeEngine'
+group 'com.oop.orangeengine'
 version 'v1'
 
 sourceCompatibility = 1.8
@@ -13,7 +13,7 @@ dependencies {
 shadowJar {
 
     minimize()
-    relocate("com.oop.orangeEngine", "com.oop.bossesExpansion.engine")
+    relocate("com.oop.orangeengine", "com.oop.bossesExpansion.engine")
     archiveName = "TestingPlugin.jar"
 
     destinationDirectory = file('target')

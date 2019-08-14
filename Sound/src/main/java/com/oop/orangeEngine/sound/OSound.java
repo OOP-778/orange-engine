@@ -1,6 +1,6 @@
-package com.oop.orangeEngine.sound;
+package com.oop.orangeengine.sound;
 
-import com.oop.orangeEngine.main.util.version.OVersion;
+import com.oop.orangeengine.main.util.version.OVersion;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Location;
 import org.bukkit.Sound;

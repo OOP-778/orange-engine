@@ -1,8 +1,8 @@
 package com.oop.testingPlugin;
 
-import com.oop.orangeEngine.file.OFile;
-import com.oop.orangeEngine.main.plugin.EnginePlugin;
-import com.oop.orangeEngine.yaml.OConfiguration;
+import com.oop.orangeengine.file.OFile;
+import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.yaml.OConfiguration;
 
 public class TestingPlugin extends EnginePlugin {
 

@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.oop.orangeEngine'
+group 'com.oop.orangeengine'
 version 'v1'
 
 sourceCompatibility = 1.8
@@ -13,9 +13,5 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot:1.12.2"
-    implementation project(":Engine")
     implementation project(":Message")
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }

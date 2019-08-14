@@ -7,7 +7,7 @@ buildscript {
     }
 }
 
-group 'com.oop.orangeEngine'
+group 'com.oop.orangeengine'
 version 'v1'
 
 String[] blacklistedProjects_COMPILE = ["Testing", "NBT"]
@@ -29,9 +29,11 @@ allprojects {
 allprojects {
 
     if (!blacklistedProjects_COMPILE.contains(project.name)) {
-        
+
         apply plugin: 'com.github.johnrengelman.shadow'
         apply plugin: 'java'
+
+        group = rootProject.name
 
         dependencies {
 
@@ -60,23 +62,46 @@ allprojects {
                 destinationDirectory = file('../target')
             }
 
+            apply plugin: 'maven-publish'
+
+            publishing {
+                publications {
+                    mavenJava(MavenPublication) {
+
+                        artifact file("OrangeEngine-${project.name}.jar")
+                        artifactId = project.name
+
+                        pom {
+                            url = 'oopdevelopment.com'
+                            developers {
+                                developer {
+                                    id = 'OOP-778'
+                                    email = 'oskardhavel@gmail.com'
+                                }
+                            }
+
+                        }
+                    }
+                }
+                repositories {
+                    if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+                        maven {
+                            credentials {
+                                username project.mavenUsername
+                                password project.mavenPassword
+                            }
+
+                            def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
+                            def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
+                            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                        }
+                    }
+                }
+
+            }
+
         }
 
-        apply plugin: 'maven-publish'
-
-        publishing {
-            publications {
-                shadow(MavenPublication) { publication ->
-                    project.shadow.component(publication)
-                }
-            }
-            repositories {
-                maven {
-                    url "https://repo.codemc.org/repository/maven-releases/"
-                }
-            }
-        }
-
-        
     }
+
 }

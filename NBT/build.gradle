@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.oop.orangeEngine'
+group 'com.oop.orangeengine'
 version 'v1'
 
 sourceCompatibility = 1.8
@@ -19,8 +19,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
     
-    relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeEngine.nbt")
+    relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeengine.nbt")
     archiveName = "nbt.jar"
 
-    destinationDirectory = file('target')
+    destinationDirectory = file('../Engine/lib')
 }

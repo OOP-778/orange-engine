@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.oop.orangeEngine'
+group 'com.oop.orangeengine'
 version 'v1'
 
 sourceCompatibility = 1.8
