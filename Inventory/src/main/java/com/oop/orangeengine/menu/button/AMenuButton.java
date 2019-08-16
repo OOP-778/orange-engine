@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu.button;
 
+import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.sound.WrappedSound;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @Getter
-public abstract class AMenuButton {
+public abstract class AMenuButton extends Storegable {
 
     private ItemStack currentItem;
     private int slot = -1;

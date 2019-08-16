@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
-public class Storegable extends HashMap<String, Object> {
+public abstract class Storegable extends HashMap<String, Object> {
 
     public boolean containsData(String key) {
         return containsKey(key);
