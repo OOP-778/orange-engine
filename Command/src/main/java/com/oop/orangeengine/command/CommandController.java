@@ -2,6 +2,7 @@ package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.line.LineContent;
@@ -55,6 +56,7 @@ public class CommandController {
 
                 if (args.length == 0)
                     handleCommand(args, sender, command);
+
                 else {
 
                     if (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help")) {
@@ -141,6 +143,18 @@ public class CommandController {
 
         }
 
+        //Check for ableToExecute
+        int found = 0;
+        for (Class executerClass : command.getAbleToExecute())
+            if(executerClass == sender.getClass()) found++;
+
+        if(found == 0) {
+
+            sender.sendMessage(colorize(command.getNotAbleToExecuteMessage().replace("%sender%", sender instanceof Player ? "Console" : "Player")));
+            return;
+
+        }
+
         //Check for sender requirements
         for (RequirementMapper requirementMapper : command.getRequirementSet()) {
 
@@ -211,7 +225,11 @@ public class CommandController {
         if (command.getSubCommands().isEmpty()) {
             OMessage message = new OMessage();
             MessageLine line = new MessageLine();
-            line.append(colorScheme.getMainColor() + "Usage: /" + (command.getParent() != null ? command.getParent().getLabel() + " " : ""));
+
+            Helper.print("HAS PARENT: " + command.getParent() != null);
+            String allParents = command.getLabelWithParents();
+
+            line.append(colorScheme.getMainColor() + "Usage: /" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
 
             LineContent labelContent = new LineContent(colorScheme.getMainColor() + command.getLabel());
             if (!command.getDescription().equalsIgnoreCase("none"))

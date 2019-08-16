@@ -1,4 +1,4 @@
 package com.oop.orangeengine.menu.types;
 
-public class NormalMenu {
+public class BasicMenu {
 }

@@ -2,6 +2,7 @@ package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
+import com.oop.orangeengine.main.Helper;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -14,6 +15,8 @@ import java.util.function.Consumer;
 public class OCommand {
 
     private Class[] ableToExecute = new Class[]{Player.class, ConsoleCommandSender.class};
+
+    private String notAbleToExecuteMessage = "&c&l(!)&7 Command can only be executed by %sender%";
 
     //The name of the command
     private String label;
@@ -46,7 +49,7 @@ public class OCommand {
     private Map<Integer, TabCompletion> tabComplete = new HashMap<>();
 
     //Parent
-    private OCommand parent;
+    private OCommand parent = null;
 
     //for nextTabComplete
     private int currentTabComplete = 0;
@@ -71,8 +74,8 @@ public class OCommand {
         return this;
     }
 
-    public OCommand alias(String alias) {
-        this.aliases.add(alias);
+    public OCommand alias(String... alias) {
+        this.aliases.addAll(Arrays.asList(alias));
         return this;
     }
 
@@ -87,7 +90,7 @@ public class OCommand {
     }
 
     public OCommand subCommand(OCommand command) {
-        this.subCommands.put(command.getLabel(), command.parent(this));
+        this.subCommands.put(command.getLabel(), command.setParent(this));
         return this;
     }
 
@@ -113,16 +116,16 @@ public class OCommand {
         return this;
     }
 
-    public OCommand setAbleToExecute(Class<? extends CommandSender>... ableToExecute) {
+    public OCommand ableToExecute(Class<? extends CommandSender>... ableToExecute) {
         this.ableToExecute = ableToExecute;
         return this;
     }
 
-    public OCommand parent() {
+    public OCommand getParent() {
         return parent;
     }
 
-    public OCommand parent(OCommand parent) {
+    public OCommand setParent(OCommand parent) {
         this.parent = parent;
         return this;
     }
@@ -144,6 +147,7 @@ public class OCommand {
 
     private String getLabelWithParents(String current) {
 
+        Helper.print(getParent().getLabel());
         if (getParent() == null)
             return current + getLabel() + " ";
         else

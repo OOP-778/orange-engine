@@ -1,9 +1,13 @@
 package com.oop.orangeengine.database;
 
+import com.oop.orangeengine.database.types.SQLiteDatabase;
 import com.oop.orangeengine.main.util.pair.OPair;
 import lombok.Getter;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +16,12 @@ public abstract class ODatabse {
 
     private Connection connection;
 
-    abstract Connection provideConnection();
+    protected abstract Connection provideConnection();
 
     public Connection getConnection() {
 
         try {
-            if (connection.isClosed() || connection == null)
+            if (connection == null || connection.isClosed())
                 connection = provideConnection();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -61,7 +65,7 @@ public abstract class ODatabse {
         if (hasColumn(table, column)) return;
 
         try (Connection connection = getConnection()) {
-            connection.createStatement().executeQuery("ALTER TABLE " + table + " ADD " + column + " " + columnType.getSql());
+            execute("ALTER TABLE " + table + " ADD " + column + " " + columnType.getSql(), connection);
 
         } catch (SQLException e) {
             throw new IllegalStateException(e);
@@ -69,8 +73,20 @@ public abstract class ODatabse {
 
     }
 
-    public void execute(String statement) throws SQLException {
-        getConnection().createStatement().executeQuery(statement);
+    public void execute(String statement, Connection connection) throws SQLException {
+        connection.createStatement().execute(statement);
+    }
+
+    public Object gatherColumnValue(String table, String column, String identifierColumn, String identifierValue) throws SQLException {
+
+        try (Connection connection = getConnection()) {
+
+            ResultSet rs = connection.createStatement().executeQuery("SELECT " + column + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'");
+            rs.next();
+
+            return rs.getObject(0);
+
+        }
     }
 
     public TableCreator newTableCreator() {
@@ -82,6 +98,8 @@ public abstract class ODatabse {
         private ODatabse databse;
         private String name;
         private List<OPair<String, OColumn>> columns = new ArrayList<>();
+
+        private boolean primaryKey = false;
 
         private TableCreator(ODatabse databse) {
             this.databse = databse;
@@ -97,15 +115,32 @@ public abstract class ODatabse {
             return this;
         }
 
+        public TableCreator addColumnPrimaryKey() {
+
+            primaryKey = true;
+            return this;
+
+        }
+
         public ODatabse create() {
 
             StringBuilder queryBuilder = new StringBuilder();
             queryBuilder.append("CREATE TABLE ").append(name).append(" (");
 
-            boolean first = true;
-            for(OPair<String, OColumn> columnPair : columns) {
+            if (primaryKey) {
 
-                if(first) {
+                if (databse instanceof SQLiteDatabase)
+                    queryBuilder.append("id INTEGER PRIMARY KEY AUTOINCREMENT, ");
+
+                else
+                    queryBuilder.append("id int AUTO_INCREMENT");
+
+            }
+
+            boolean first = true;
+            for (OPair<String, OColumn> columnPair : columns) {
+
+                if (first) {
                     queryBuilder.append(columnPair.getFirst()).append(" ").append(columnPair.getSecond().getSql());
                     first = false;
 
@@ -114,10 +149,14 @@ public abstract class ODatabse {
 
             }
 
+            if (primaryKey && !(databse instanceof SQLiteDatabase))
+                queryBuilder.append(", PRIMARY KEY (id)");
+
             queryBuilder.append(")");
+            System.out.println(queryBuilder);
 
             try {
-                databse.execute(queryBuilder.toString());
+                databse.execute(queryBuilder.toString(), getConnection());
             } catch (SQLException e) {
                 e.printStackTrace();
             }

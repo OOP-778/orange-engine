@@ -65,7 +65,6 @@ allprojects {
 
             jar {
                 dependsOn shadowJar
-                dependsOn publish
             }
 
             task sourcesJar(type: Jar) {

@@ -13,6 +13,6 @@ public @interface DatabaseValue {
 
     String columnName();
 
-    OColumn rowType() default OColumn.TEXT;
+    OColumn columnType() default OColumn.TEXT;
 
 }

@@ -129,8 +129,6 @@ public class MessageLine {
             else {
 
                 lastColorL = ColorFinder.find(clonedLC.getText());
-                Helper.print(clonedLC.getText().replace("&", "#"));
-                Helper.print((lastColorL.color+ ":" + lastColorL.decoration).replace("&", "#"));
                 buffer.append(clonedLC.getText());
 
             }

@@ -1,5 +1,6 @@
 package com.oop.orangeengine.command;
 
+import com.oop.orangeengine.main.util.OptionalConsumer;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 
@@ -18,8 +19,8 @@ public class WrappedCommand {
     }
 
 
-    public Optional<Object> getArg(String arg) {
-        return Optional.ofNullable(arguments.get(arg));
+    public OptionalConsumer<Object> getArg(String arg) {
+        return OptionalConsumer.of(Optional.ofNullable(arguments.get(arg)));
     }
 
     public <T> T getArgAsReq(String arg) {

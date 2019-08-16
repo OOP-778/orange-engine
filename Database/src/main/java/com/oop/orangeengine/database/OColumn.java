@@ -7,8 +7,7 @@ public enum OColumn {
     TEXT("TEXT"),
     VARCHAR("VARCHAR"),
     DOUBLE("DOUBLE"),
-    BOOLEAN("BOOLEAN"),
-    SMART("SMART");
+    BOOLEAN("BOOLEAN");
 
     private String sql;
 

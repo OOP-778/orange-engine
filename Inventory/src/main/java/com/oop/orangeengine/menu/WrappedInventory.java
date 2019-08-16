@@ -53,4 +53,9 @@ public class WrappedInventory {
     }
 
 
+    public void updateButton(AMenuButton button) {
+
+
+
+    }
 }

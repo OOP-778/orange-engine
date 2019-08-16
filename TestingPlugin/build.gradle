@@ -5,15 +5,17 @@ version 'v1'
 sourceCompatibility = 1.8
 
 dependencies {
+    compile project(":Engine")
     compile project(":Message")
     compile project(":File")
     compile project(":EventsSubscription")
+    compile project(":Command")
 }
 
 shadowJar {
 
     minimize()
-    relocate("com.oop.orangeengine", "com.oop.bossesExpansion.engine")
+    relocate("com.oop.orangeengine", "com.oop.testingPlugin.engine")
     archiveName = "TestingPlugin.jar"
 
     destinationDirectory = file('target')

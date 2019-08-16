@@ -1,7 +1,6 @@
 package com.oop.orangeengine.database;
 
 import com.oop.orangeengine.database.annotations.DatabaseTable;
-import com.oop.orangeengine.database.annotations.DatabaseValue;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -13,37 +12,12 @@ public class Runner {
     public static void main(String[] args) {
 
         ODatabse database = null;
-        TestingObject testingObject = new TestingObjectB();
 
-        DatabaseTable table = findTable(testingObject.getClass());
-        if (table == null) return;
+        Integer value = 1;
+        System.out.println(value.hashCode());
 
-        try {
-
-            boolean first = true;
-
-            for (Field field : mergeSuperClassFields(testingObject.getClass())) {
-
-                DatabaseValue databaseValue = field.getDeclaredAnnotation(DatabaseValue.class);
-                if (databaseValue == null) continue;
-
-                if (first) {
-
-                    database.newTableCreator()
-                            .setName(table.tableName())
-                            .addColumn(databaseValue.columnName(), databaseValue.rowType())
-                            .create();
-                    first = false;
-                    continue;
-
-                }
-
-
-
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        value = 5;
+        System.out.println(value.hashCode());
 
     }
 
@@ -67,7 +41,8 @@ public class Runner {
         fields.addAll(Arrays.asList(klass.getDeclaredFields()));
 
         //Add declared source superclass fields
-        fields.addAll(Arrays.asList(klass.getSuperclass().getDeclaredFields()));
+        if(klass.getSuperclass() != null)
+            fields.addAll(Arrays.asList(klass.getSuperclass().getDeclaredFields()));
 
         fields.forEach(field -> field.setAccessible(true));
 

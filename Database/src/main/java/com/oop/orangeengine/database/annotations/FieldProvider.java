@@ -1,6 +1,6 @@
 package com.oop.orangeengine.database.annotations;
 
-import com.oop.orangeengine.database.data.IDBFieldProvider;
+import com.oop.orangeengine.database.provider.IDBFieldProvider;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
