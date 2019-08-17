@@ -5,21 +5,32 @@ import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.sound.WrappedSound;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@Getter
+@Accessors(fluent = true, chain = true)
 public abstract class AMenuButton extends Storegable {
 
+    @Getter
     private ItemStack currentItem;
-    private int slot = -1;
+    @Getter
+    private int slot;
+    @Setter @Getter
     private WrappedInventory holder;
+    @Setter @Getter
     private WrappedSound sound;
 
-    private Map<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new HashMap<>();
+    private final Map<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new HashMap<>();
+
+    public AMenuButton(ItemStack currentItem, int slot) {
+        this.currentItem = currentItem;
+        this.slot = slot;
+    }
 
     public AMenuButton addClickHandler(ClickEnum clickEnum, Consumer<ButtonClickEvent> event) {
         clickHandler.remove(clickEnum);
@@ -35,10 +46,12 @@ public abstract class AMenuButton extends Storegable {
         return this;
     }
 
-    public void setCurrentItem(ItemStack itemStack) {
+    public AMenuButton setCurrentItem(ItemStack itemStack) {
         currentItem = itemStack;
-        if(holder != null)
+        if (holder != null)
             holder.updateButton(this);
+
+        return this;
     }
 
 }

@@ -91,7 +91,7 @@ allprojects {
                         artifact sourcesJar
                         artifact javadocJar
 
-                        group = project.group
+                        groupId = project.group
                         artifactId = project.name
                         version = project.version
 
@@ -108,6 +108,7 @@ allprojects {
                     }
                 }
                 repositories {
+                    mavenLocal()
                     if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
                         maven {
                             credentials {
