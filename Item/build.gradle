@@ -9,6 +9,6 @@ sourceCompatibility = 1.8
 
 dependencies {
 
-    implementation project(":File")
-    implementation project(":Message")
+    compileOnly project(":File")
+    compileOnly project(":Message")
 }

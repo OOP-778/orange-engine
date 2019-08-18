@@ -10,4 +10,12 @@ public class OPair<F, S> implements IPair {
     private F first;
     private S second;
 
+    public F getKey(){
+        return first;
+    }
+
+    public S getValue() {
+        return second;
+    }
+
 }

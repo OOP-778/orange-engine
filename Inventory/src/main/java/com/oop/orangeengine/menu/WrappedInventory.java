@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.packet.SlotUpdate;
@@ -11,7 +12,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
@@ -25,8 +28,9 @@ public class WrappedInventory {
 
         this.owner = owner;
         this.bukkitInventory = inventory;
-
         this.buttons = new AMenuButton[inventory.getSize()];
+
+        //Initialize items so we don't get any nulls
         loadItems();
 
     }
@@ -45,13 +49,13 @@ public class WrappedInventory {
     }
 
     public Set<AMenuButton> getButtons(boolean filterOutItems) {
-        return Arrays.asList(buttons).stream()
+        return Arrays.stream(buttons)
                 .filter(button -> filterOutItems && !(button instanceof BukkitItem))
                 .collect(Collectors.toSet());
     }
 
-    public Set<AMenuButton> getItems() {
-        return Arrays.asList(buttons).stream()
+    public Set<AMenuButton> getBukkitItems() {
+        return Arrays.stream(buttons)
                 .filter(button -> button instanceof BukkitItem)
                 .collect(Collectors.toSet());
     }
@@ -76,13 +80,31 @@ public class WrappedInventory {
     }
 
     public long emptySlots() {
-        return Arrays.asList(buttons).stream()
+        return Arrays.stream(buttons)
                 .filter(button -> button.currentItem().getType() == Material.AIR)
                 .count();
     }
 
+    public List<Integer> listEmptySlots() {
+        //TODO add if button is placeholder it acts as empty slot
+        return Arrays.stream(buttons)
+                .filter(button -> button.currentItem().getType() == Material.AIR)
+                .map(AMenuButton::slot)
+                .collect(Collectors.toList());
+    }
+
     public void open(Player player) {
         player.openInventory(bukkitInventory);
+    }
+
+    public void openToAll(Predicate<Player> filter) {
+        Helper.getPlayers().stream()
+                .filter(player -> filter != null && filter.test(player))
+                .forEach(this::open);
+    }
+
+    public void openToAll() {
+        openToAll(null);
     }
 
 }

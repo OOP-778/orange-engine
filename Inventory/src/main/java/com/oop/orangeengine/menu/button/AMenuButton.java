@@ -32,14 +32,14 @@ public abstract class AMenuButton extends Storegable {
         this.slot = slot;
     }
 
-    public AMenuButton addClickHandler(ClickEnum clickEnum, Consumer<ButtonClickEvent> event) {
+    public AMenuButton setClickHandler(ClickEnum clickEnum, Consumer<ButtonClickEvent> event) {
         clickHandler.remove(clickEnum);
         clickHandler.put(clickEnum, event);
 
         return this;
     }
 
-    public AMenuButton addClickHandler(Consumer<ButtonClickEvent> event) {
+    public AMenuButton setClickHandler(Consumer<ButtonClickEvent> event) {
         clickHandler.remove(ClickEnum.GLOBAL);
         clickHandler.put(ClickEnum.GLOBAL, event);
 

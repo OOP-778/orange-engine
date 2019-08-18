@@ -7,13 +7,13 @@ buildscript {
     }
 }
 
-defaultTasks 'clean', 'build', 'publish'
+defaultTasks 'clean', 'build'
 
 group 'com.oop.orangeengine'
 version 'v1'
 
-String[] blacklistedProjects_COMPILE = ["Testing", "NBT"]
-String[] blacklistedProjects_SPIGOT = ["Particle"]
+def blacklistedProjects_COMPILE = ["Testing", "NBT", "OrangeEngine"]
+def blacklistedProjects_SPIGOT = ["Particle"]
 
 allprojects {
 
@@ -30,103 +30,90 @@ allprojects {
 
 allprojects {
 
-    if (!blacklistedProjects_COMPILE.contains(project.name)) {
+    if(equalsString(project.name, blacklistedProjects_COMPILE)) return
 
-        apply plugin: 'com.github.johnrengelman.shadow'
-        apply plugin: 'java'
-        apply plugin: 'maven-publish'
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: "base"
+    apply plugin: "maven"
 
-        group = "com.oop.orangeengine"
-        version = "1.0"
+    group = "com.oop.orangeengine"
+    version = "1.0"
 
-        dependencies {
+    dependencies {
 
-            //Don't require Engine in Engine lmfao
-            if (!project.name.equalsIgnoreCase("Engine")) {
-                compileOnly project(":Engine")
-            }
-
-            if (!blacklistedProjects_SPIGOT.contains(project.name))
-                compileOnly "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
-
-            compileOnly 'org.projectlombok:lombok:1.18.8'
-            annotationProcessor 'org.projectlombok:lombok:1.18.8'
-
+        //Don't require Engine in Engine lmfao
+        if (!project.name.equalsIgnoreCase("Engine")) {
+            compileOnly project(":Engine")
         }
-        
 
-        if (!blacklistedProjects_COMPILE.contains(project.name)) {
+        if (!blacklistedProjects_SPIGOT.contains(project.name))
+            compileOnly "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
 
-            shadowJar {
+        compileOnly 'org.projectlombok:lombok:1.18.8'
+        annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
-                minimize()
-                archiveName = "OrangeEngine-${project.name}.jar"
+    }
 
-                destinationDirectory = file('../target')
-            }
+    jar {
 
-            jar {
-                dependsOn shadowJar
-            }
+        dependsOn shadowJar
+        if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword'))
+            dependsOn publish
 
-            task sourcesJar(type: Jar) {
-                from sourceSets.main.allJava
-                archiveClassifier = 'sources'
-            }
+    }
 
-            task javadocJar(type: Jar) {
-                from javadoc
-                archiveClassifier = 'javadoc'
-            }
+    shadowJar {
 
-            artifacts {
-                archives sourcesJar
-                archives javadocJar
-            }
+        minimize()
+        archiveName = "OrangeEngine-${project.name}.jar"
 
-            publishing {
-                publications {
-                    mavenJava(MavenPublication) {
-                        from components.java
-                        artifact sourcesJar
-                        artifact javadocJar
+        destinationDirectory = file('../target')
+    }
 
-                        groupId = project.group
-                        artifactId = project.name
-                        version = project.version
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifact source: file("../target/OrangeEngine-${project.name}.jar"), extension: 'jar'
 
-                        pom {
-                            url = 'oopdevelopment.com'
-                            developers {
-                                developer {
-                                    id = 'OOP-778'
-                                    email = 'oskardhavel@gmail.com'
-                                }
-                            }
+                groupId = project.group
+                artifactId = project.name.toLowerCase()
+                version = project.version
 
+                pom {
+                    url = 'oopdevelopment.com'
+                    developers {
+                        developer {
+                            id = 'OOP-778'
+                            email = 'oskardhavel@gmail.com'
                         }
                     }
-                }
-                repositories {
-                    mavenLocal()
-                    if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
-                        maven {
-                            credentials {
-                                username project.mavenUsername
-                                password project.mavenPassword
-                            }
 
-                            def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
-                            def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
-                            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-                        }
-                    }
                 }
-
             }
+        }
+        repositories {
+            if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+                maven {
+                    credentials {
+                        username project.mavenUsername
+                        password project.mavenPassword
+                    }
 
+                    def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
+                    def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
+                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                }
+            }
         }
 
     }
 
+}
+
+boolean equalsString(String string, List<String> list) {
+    return list.stream().anyMatch { string2 ->
+        string2.equalsIgnoreCase(string)
+    }
 }

@@ -13,5 +13,5 @@ repositories {
 }
 
 dependencies {
-    implementation project(":Message")
+    compileOnly project(":Message")
 }

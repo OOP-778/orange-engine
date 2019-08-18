@@ -16,7 +16,7 @@ shadowJar {
 
     minimize()
     relocate("com.oop.orangeengine", "com.oop.testingPlugin.engine")
-    archiveName = "TestingPlugin.jar"
+    archiveName = "OrangeEngine-TestingPlugin.jar"
 
-    destinationDirectory = file('target')
+    destinationDirectory = file('../target')
 }

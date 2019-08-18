@@ -14,6 +14,6 @@ repositories {
 
 dependencies {
     compileOnly files("lib/spigot-1.13.2.jar")
-    implementation project(":Reflection")
-    implementation project(":Item")
+    compileOnly project(":Reflection")
+    compileOnly project(":Item")
 }
