@@ -14,6 +14,10 @@ public class OptionalConsumer<T> implements Consumer<Optional<T>> {
         return new OptionalConsumer<>(optional);
     }
 
+    public static <T> OptionalConsumer<T> of(T nullable) {
+        return new OptionalConsumer<>(Optional.ofNullable(nullable));
+    }
+
     public OptionalConsumer<T> ifPresent(Consumer<T> c) {
         optional.ifPresent(c);
         return this;

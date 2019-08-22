@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.oop.orangeengine.yaml.util.ConfigurationUtil.isValidIndex;
+import static com.oop.orangeengine.yaml.util.ConfigurationUtil.parse;
 import static java.util.stream.Collectors.toList;
 
 public class OConfiguration implements Valuable {
@@ -31,7 +32,14 @@ public class OConfiguration implements Valuable {
     private OFile oFile;
     private Map<String, AConfigurationValue> values = new HashMap<>();
     private Map<String, ConfigurationSection> sections = new HashMap<>();
-    private List<String> header = new ArrayList<>();
+    private List<String> header = new ArrayList<String>() {{
+        add("Configuration was generated with OrangeEngine!");
+        add("An awesome library written by OOP-778");
+        add(" ");
+        add("Support -> https://discord.gg/35fxvm6");
+        add("SpigotMC -> https://www.spigotmc.org/members/brian.562713/");
+        add("GitLab -> https://gitlab.com/oskardhavel");
+    }};
 
     private Set<Class<? extends ConfigurationSerializable>> serializableSet = new HashSet<>();
 
@@ -70,7 +78,7 @@ public class OConfiguration implements Valuable {
             ConfigurationSection key = null;
 
             OIterator<UnreadString> looper = new OIterator<>(array);
-            List<UnreadString> mainSections = new ArrayList<>();
+            List<OPair<UnreadString, List<String>>> mainSections = new ArrayList<>();
 
             List<String> description = new ArrayList<>();
             while (looper.hasNext()) {
@@ -78,13 +86,13 @@ public class OConfiguration implements Valuable {
                 UnreadString line = looper.next();
                 if (line == null) continue;
 
-                if (ConfigurationUtil.firstCharsAfterSpaces(line.value(), 1).equalsIgnoreCase("#")) {
+                if (line.value().contains("#")) {
+                    OPair<String, Integer> parsed = parse(line.value().substring(1));
+                    if (parsed.getFirst().equalsIgnoreCase("------------------")) continue;
 
-                    //We got a description
-                    description.add(line.value());
-                    continue;
+                    description.add(parsed.getFirst());
 
-                }
+                } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
 
                 if (line.value().contains(":")) {
 
@@ -97,12 +105,15 @@ public class OConfiguration implements Valuable {
 
                         if (valid && ConfigurationUtil.isList(valuesArray, elementIndex + 1)) {
 
-                            if (ConfigurationUtil.findSpaces(split[0]) >= 2) continue;
+                            if (ConfigurationUtil.findSpaces(split[0]) >= 2) {
+                                description.clear();
+                                continue;
+                            }
 
                             //Is list
                             List<UnreadString> listValues = looper.nextValuesThatMatches(us -> us.value().contains("-"), true);
-                            OPair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
-                            ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> ConfigurationUtil.parse(ConfigurationUtil.parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
+                            OPair<String, Integer> parsedKey = parse(split[0]);
+                            ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
 
                             value.setSpaces(parsedKey.getSecond());
                             value.description(description);
@@ -111,23 +122,30 @@ public class OConfiguration implements Valuable {
                             values.put(value.getKey(), value);
 
                         } else {
-                            if (ConfigurationUtil.findSpaces(split[0]) != 0) continue;
-                            mainSections.add(line);
+                            if (ConfigurationUtil.findSpaces(split[0]) != 0) {
+                                description.clear();
+                                continue;
+                            }
+                            mainSections.add(new OPair<>(line, new ArrayList<>(description)));
+                            description.clear();
                         }
 
                     } else {
 
-                        if (ConfigurationUtil.findSpaces(split[0]) >= 2) continue;
-                        OPair<String, Integer> parsedKey = ConfigurationUtil.parse(split[0]);
+                        if (ConfigurationUtil.findSpaces(split[0]) >= 2) {
+                            description.clear();
+                            continue;
+                        }
+                        OPair<String, Integer> parsedKey = parse(split[0]);
 
                         AConfigurationValue value;
 
                         //Check for list
-                        if(split[1].trim().startsWith("[]"))
+                        if (split[1].trim().startsWith("[]"))
                             value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
 
                         else
-                            value = new ConfigurationValue(parsedKey.getFirst(), ObjectsMapper.mapObject(ConfigurationUtil.parse(split[1]).getFirst()));
+                            value = new ConfigurationValue(parsedKey.getFirst(), ObjectsMapper.mapObject(parse(split[1]).getFirst()));
 
                         value.setSpaces(parsedKey.getSecond());
                         value.description(description);
@@ -140,11 +158,13 @@ public class OConfiguration implements Valuable {
 
             }
 
-            for (UnreadString headSection : mainSections) {
+            for (OPair<UnreadString, List<String>> headSection : mainSections) {
 
-                int startingIndex = Arrays.asList(array).indexOf(headSection);
+                System.out.println(headSection.getFirst() + ", " + headSection.getSecond());
+                int startingIndex = Arrays.asList(array).indexOf(headSection.getFirst());
                 int endIndex = ConfigurationUtil.findSectionEnd(startingIndex, looper);
                 ConfigurationSection section = ConfigurationUtil.loadSection(this, new OIterator(ConfigurationUtil.copy(array, startingIndex, endIndex)));
+                section.description(headSection.getSecond());
 
                 sections.put(section.getKey(), section);
 
@@ -227,6 +247,17 @@ public class OConfiguration implements Valuable {
         }
 
         if (!path.contains(".")) {
+            if (values.containsKey(path)) {
+                if (object == null) {
+                    values.remove(path);
+                    return null;
+                }
+
+                AConfigurationValue value2 = values.get(path);
+                value2.updateObject(object);
+
+                return value2;
+            }
             if (value == null) value = AConfigurationValue.fromObject(path, object);
             values.put(path, value);
             value.setConfiguration(this);
@@ -279,7 +310,7 @@ public class OConfiguration implements Valuable {
 
     public Map<String, AConfigurationValue> getAllValues() {
 
-        Map<String, AConfigurationValue> allValues = new HashMap<>();
+        Map<String, AConfigurationValue> allValues = new LinkedHashMap<>();
 
         values.forEach((k, v) -> allValues.put(v.path(), v));
         for (ConfigurationSection section : sections.values()) {
@@ -303,44 +334,29 @@ public class OConfiguration implements Valuable {
         return sections;
     }
 
-    public void save() {
+    public void save(OFile file) {
         FileWriter w = null;
         CustomWriter bw = null;
 
         try {
 
             oFile.createIfNotExists();
-            File file = oFile.getFile();
-            w = new FileWriter(file);
+            w = new FileWriter(file.getFile());
             bw = new CustomWriter(w);
 
-            bw.newLine();
-            bw.writeWithoutSmart("#/*");
-            bw.newLine();
-            bw.writeWithoutSmart("#Configuration was generated with OrangeEngine!");
-            bw.newLine();
-            bw.writeWithoutSmart("#An awesome library written by OOP-778");
-            bw.newLine();
-            bw.newLine();
-            bw.writeWithoutSmart("#Support -> https://discord.gg/35fxvm6");
-            bw.newLine();
-            bw.writeWithoutSmart("#SpigotMC -> https://www.spigotmc.org/members/brian.562713/");
-            bw.newLine();
-            bw.writeWithoutSmart("#GitLab -> https://gitlab.com/oskardhavel");
-            bw.newLine();
-            bw.writeWithoutSmart("#---------------------");
-            bw.newLine();
+            bw.write("#/*");
 
-            if(!header.isEmpty()) {
-                bw.newLine();
+            if (!header.isEmpty()) {
                 for (String head : header) {
-                    bw.writeWithoutSmart("#" + head);
-                    bw.newLine();
+                    if (head.trim().length() == 0)
+                        bw.newLine();
+
+                    else
+                        bw.write("# " + head);
                 }
-                bw.newLine();
             }
 
-            bw.writeWithoutSmart("#*/");
+            bw.write("#*/");
             bw.newLine();
 
             for (AConfigurationValue value : getValues().values()) {
@@ -354,6 +370,7 @@ public class OConfiguration implements Valuable {
 
                 section.writeDescription(bw, section.getSpaces());
                 section.write(bw);
+                bw.newLine();
 
             }
 
@@ -368,6 +385,10 @@ public class OConfiguration implements Valuable {
             }
         }
 
+    }
+
+    public void save() {
+        save(oFile);
     }
 
     public OFile getOFile() {
@@ -389,7 +410,7 @@ public class OConfiguration implements Valuable {
     public ConfigurationSection createNewSection(String path) {
 
         if (!path.contains(".")) {
-            if(sections.containsKey(path))
+            if (sections.containsKey(path))
                 return sections.get(path);
 
             ConfigurationSection section = new ConfigurationSection(this, path, 0);
@@ -423,6 +444,10 @@ public class OConfiguration implements Valuable {
         return null;
     }
 
+    public void clearDefaultHeader() {
+        this.header.clear();
+    }
+
     public void appendHeader(String string) {
         this.header.add(string);
     }
@@ -446,7 +471,8 @@ public class OConfiguration implements Valuable {
                 .map(clazz -> {
                     try {
                         return clazz.newInstance();
-                    } catch (InstantiationException | IllegalAccessException ignored) {}
+                    } catch (InstantiationException | IllegalAccessException ignored) {
+                    }
                     return null;
                 })
                 .filter(serializer -> serializer != null && serializer.getType().equalsIgnoreCase(type))

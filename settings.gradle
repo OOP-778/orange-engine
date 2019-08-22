@@ -16,4 +16,5 @@ include 'Database'
 include 'Particle'
 include 'Command'
 include 'Sound'
+include 'Hologram'
 

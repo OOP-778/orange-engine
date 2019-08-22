@@ -1,31 +1,56 @@
 package com.oop.orangeengine.main;
 
+import com.oop.orangeengine.main.component.AEngineComponent;
+import com.oop.orangeengine.main.util.DefaultInitialization;
+import com.oop.orangeengine.main.util.JarUtil;
+import sun.tools.jar.resources.jar;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+
 public class ClassLoader {
 
     public static void load() {
         try {
 
-            //Load EventsSubscription
-            if (classFound("com.oop.orangeengine.eventsSubscription.SubscriptionFactory"))
-                Class.forName("com.oop.orangeengine.eventsSubscription.SubscriptionFactory").newInstance();
+            JarFile jarFile = JarUtil.getJarFile(ClassLoader.class);
 
-            //Load Reflection
-            if (classFound("com.oop.orangeengine.reflection.OReflection"))
-                Class.forName("com.oop.orangeengine.reflection.OReflection").newInstance();
+            final Enumeration<JarEntry> entries = jarFile.entries();
+            List<String> classNames = new ArrayList<>();
+
+            while (entries.hasMoreElements()) {
+
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("com.oop.orangeEngine"))
+                    classNames.add(entry.getName());
+
+            }
+
+            jarFile.close();
+            for (String className : classNames) {
+
+                Class klass = Class.forName(className);
+                if (klass.getName().startsWith("com.oop.orangeengine"))
+                    for (Constructor constructor : klass.getConstructors())
+                        if(constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
+                            try {
+                                constructor.newInstance();
+                            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
+                        }
+            }
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-    }
-
-    public static boolean classFound(String path) {
-        try {
-            Class.forName(path);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
 }

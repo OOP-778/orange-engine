@@ -4,6 +4,9 @@ public enum ClickEnum {
 
     RIGHT,
     LEFT,
-    GLOBAL
+    GLOBAL,
+    SHIFT_RIGHT,
+    SHIFT_LEFT,
+    SHIFT_GLOBAL
 
 }

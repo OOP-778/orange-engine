@@ -1,8 +1,8 @@
 package com.oop.orangeengine.particle.versions.v8;
 
+import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.material.OMaterial;
-import com.oop.orangeengine.reflection.OSimpleReflection;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;

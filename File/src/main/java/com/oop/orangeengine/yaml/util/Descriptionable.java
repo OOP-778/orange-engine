@@ -15,7 +15,7 @@ public abstract class Descriptionable {
     }
 
     public Descriptionable description(List<String> description) {
-        this.description = description.stream().collect(Collectors.toList());
+        this.description = new ArrayList<>(description);
         description.clear();
         return this;
     }
@@ -28,33 +28,26 @@ public abstract class Descriptionable {
 
         if (!description.isEmpty()) {
 
+            bw.newLine();
             if (description.size() > 1) {
-                bw.newLine();
-                bw.writeWithoutSmart(ConfigurationUtil.stringWithSpaces(spaces) + "#------------------");
+                bw.write(ConfigurationUtil.stringWithSpaces(spaces) + "#------------------");
                 bw.newLine();
 
                 for (String d : description) {
 
                     if (d.trim().length() > 0) {
-                        bw.newLine();
-                        bw.writeWithoutSmart(ConfigurationUtil.stringWithSpaces(spaces) + '#' + d);
+                        bw.write(ConfigurationUtil.stringWithSpaces(spaces) + "# " + d);
                     }
 
                 }
 
                 bw.newLine();
-                bw.newLine();
-                bw.writeWithoutSmart(ConfigurationUtil.stringWithSpaces(spaces) + "#------------------");
+                bw.write(ConfigurationUtil.stringWithSpaces(spaces) + "#------------------");
             } else {
 
-                for (String d : description) {
-
-                    bw.newLine();
-                    bw.writeWithoutSmart(ConfigurationUtil.stringWithSpaces(spaces) + '#' + d);
-
-                }
+                for (String d : description)
+                    bw.write(ConfigurationUtil.stringWithSpaces(spaces) + "# " + d);
             }
-            bw.newLine();
 
         }
 

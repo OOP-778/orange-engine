@@ -123,7 +123,7 @@ public class ConfigurationUtil {
                     AConfigurationValue value;
 
                     //Check for list
-                    if(split[1].trim().startsWith("[]"))
+                    if (split[1].trim().startsWith("[]"))
                         value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
 
                     else
@@ -159,8 +159,12 @@ public class ConfigurationUtil {
             } else {
 
                 if (line.value().contains("#")) {
-                    description.add(parse(line.value()).getFirst());
-                } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add(line.value());
+                    OPair<String, Integer> parsed = parse(line.value().substring(1));
+                    if (parsed.getFirst().equalsIgnoreCase("------------------")) continue;
+
+                    description.add(parsed.getFirst());
+
+                } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
 
             }
 
@@ -209,7 +213,7 @@ public class ConfigurationUtil {
 
         for (Character c : key.toCharArray()) {
 
-            if (c.toString().equalsIgnoreCase(" ") && !foundFirstChar) spaces++;
+            if ((c.toString().equalsIgnoreCase(" ") || c.toString().equalsIgnoreCase("#")) && !foundFirstChar) spaces++;
             else {
 
                 if (lcount == 0 && c.toString().equalsIgnoreCase("\"")) continue;
@@ -299,9 +303,9 @@ public class ConfigurationUtil {
     public static void smartNewLine(CustomWriter bw) throws IOException {
 
         String lastWritten = bw.getLastWritten();
-        if(lastWritten.length() <= 1) return;
+        if (lastWritten.length() <= 1) return;
 
-        if(lastWritten.charAt(lastWritten.length()-1) != ':')
+        if (lastWritten.charAt(lastWritten.length() - 1) != ':')
             bw.newLine();
 
     }

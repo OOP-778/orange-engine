@@ -98,7 +98,7 @@ public class WrappedInventory {
     }
 
     public void openToAll(Predicate<Player> filter) {
-        Helper.getPlayers().stream()
+        Helper.getOnlinePlayers().stream()
                 .filter(player -> filter != null && filter.test(player))
                 .forEach(this::open);
     }

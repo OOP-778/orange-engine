@@ -4,14 +4,17 @@ import com.oop.orangeengine.eventssubscription.subscription.SubEvent;
 import com.oop.orangeengine.eventssubscription.subscription.SubscribedEvent;
 import com.oop.orangeengine.main.Cleaner;
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.component.AEngineComponent;
+import com.oop.orangeengine.main.util.DefaultInitialization;
 import org.bukkit.event.Event;
 
 import java.util.function.Consumer;
 
-public class SubscriptionFactory {
+public class SubscriptionFactory extends AEngineComponent {
 
     private static SubscriptionFactory INSTANCE;
 
+    @DefaultInitialization
     public SubscriptionFactory() {
 
         if (INSTANCE != null) {
@@ -42,5 +45,10 @@ public class SubscriptionFactory {
 
     public static SubscriptionFactory getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public String getName() {
+        return "Subscription Factory";
     }
 }

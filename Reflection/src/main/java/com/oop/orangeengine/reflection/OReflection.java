@@ -2,15 +2,18 @@ package com.oop.orangeengine.reflection;
 
 import com.oop.orangeengine.main.Cleaner;
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.component.AEngineComponent;
+import com.oop.orangeengine.main.util.DefaultInitialization;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class OReflection {
+public class OReflection  {
 
     private Map<String, OClass> classMap = new HashMap<>();
     private static OReflection INSTANCE;
 
+    @DefaultInitialization
     public OReflection() {
 
         if (INSTANCE != null) {

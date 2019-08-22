@@ -59,6 +59,8 @@ public abstract class AConfigurationValue extends Descriptionable {
 
     public abstract Object getValue();
 
+    public abstract void updateObject(Object object);
+
     public <T> T getValueAsReq() {
         return (T) getValue();
     }

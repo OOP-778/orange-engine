@@ -8,6 +8,7 @@ import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.StaticTask;
 import com.oop.orangeengine.main.task.TaskController;
 import lombok.Getter;
+import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Engine {
     private List<AEngineComponent> components = new ArrayList<>();
     private TaskController taskController;
     private OLogger logger;
+    private final FSTConfiguration fstConfiguration = FSTConfiguration.createJsonConfiguration();
 
     public Engine(EnginePlugin plugin) {
         instance = this;

@@ -1,4 +1,7 @@
 package com.oop.orangeengine.main.util;
 
-public class Updateable {
+public interface Updateable {
+
+    void update();
+
 }

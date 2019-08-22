@@ -1,11 +1,15 @@
 package com.oop.orangeengine.database;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public enum OColumn {
 
     INTEGER("INT"),
-    FLOAT("LONG"),
+    FLOAT("FLOAT"),
+    LONG("LONG"),
     TEXT("TEXT"),
-    VARCHAR("VARCHAR"),
+    VARCHAR("VARCHAR(255)"),
     DOUBLE("DOUBLE"),
     BOOLEAN("BOOLEAN");
 
@@ -50,5 +54,28 @@ public enum OColumn {
 
     public String getSql() {
         return sql;
+    }
+
+    public Object getObject(ResultSet rs) throws SQLException {
+        if (this == INTEGER)
+            return rs.getInt(1);
+
+        else if (this == BOOLEAN)
+            return rs.getBoolean(1);
+
+        else if (this == FLOAT)
+            return rs.getFloat(1);
+
+        else if (this == DOUBLE)
+            return rs.getDouble(1);
+
+        else if(this == LONG)
+            return rs.getLong(1);
+
+        else if (this == VARCHAR || this == TEXT)
+            return rs.getString(1);
+
+        return rs.getObject(1);
+
     }
 }

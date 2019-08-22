@@ -12,8 +12,10 @@ import java.security.AccessController;
 @Getter
 public class CustomWriter extends BufferedWriter {
 
+    final private String lineSeparator = AccessController.doPrivileged(new GetPropertyAction("line.separator"));
+
     @Setter
-    private String lastWritten = "";
+    private String lastWritten = null;
 
     public CustomWriter(Writer writer) {
         super(writer);
@@ -21,18 +23,20 @@ public class CustomWriter extends BufferedWriter {
 
     @Override
     public void write(String s, int i, int i1) throws IOException {
-
-        super.write(s, i, i1);
-        if (s.equalsIgnoreCase(AccessController.doPrivileged(new GetPropertyAction("line.separator"))))
+        if(s.equals(lineSeparator)) {
+            if(lastWritten == null)
+                return;
+            super.write(s, i, i1);
             return;
+        }
 
         newLine();
-
-        setLastWritten(s);
-        ConfigurationUtil.smartNewLine(this);
+        lastWritten = s;
+        super.write(s, i, i1);
     }
 
-    public void writeWithoutSmart(String s) throws IOException {
-        super.write(s, 0, s.length());
+    @Override
+    public void newLine() throws IOException {
+        super.newLine();
     }
 }

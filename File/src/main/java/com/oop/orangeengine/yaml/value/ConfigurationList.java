@@ -30,13 +30,21 @@ public class ConfigurationList extends AConfigurationValue {
     @Override
     public void write(CustomWriter bw) throws IOException {
 
-        bw.write(ConfigurationUtil.stringWithSpaces(getSpaces()) + getKey() + ":");
+        if(values.isEmpty())
+            bw.write(ConfigurationUtil.stringWithSpaces(getSpaces()) + getKey() + ": []");
+
+        else
+            bw.write(ConfigurationUtil.stringWithSpaces(getSpaces()) + getKey() + ":");
+
         for (Object value : values) {
-
-            bw.newLine();
             bw.write(ConfigurationUtil.stringWithSpaces(getSpaces()) + "- " + ObjectsMapper.toString(value));
-
         }
 
+    }
+
+    @Override
+    public void updateObject(Object object) {
+        if(object instanceof List)
+            values = (List<Object>) object;
     }
 }

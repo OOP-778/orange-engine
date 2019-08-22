@@ -36,4 +36,9 @@ public class ConfigurationValue extends AConfigurationValue {
     public void write(CustomWriter bw) throws IOException {
         bw.write(ConfigurationUtil.stringWithSpaces(getSpaces()) + getKey() + ": " + ObjectsMapper.toString(getValue()));
     }
+
+    @Override
+    public void updateObject(Object object) {
+        this.value = object;
+    }
 }

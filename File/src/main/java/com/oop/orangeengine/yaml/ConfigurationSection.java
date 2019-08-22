@@ -18,8 +18,8 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
     private OConfiguration configuration;
     private String key;
     private ConfigurationSection parent;
-    private Map<String, AConfigurationValue> values = new HashMap<>();
-    private Map<String, ConfigurationSection> sections = new HashMap<>();
+    private Map<String, AConfigurationValue> values = new LinkedHashMap<>();
+    private Map<String, ConfigurationSection> sections = new LinkedHashMap<>();
     private int spaces;
 
     public ConfigurationSection(OConfiguration configuration, String key, int spaces) {
@@ -142,8 +142,16 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
         }
 
+        boolean first = true;
         for (ConfigurationSection value : sections.values()) {
-            value.write(bw);
+            if(first) {
+                first = false;
+                value.write(bw);
+
+            }  else {
+                bw.newLine();
+                value.write(bw);
+            }
         }
 
     }

@@ -5,6 +5,7 @@ import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -78,7 +79,7 @@ public class OTask extends Storegable {
     }
 
     public boolean isCancelled() {
-        return bukkitTask.isCancelled();
+        return Bukkit.getScheduler().isCurrentlyRunning(bukkitTask.getTaskId());
     }
 
     public void cancel() {

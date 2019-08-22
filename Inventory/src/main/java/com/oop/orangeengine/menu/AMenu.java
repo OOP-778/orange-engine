@@ -77,6 +77,7 @@ public abstract class AMenu {
     }
 
     public boolean hasChild(String identifier, boolean deepLookup) {
+
         Optional<AMenu> first = children.stream()
                 .filter(child -> child.identifier.equalsIgnoreCase(identifier))
                 .findFirst();
@@ -139,6 +140,6 @@ public abstract class AMenu {
         return this;
     }
 
-    abstract void build();
+    protected abstract void build();
 
 }

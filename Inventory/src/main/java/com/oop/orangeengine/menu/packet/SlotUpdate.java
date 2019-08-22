@@ -1,6 +1,6 @@
 package com.oop.orangeengine.menu.packet;
 
-import com.oop.orangeengine.reflection.OSimpleReflection;
+import com.oop.orangeengine.main.util.OSimpleReflection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

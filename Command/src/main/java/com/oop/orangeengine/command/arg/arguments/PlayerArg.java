@@ -24,6 +24,6 @@ public class PlayerArg extends CommandArgument<Player> {
 
     @Override
     public void onAdd(OCommand command) {
-        command.nextTabComplete((args) -> Helper.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        command.nextTabComplete((args) -> Helper.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
     }
 }
