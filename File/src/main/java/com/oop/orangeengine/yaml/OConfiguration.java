@@ -44,12 +44,16 @@ public class OConfiguration implements Valuable {
     private Set<Class<? extends ConfigurationSerializable>> serializableSet = new HashSet<>();
 
     public OConfiguration(File file) {
+        this(new OFile(file));
+    }
+
+    public OConfiguration(OFile oFile) {
         serializableSet.addAll(defaultSerializers);
         try {
 
-            this.oFile = new OFile(file);
+            this.oFile = oFile;
 
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            BufferedReader reader = new BufferedReader(new FileReader(oFile.getFile()));
             String sCurrentLine;
             int index = 0;
             List<UnreadString> lines = new ArrayList<>();

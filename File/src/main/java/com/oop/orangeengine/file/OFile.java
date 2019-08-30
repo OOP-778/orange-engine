@@ -26,10 +26,13 @@ public class OFile {
     public OFile(File file) {
         this.file = file;
         this.fileName = file.getName();
+
+        if (file.getParentFile() != null)
+            this.folder = file.getParentFile();
     }
 
-    public void createIfNotExists() {
-        createIfNotExists(false);
+    public OFile createIfNotExists() {
+        return createIfNotExists(false);
     }
 
     public void rename(String to) {
@@ -50,9 +53,13 @@ public class OFile {
         return file != null ? file : folder != null ? new File(folder, fileName) : new File(fileName);
     }
 
-    public void createIfNotExists(boolean importFromResources) {
+    public OFile createIfNotExists(boolean importFromResources) {
 
         try {
+
+            if(folder != null && !folder.exists())
+                folder.mkdirs();
+
             File file = folder == null ? new File(fileName) : new File(folder, fileName);
             if (!file.exists()) {
 
@@ -66,6 +73,8 @@ public class OFile {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        return this;
 
     }
 
