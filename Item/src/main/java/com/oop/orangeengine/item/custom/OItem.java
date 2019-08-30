@@ -54,6 +54,10 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
             for(String enchant : stringList) {
 
                 String[] split = enchant.split(":");
+                System.out.println("LENGHT: " + split.length);
+                System.out.println(enchant);
+                System.out.println("0: " + split[0]);
+                System.out.println("1: " + split[1]);
                 addEnchant(Enchantment.getByName(split[0].toUpperCase()), Integer.parseInt(split[1]));
 
             }
