@@ -7,7 +7,7 @@ buildscript {
     }
 }
 
-defaultTasks 'clean', 'build'
+defaultTasks 'clean', 'build', 'publish'
 
 group 'com.oop.orangeengine'
 def props = new Properties()
@@ -61,10 +61,12 @@ allprojects {
     jar {
 
         dependsOn shadowJar
-        if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword'))
-            dependsOn publish
+        //if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword'))
+        dependsOn publish
 
     }
+
+    publish.shouldRunAfter shadowJar
 
     shadowJar {
 
@@ -96,6 +98,7 @@ allprojects {
             }
         }
         repositories {
+            mavenLocal()
             if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
                 maven {
                     credentials {
@@ -106,7 +109,7 @@ allprojects {
                     def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
                     def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
                     url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-                    
+
                 }
             }
         }

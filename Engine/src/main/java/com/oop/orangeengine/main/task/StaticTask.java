@@ -5,6 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 public class StaticTask {
 
     private JavaPlugin owning;
@@ -31,6 +34,12 @@ public class StaticTask {
             async.run();
             sync(sync);
         });
+    }
+
+    public <T> CompletableFuture<T> gatherFromSync(Supplier<T> supplier) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        sync(() -> future.complete(supplier.get()));
+        return future;
     }
 
     public BukkitTask async(Runnable runnable) {

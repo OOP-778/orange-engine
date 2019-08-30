@@ -1,6 +1,8 @@
 package com.oop.orangeengine.main.util;
 
+import net.minecraft.server.v1_8_R3.PlayerConnection;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -93,7 +95,6 @@ public final class OSimpleReflection {
     public static Field getField(String className, Package packageType, boolean declared, String fieldName) throws Exception {
         return getField(packageType.getClass(className), declared, fieldName);
     }
-
 
     public static void setValue(Object instance, Class<?> clazz, boolean declared, String fieldName, Object value) throws Exception {
         getField(clazz, declared, fieldName).set(instance, value);
@@ -262,4 +263,54 @@ public final class OSimpleReflection {
             return reference;
         }
     }
+
+    public static class Player {
+
+        private static Class<?>
+            CRAFT_PLAYER_CLASS,
+            ENTITY_PLAYER_CLASS,
+            PLAYER_CONNECTION_CLASS,
+            PACKET_CLASS;
+
+        private static Method
+            SEND_PACKET_METHOD,
+            GET_HANDLE_METHOD;
+
+        private static Field
+            PLAYER_CONNECTION_FIELD;
+
+        static {
+            try {
+
+                CRAFT_PLAYER_CLASS = Package.CB_ENTITY.getClass("CraftPlayer");
+                ENTITY_PLAYER_CLASS = Package.NMS.getClass("EntityPlayer");
+                PLAYER_CONNECTION_CLASS = Package.NMS.getClass("PlayerConnection");
+                PACKET_CLASS = Package.NMS.getClass("Packet");
+
+                PLAYER_CONNECTION_FIELD = getField(ENTITY_PLAYER_CLASS, true,"playerConnection");
+
+                SEND_PACKET_METHOD = getMethod(PLAYER_CONNECTION_CLASS, "sendPacket", PACKET_CLASS);
+                GET_HANDLE_METHOD = getMethod(CRAFT_PLAYER_CLASS, "getHandle");
+
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        public static void sendPacket(org.bukkit.entity.Player player, Object packet) {
+            try {
+
+                Object entityPlayer = GET_HANDLE_METHOD.invoke(player);
+                Object connection = PLAYER_CONNECTION_FIELD.get(entityPlayer);
+
+                SEND_PACKET_METHOD.invoke(connection, packet);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
 }

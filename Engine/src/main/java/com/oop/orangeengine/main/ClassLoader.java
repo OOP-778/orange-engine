@@ -38,7 +38,7 @@ public class ClassLoader {
             for (String className : classNames) {
 
                 Class klass = Class.forName(className);
-                if (klass.getName().startsWith("com.oop.orangeengine"))
+                if (klass.getName().startsWith("com.oop"))
                     for (Constructor constructor : klass.getConstructors())
                         if(constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
                             try {

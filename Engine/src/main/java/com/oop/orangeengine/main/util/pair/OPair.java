@@ -18,4 +18,9 @@ public class OPair<F, S> implements IPair {
         return second;
     }
 
+    public void set(F first, S second) {
+        this.first = first;
+        this.second = second;
+    }
+
 }

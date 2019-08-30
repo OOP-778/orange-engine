@@ -2,10 +2,12 @@ package com.orangeengine.hologram;
 
 import com.oop.orangeengine.main.util.Updateable;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 public class HoloLine implements Viewable, Updateable {
@@ -28,6 +30,7 @@ public class HoloLine implements Viewable, Updateable {
     public void addViewer(UUID uuid) {
         removeViewer(uuid);
         viewers.add(uuid);
+        wrappedArmorStand.spawn(Bukkit.getPlayer(uuid));
     }
 
     @Override
@@ -37,6 +40,6 @@ public class HoloLine implements Viewable, Updateable {
 
     @Override
     public void update() {
-
+        wrappedArmorStand.update();
     }
 }

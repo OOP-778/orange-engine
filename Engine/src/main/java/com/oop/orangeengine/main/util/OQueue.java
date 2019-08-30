@@ -1,11 +1,12 @@
 package com.oop.orangeengine.main.util;
 
 
+import java.io.Serializable;
 import java.util.AbstractQueue;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class OQueue<T> extends AbstractQueue<T> {
+public class OQueue<T> extends AbstractQueue<T> implements Serializable {
 
     private LinkedList<T> elements = new LinkedList<>();
 

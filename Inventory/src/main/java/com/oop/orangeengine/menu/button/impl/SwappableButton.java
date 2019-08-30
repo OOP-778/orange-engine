@@ -12,13 +12,14 @@ import org.bukkit.inventory.ItemStack;
 public class SwappableButton extends AMenuButton {
 
     private ItemStack toSwap;
+
     public SwappableButton(ItemStack item, int slot) {
         super(item, slot);
     }
 
     public void swap() {
         ItemStack swapWith = currentItem().clone();
-        setCurrentItem(toSwap);
+        currentItem(toSwap);
 
         toSwap = swapWith;
     }

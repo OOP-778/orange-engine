@@ -1,11 +1,16 @@
 package com.orangeengine.hologram;
 
+import com.oop.orangeengine.main.util.OptionalConsumer;
+import com.oop.orangeengine.main.util.Updateable;
+
 import javax.swing.text.View;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
-public class OHolo implements Viewable {
+public class OHolo implements Viewable, Updateable {
 
     private final double spacing = 0.21D;
     private List<HoloLine> lineList = new LinkedList<>();
@@ -22,6 +27,20 @@ public class OHolo implements Viewable {
 
     @Override
     public List<UUID> getViewers() {
+        if(lineList.isEmpty()) return new ArrayList<>();
         return lineList.get(0).getViewers();
+    }
+
+    public OptionalConsumer<HoloLine> getLineThatMatches(Predicate<HoloLine> filter) {
+        return OptionalConsumer.of(
+                lineList.stream()
+                    .filter(filter)
+                    .findFirst()
+        );
+    }
+
+    @Override
+    public void update() {
+        lineList.forEach(HoloLine::update);
     }
 }

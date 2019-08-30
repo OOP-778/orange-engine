@@ -2,16 +2,38 @@ package com.oop.orangeengine.menu.events;
 
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.WrappedInventory;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
-public class ButtonClickEvent {
+public class ButtonClickEvent extends Event implements Cancellable {
 
-    private WrappedInventory wrappedInventory;
-    private AMenu menu;
-    private InventoryClickEvent originalEvent;
+    private static HandlerList handlerList = new HandlerList();
 
+    private final WrappedInventory wrappedInventory;
+    private final AMenu menu;
+    private final InventoryClickEvent originalEvent;
+    private final Player player;
+    private boolean cancelled = false;
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlerList;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean b) {
+        cancelled = b;
+    }
 }

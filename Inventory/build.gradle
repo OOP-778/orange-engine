@@ -15,4 +15,5 @@ repositories {
 dependencies {
     compileOnly project(":File")
     compileOnly project(":Sound")
+    compileOnly project(":Item")
 }

@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu;
 
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.MenuCloseEvent;
@@ -8,30 +9,28 @@ import com.oop.orangeengine.menu.events.MenuOpenEvent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Accessors(fluent = true, chain = true)
-public abstract class AMenu {
+public abstract class AMenu implements InventoryHolder {
 
     final private int maxSize = 54;
-
-    @Setter
-    private WrappedInventory wrappedInventory;
-
     @Getter
     private final String identifier;
-
+    @Setter
+    protected WrappedInventory wrappedInventory;
     @Getter
     private AMenu parent;
 
     @Getter
     private int size;
+
+    @Getter
+    private String title;
 
     @Getter
     @Setter
@@ -61,8 +60,12 @@ public abstract class AMenu {
         size(size);
     }
 
+    public AMenu(String identifier, int size) {
+        this(identifier, size, null);
+    }
+
     private void size(int size) {
-        if(size > maxSize)
+        if (size > maxSize)
             throw new IllegalStateException("Menu size is bigger than Minecraft allows (" + size + "/" + maxSize + ")");
 
         if (size <= 6)
@@ -72,25 +75,32 @@ public abstract class AMenu {
             this.size = size;
     }
 
-    public AMenu(String identifier, int size) {
-        this(identifier, size, null);
+    public void title(String title) {
+        this.title = title;
+        //TODO Add title update packet
     }
 
-    public boolean hasChild(String identifier, boolean deepLookup) {
+    public boolean hasChild(String identifier) {
+        return getChild(identifier, true).isPresent();
+    }
 
+    public OptionalConsumer<AMenu> getChild(String identifier, boolean deepLookup) {
         Optional<AMenu> first = children.stream()
                 .filter(child -> child.identifier.equalsIgnoreCase(identifier))
                 .findFirst();
 
         if (first.isPresent())
-            return true;
+            return OptionalConsumer.of(first);
 
         else if (deepLookup) {
-            return children.stream()
-                    .anyMatch(child -> child.hasChild(identifier, true));
+            return OptionalConsumer.of(children.stream()
+                    .map(child -> child.getChild(identifier, true))
+                    .filter(OptionalConsumer::isPresent)
+                    .map(optional -> (AMenu) optional.get())
+                    .findFirst());
 
         } else
-            return false;
+            return OptionalConsumer.of(Optional.empty());
     }
 
     public boolean isSlotEmpty(int slot) {
@@ -100,35 +110,44 @@ public abstract class AMenu {
     public void addButton(AMenuButton button) {
 
         if (!isSlotEmpty(button.slot()))
-            //Friendly warning so it's known
-            Engine.getInstance().getLogger().printWarning("Duplicate slot found in menu: " + identifier + ", slot: " + button.slot());
+            // Friendly warning so it's known
+            Engine.getInstance().getLogger().printWarning("Duplicate slot was found in menu: " + identifier + ", slot: " + button.slot());
 
         buttons.add(button);
     }
 
+    public void setButton(int slot, AMenuButton button) {
+        button.slot(slot);
+        buttons.add(button);
+    }
+
     public void update() {
-        if(updater != null)
+        if (updater != null)
             updater.accept(this);
     }
 
-    public WrappedInventory getInventory(boolean rebuild) {
-
-        if(rebuild || wrappedInventory == null)
+    public WrappedInventory getWrappedInventory(boolean rebuild) {
+        if (rebuild || wrappedInventory == null)
             build();
 
         assert wrappedInventory != null;
         return wrappedInventory;
-
     }
 
-    public WrappedInventory getInventory() {
-
-        if(wrappedInventory == null)
+    public WrappedInventory getWrappedInventory() {
+        if (wrappedInventory == null)
             build();
 
         assert wrappedInventory != null;
         return wrappedInventory;
+    }
 
+    @Override
+    public Inventory getInventory() {
+        if (wrappedInventory != null)
+            return wrappedInventory.getBukkitInventory();
+
+        return null;
     }
 
     public AMenu parent(AMenu parent) {
@@ -141,5 +160,9 @@ public abstract class AMenu {
     }
 
     protected abstract void build();
+
+    public abstract WrappedInventory getWrapperFromBukkit(Inventory inventory);
+
+    protected abstract Inventory provideNewInv();
 
 }

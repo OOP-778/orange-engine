@@ -1,8 +1,10 @@
 menu1:
 
-  _type_: paged menu
+  # There's two types paged & normal
+  type: paged
   title: "&eExample Menu Title"
 
+  # Layout is a way to form your GUI this also defines inventory size
   layout:
     - "XXXXXXXXX"
     - ""
@@ -10,20 +12,36 @@ menu1:
     - "XXXPXNXXX"
 
   buttons:
+
+    # This is the layout ID
     "X":
-      _type_: filler button
+      # There's three types of buttons
+      # filler = Dummy button
+      # normal = An ordinary button
+      # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+      type: filler
       material: YELLOW_STAINED_GLASS_PANE
 
-    "next page":
-      _type_: swappable button
-      layout id: "N"
+    "N":
+      # There's three types of buttons
+      # filler = Dummy button
+      # normal = An ordinary button
+      # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+      type: swappable
       material: arrow
       display name: "&e>>"
       on swap:
         material: black_stained_glass_pane
 
+      on click:
+        execute action: "next page"
+
     "previous page":
-      _type_: swappable button
+      # There's three types of buttons
+      # filler = Dummy button
+      # normal = An ordinary button
+      # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+      type: swappable
       layout id: "P"
       material: arrow
       display name: "&e<<"
@@ -31,9 +49,14 @@ menu1:
         material: black_stained_class_pane
 
     "show player":
-      _type_: normal button
+      # There's three types of buttons
+      # filler = Dummy button
+      # normal = An ordinary button
+      # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+      type: normal
+      template: true
       layout id: "Q"
       material: player_head
-      on click:
-        open: "player modification"
+
+
 

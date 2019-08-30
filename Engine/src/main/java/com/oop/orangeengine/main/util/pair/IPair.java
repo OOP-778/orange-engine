@@ -1,4 +1,6 @@
 package com.oop.orangeengine.main.util.pair;
 
-public interface IPair {
+import java.io.Serializable;
+
+public interface IPair extends Serializable {
 }

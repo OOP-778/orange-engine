@@ -5,6 +5,7 @@ import com.oop.orangeengine.main.util.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,6 +15,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class OItem extends ItemBuilder implements ConfigurationSerializable<OItem> {
+
+    public OItem() {
+        super(Material.AIR, 1);
+    }
 
     public OItem(ItemStack item) {
         super(item);

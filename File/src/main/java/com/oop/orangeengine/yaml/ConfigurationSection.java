@@ -197,8 +197,16 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         return getValue(path, null) != null;
     }
 
-    public boolean isPresentSection(String child) {
-        return getSections().containsKey(child);
+    public boolean hasValue(String path) {
+        return isPresentValue(path);
+    }
+
+    public boolean isPresentSection(String sectionName) {
+        return getSections().containsKey(sectionName);
+    }
+
+    public boolean hasChild(String sectionName) {
+        return isPresentSection(sectionName);
     }
 
     public ConfigurationSection getSection(String sectionName) {

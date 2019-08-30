@@ -52,4 +52,9 @@ public class TaskController implements ITaskController {
                 return Bukkit.getScheduler().runTask(owning, task.run());
 
     }
+
+    private boolean isAsyncThread() {
+        return Thread.currentThread().getName().contains("Async");
+    }
+
 }

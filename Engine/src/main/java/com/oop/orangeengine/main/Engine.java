@@ -53,6 +53,10 @@ public class Engine {
         return instance;
     }
 
+    public static Engine getEngine() {
+        return getInstance();
+    }
+
     public void initComponent(AEngineComponent component) {
         this.components.add(component);
         component.onEnable();

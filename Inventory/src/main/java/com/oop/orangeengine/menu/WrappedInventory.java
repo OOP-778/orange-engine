@@ -10,30 +10,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
-public class WrappedInventory {
+public class WrappedInventory implements Cloneable {
 
     private AMenu owner;
     private Inventory bukkitInventory;
     private AMenuButton[] buttons;
 
     public WrappedInventory(AMenu owner, Inventory inventory) {
-
         this.owner = owner;
         this.bukkitInventory = inventory;
         this.buttons = new AMenuButton[inventory.getSize()];
 
         //Initialize items so we don't get any nulls
         loadItems();
-
     }
+
+    private WrappedInventory() {}
 
     private void loadItems() {
         for (int slot = 0; slot < buttons.length; slot++) {
@@ -49,12 +46,19 @@ public class WrappedInventory {
     }
 
     public Set<AMenuButton> getButtons(boolean filterOutItems) {
+        ensureNotEmpty();
         return Arrays.stream(buttons)
                 .filter(button -> filterOutItems && !(button instanceof BukkitItem))
                 .collect(Collectors.toSet());
     }
 
+    public AMenuButton getButtonAt(int slot) {
+        ensureNotEmpty();
+        return buttons[slot];
+    }
+
     public Set<AMenuButton> getBukkitItems() {
+        ensureNotEmpty();
         return Arrays.stream(buttons)
                 .filter(button -> button instanceof BukkitItem)
                 .collect(Collectors.toSet());
@@ -74,18 +78,32 @@ public class WrappedInventory {
                 .collect(Collectors.toSet());
     }
 
+    private void ensureNotEmpty() {
+        if(buttons == null) {
+            buttons = new AMenuButton[bukkitInventory.getSize()];
+            loadItems();
+        }
+    }
+
     public void setButton(int slot, AMenuButton button) {
+        ensureNotEmpty();
+        if (button == null)
+            button = BukkitItem.newAir(slot);
+
         buttons[slot] = button;
+        button.holder(this);
         updateButton(button);
     }
 
     public long emptySlots() {
+        ensureNotEmpty();
         return Arrays.stream(buttons)
                 .filter(button -> button.currentItem().getType() == Material.AIR)
                 .count();
     }
 
     public List<Integer> listEmptySlots() {
+        ensureNotEmpty();
         //TODO add if button is placeholder it acts as empty slot
         return Arrays.stream(buttons)
                 .filter(button -> button.currentItem().getType() == Material.AIR)
@@ -107,4 +125,14 @@ public class WrappedInventory {
         openToAll(null);
     }
 
+    @Override
+    protected WrappedInventory clone() {
+        WrappedInventory wrappedInventory = new WrappedInventory();
+        wrappedInventory.owner = owner;
+        wrappedInventory.bukkitInventory = owner.provideNewInv();
+        Arrays.stream(buttons)
+                .map(AMenuButton::clone)
+                .forEach(button -> wrappedInventory.setButton(button.slot(), button));
+        return wrappedInventory;
+    }
 }

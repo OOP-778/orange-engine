@@ -10,6 +10,7 @@ import com.oop.orangeengine.database.provider.FieldProviderController;
 import com.oop.orangeengine.database.provider.IDBFieldProvider;
 import com.oop.orangeengine.main.util.pair.OPair;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -22,6 +23,9 @@ public abstract class DatabaseObject {
     private Class holder;
     @Getter
     private int rowId = -1;
+
+    @Setter
+    private Runnable whenLoaded;
 
     public DatabaseObject() {
         this.holder = this.getClass();
@@ -89,6 +93,8 @@ public abstract class DatabaseObject {
 
                 }
             }
+            if(whenLoaded != null)
+                whenLoaded.run();
 
         } catch (Exception ex) {
             throw new IllegalStateException(ex);

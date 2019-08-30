@@ -122,12 +122,21 @@ public class OTask extends Storegable {
     }
 
     public OTask whenFinished(Consumer<OTask> whenFinished) {
-        this.whenFinished = whenFinished;
-        return this;
+        return whenFinished(whenFinished, true);
     }
 
     public OTask whenFinished(Runnable whenFinished) {
-        this.whenFinished = (task) -> whenFinished.run();
+        return whenFinished((task) -> whenFinished.run(), true);
+    }
+
+    public OTask whenFinished(Consumer<OTask> whenFinished, boolean sync) {
+        this.whenFinished = (task) -> {
+            if(sync)
+                StaticTask.getInstance().sync(() -> whenFinished.accept(this));
+
+            else
+                StaticTask.getInstance().async(() -> whenFinished.accept(task));
+        };
         return this;
     }
 

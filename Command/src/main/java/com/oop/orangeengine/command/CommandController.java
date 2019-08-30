@@ -3,6 +3,7 @@ package com.oop.orangeengine.command;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.main.Helper;
+import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.util.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.line.LineContent;
@@ -23,13 +24,14 @@ import java.util.stream.Collectors;
 
 public class CommandController {
 
+    private Set<Command> registered = new HashSet<>();
     private static CommandMap commandMap;
     private static boolean init = false;
 
     private ColorScheme colorScheme;
     private JavaPlugin plugin;
 
-    public CommandController(JavaPlugin plugin) {
+    public CommandController(EnginePlugin plugin) {
 
         this.plugin = plugin;
         this.colorScheme = new ColorScheme();
@@ -45,12 +47,12 @@ public class CommandController {
                 ex.printStackTrace();
             }
         }
-
+        plugin.onDisable(() -> registered.forEach(cmd -> cmd.unregister(commandMap)));
     }
 
     public void register(OCommand command) {
 
-        commandMap.register(plugin.getName(), new Command(command.getLabel(), command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
+        Command bukkitCommand = new Command(command.getLabel(), command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
             @Override
             public boolean execute(CommandSender sender, String cmdName, String[] args) {
 
@@ -116,7 +118,9 @@ public class CommandController {
 
                 return completion;
             }
-        });
+        };
+        registered.add(bukkitCommand);
+        commandMap.register(plugin.getName(), bukkitCommand);
 
     }
 
@@ -146,7 +150,7 @@ public class CommandController {
         //Check for ableToExecute
         int found = 0;
         for (Class executerClass : command.getAbleToExecute())
-            if(executerClass == sender.getClass()) found++;
+            if(executerClass.isAssignableFrom(sender.getClass())) found++;
 
         if(found == 0) {
 

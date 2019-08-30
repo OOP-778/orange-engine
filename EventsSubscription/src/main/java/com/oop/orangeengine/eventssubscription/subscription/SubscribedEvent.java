@@ -33,12 +33,12 @@ public class SubscribedEvent<T extends Event> extends Storegable {
     }
 
     public void executeTask() {
-        if(props.getTimeOut() != -1)
+        if(props.timeOut() != -1)
             task = new OTask().
-                    delay(props.getTimeOut()).
+                    delay(props.timeOut()).
                     runnable(() -> {
 
-                        props.getOnTimeOut().accept(this);
+                        props.onTimeOut().accept(this);
                         end();
 
                     }).
@@ -49,13 +49,16 @@ public class SubscribedEvent<T extends Event> extends Storegable {
 
         try {
 
-            if(props.isAsync())
+            if(props.filter() != null && !props.filter().test(event))
+                return;
+
+            if(props.async())
                 StaticTask.getInstance().async(() -> listener.accept(event));
             else
                 StaticTask.getInstance().sync(() -> listener.accept(event));
 
             timesRan++;
-            if(timesRan > 0 && timesRan == props.getTimesToRun())
+            if(timesRan > 0 && timesRan == props.timesToRun())
                 end();
 
         } catch (Exception ex) {
