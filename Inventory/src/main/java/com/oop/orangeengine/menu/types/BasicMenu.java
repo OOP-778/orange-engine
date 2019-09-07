@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu.types;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.WrappedInventory;
 import org.bukkit.Bukkit;
@@ -36,6 +37,6 @@ public class BasicMenu extends AMenu {
 
     @Override
     protected Inventory provideNewInv() {
-        return Bukkit.createInventory(this, size(), title());
+        return Bukkit.createInventory(this, size(), Helper.color(title()));
     }
 }

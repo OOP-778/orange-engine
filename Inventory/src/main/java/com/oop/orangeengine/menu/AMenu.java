@@ -9,6 +9,7 @@ import com.oop.orangeengine.menu.events.MenuOpenEvent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -104,7 +105,7 @@ public abstract class AMenu implements InventoryHolder {
     }
 
     public boolean isSlotEmpty(int slot) {
-        return buttons.stream().noneMatch(button -> button.slot() == slot);
+        return buttons.stream().anyMatch(button -> button.slot() == slot && button.currentItem().getType() == Material.AIR);
     }
 
     public void addButton(AMenuButton button) {
