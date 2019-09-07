@@ -20,6 +20,14 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         super(Material.AIR, 1);
     }
 
+    public OItem(Material material) {
+        super(material, 1);
+    }
+
+    public OItem(OMaterial material) {
+        super(material.parseItem());
+    }
+
     public OItem(ItemStack item) {
         super(item);
     }

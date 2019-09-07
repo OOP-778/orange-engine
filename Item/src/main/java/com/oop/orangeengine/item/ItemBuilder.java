@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 
 public abstract class ItemBuilder implements Typeable {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private ItemStack itemStack;
 
     public ItemBuilder(ItemStack item) {
@@ -209,4 +210,13 @@ public abstract class ItemBuilder implements Typeable {
         return itemStack.getType();
     }
 
+    public ItemBuilder addLore(String text) {
+        List<String> lore = getItemMeta().hasLore() ? getItemMeta().getLore() : new ArrayList<>();
+        lore.add(text);
+
+        ItemMeta meta = getItemMeta();
+        meta.setLore(lore);
+        setItemMeta(meta);
+        return this;
+    }
 }

@@ -23,13 +23,16 @@ public class MenuDesigner {
                 chars = "AAAAAAAAA".toCharArray();
 
             for (char c : chars) {
-                System.out.println("ROW: " + rowNumber + ", SLOT: " + slot);
                 layout[rowNumber][slot] = c;
                 slot++;
             }
 
             rowNumber++;
         }
+    }
+
+    public int getSize() {
+        return layout.length;
     }
 
     public MenuDesigner setButton(char layoutId, AMenuButton button) {
@@ -56,7 +59,6 @@ public class MenuDesigner {
                 }
 
                 realSlot++;
-
             }
         }
     }

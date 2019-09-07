@@ -32,7 +32,6 @@ public class ClassLoader {
             jarFile.close();
             for (String className : classNames) {
 
-                System.out.println("Looking for: " + className);
                 Class klass = Class.forName(className);
                 if (klass.getName().startsWith("com.oop"))
                     for (Constructor constructor : klass.getConstructors())
