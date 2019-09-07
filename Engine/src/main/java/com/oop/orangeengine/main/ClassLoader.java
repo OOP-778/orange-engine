@@ -24,7 +24,7 @@ public class ClassLoader {
             while (entries.hasMoreElements()) {
 
                 JarEntry entry = entries.nextElement();
-                if (entry.getName().contains(".class"))
+                if (entry.getName().contains(".class") && !entry.getName().contains("$"))
                     classNames.add(entry.getName());
 
             }
