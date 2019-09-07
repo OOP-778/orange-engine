@@ -29,8 +29,7 @@ public class ClassLoader {
             while (entries.hasMoreElements()) {
 
                 JarEntry entry = entries.nextElement();
-                if (entry.getName().startsWith("com.oop.orangeEngine"))
-                    classNames.add(entry.getName());
+                classNames.add(entry.getName());
 
             }
 
