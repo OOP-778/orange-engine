@@ -44,7 +44,7 @@ public class DataHandlerController {
 
     public <T> IDataHandler<T> findDataHandler(Class<T> klass) {
         Class correctKey = dataHandlerMap.keySet().stream()
-                .filter(klass2 -> klass.isAssignableFrom(klass2))
+                .filter(klass2 -> klass2.isAssignableFrom(klass))
                 .findFirst()
                 .orElse(null);
 
