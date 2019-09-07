@@ -1,20 +1,15 @@
 package com.oop.orangeengine.main;
 
-import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.JarUtil;
-import sun.tools.jar.resources.jar;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 public class ClassLoader {
 
@@ -29,7 +24,8 @@ public class ClassLoader {
             while (entries.hasMoreElements()) {
 
                 JarEntry entry = entries.nextElement();
-                classNames.add(entry.getName());
+                if (entry.getName().contains(".class"))
+                    classNames.add(entry.getName());
 
             }
 
@@ -39,10 +35,11 @@ public class ClassLoader {
                 Class klass = Class.forName(className);
                 if (klass.getName().startsWith("com.oop"))
                     for (Constructor constructor : klass.getConstructors())
-                        if(constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
+                        if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
                             try {
                                 constructor.newInstance();
-                            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
+                            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+                            }
                         }
             }
 
