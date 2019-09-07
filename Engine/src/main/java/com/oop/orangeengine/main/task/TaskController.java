@@ -56,5 +56,4 @@ public class TaskController implements ITaskController {
     private boolean isAsyncThread() {
         return Thread.currentThread().getName().contains("Async");
     }
-
 }
