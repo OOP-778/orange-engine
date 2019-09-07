@@ -9,6 +9,7 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import lombok.Getter;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
@@ -38,8 +39,13 @@ public abstract class DataController {
 
             IntStream.range(1, rowCount + 1).parallel().forEach(rowId -> {
                 try {
+                    Class klass = classToTable.get(tableName);
+                    Constructor<? extends DatabaseObject> declaredConstructor = klass.getDeclaredConstructor();
+                    if (declaredConstructor == null)
+                        throw new IllegalStateException("Failed to find no args constructor for class " + klass.getName());
 
-                    DatabaseObject value = classToTable.get(tableName).newInstance();
+                    declaredConstructor.setAccessible(true);
+                    DatabaseObject value = declaredConstructor.newInstance();
                     value.load(database, rowId);
                     data.add(value);
 
