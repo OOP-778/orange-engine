@@ -2,10 +2,9 @@ package com.oop.orangeengine.database;
 
 import com.oop.orangeengine.database.annotations.DatabaseValue;
 import com.oop.orangeengine.database.types.SqlLiteDatabase;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 
-import javax.swing.plaf.nimbus.State;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;

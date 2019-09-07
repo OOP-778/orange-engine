@@ -1,4 +1,4 @@
-package com.oop.orangeengine.main.util;
+package com.oop.orangeengine.main.util.data;
 
 
 import java.io.Serializable;

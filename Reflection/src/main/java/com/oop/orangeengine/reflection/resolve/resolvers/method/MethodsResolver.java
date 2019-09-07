@@ -1,6 +1,6 @@
 package com.oop.orangeengine.reflection.resolve.resolvers.method;
 
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.reflection.OClass;
 import com.oop.orangeengine.reflection.resolve.resolved.ResolvedMethod;
 import com.oop.orangeengine.reflection.resolve.resolvers.AResolvers;

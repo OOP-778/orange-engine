@@ -3,7 +3,7 @@ package com.oop.orangeengine.command.arg.arguments;
 import com.oop.orangeengine.command.OCommand;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.main.Helper;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

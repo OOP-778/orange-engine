@@ -1,6 +1,6 @@
 package com.oop.orangeengine.reflection.resolve.resolvers;
 
-import com.oop.orangeengine.main.util.OQueue;
+import com.oop.orangeengine.main.util.data.OQueue;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.reflection.OClass;
 import lombok.Data;

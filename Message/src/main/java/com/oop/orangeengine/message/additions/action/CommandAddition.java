@@ -16,5 +16,4 @@ public class CommandAddition extends AAddition {
     public void apply(TextComponent component) {
         component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
     }
-
 }

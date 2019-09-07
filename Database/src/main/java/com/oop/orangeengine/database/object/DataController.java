@@ -4,13 +4,14 @@ import com.google.common.collect.HashBiMap;
 import com.oop.orangeengine.database.ODatabase;
 import com.oop.orangeengine.database.annotations.DatabaseTable;
 import com.oop.orangeengine.database.annotations.DatabaseValue;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.DataModificationHandler;
+import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,12 +20,14 @@ public abstract class DataController {
     private HashBiMap<String, Class<? extends DatabaseObject>> classToTable = HashBiMap.create();
     private ODatabase database;
 
+    private boolean autoSave;
+
     public DataController(ODatabase database) {
         this.database = database;
     }
 
     @Getter
-    private Set<DatabaseObject> data = ConcurrentHashMap.newKeySet();
+    private OConcurrentSet<DatabaseObject> data = new OConcurrentSet<>();
 
     public void load() {
         for (String tableName : classToTable.keySet()) {
@@ -74,7 +77,6 @@ public abstract class DataController {
         */
 
         try (Connection connection = database.getConnection()) {
-
             Map<Class, List<DatabaseObject>> splittedObjects = new HashMap<>();
             connection.setAutoCommit(false);
 
@@ -254,7 +256,6 @@ public abstract class DataController {
 
         // Update table structure
         tableEditor.edit();
-
     }
 
     public <T> Set<T> getData(Class<T> asKlass) {
@@ -264,4 +265,26 @@ public abstract class DataController {
                 .collect(Collectors.toSet());
     }
 
+    public void setAutoSave(boolean autoSave) {
+        this.autoSave = autoSave;
+        if (autoSave)
+            data.setHandler(new DataModificationHandler<DatabaseObject>() {
+                @Override
+                public void onAdd(DatabaseObject object) {
+                    save(object);
+                }
+
+                @Override
+                public void onRemove(DatabaseObject object) {
+                    if(object.getRowId() != -1) {
+                        DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
+                        assert table != null;
+
+                        database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
+                    }
+
+
+                }
+            });
+    }
 }

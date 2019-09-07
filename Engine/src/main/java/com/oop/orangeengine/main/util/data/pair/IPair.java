@@ -1,4 +1,4 @@
-package com.oop.orangeengine.main.util.pair;
+package com.oop.orangeengine.main.util.data.pair;
 
 import java.io.Serializable;
 

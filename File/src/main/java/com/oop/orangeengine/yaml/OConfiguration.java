@@ -3,7 +3,7 @@ package com.oop.orangeengine.yaml;
 import com.oop.orangeengine.file.OFile;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.util.OptionalConsumer;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
 import com.oop.orangeengine.yaml.util.ConfigurationUtil;

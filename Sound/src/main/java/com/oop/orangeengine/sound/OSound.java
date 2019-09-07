@@ -261,4 +261,18 @@ public enum OSound {
 
         return fallback();
     }
+
+    public static OSound match(String name) {
+        for (OSound sound : values()) {
+            if (sound.name().equalsIgnoreCase(name))
+                return sound;
+
+            for (String versionDependentName : sound.versionDependentNames)
+                if (name.equalsIgnoreCase(versionDependentName))
+                    return sound;
+        }
+
+        return null;
+    }
+
 }

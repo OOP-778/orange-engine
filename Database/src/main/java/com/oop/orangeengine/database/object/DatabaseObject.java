@@ -8,7 +8,7 @@ import com.oop.orangeengine.database.data.IDataHandler;
 import com.oop.orangeengine.database.provider.ClassFieldProvider;
 import com.oop.orangeengine.database.provider.FieldProviderController;
 import com.oop.orangeengine.database.provider.IDBFieldProvider;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import lombok.Setter;
 

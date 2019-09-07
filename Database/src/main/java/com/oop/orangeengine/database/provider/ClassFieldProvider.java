@@ -1,6 +1,6 @@
 package com.oop.orangeengine.database.provider;
 
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

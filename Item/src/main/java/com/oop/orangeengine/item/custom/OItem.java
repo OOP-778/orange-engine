@@ -1,7 +1,7 @@
 package com.oop.orangeengine.item.custom;
 
 import com.oop.orangeengine.item.ItemBuilder;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
@@ -54,10 +54,8 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
             for(String enchant : stringList) {
 
                 String[] split = enchant.split(":");
-                System.out.println("LENGHT: " + split.length);
-                System.out.println(enchant);
-                System.out.println("0: " + split[0]);
-                System.out.println("1: " + split[1]);
+                if(split.length <= 1) continue;
+
                 addEnchant(Enchantment.getByName(split[0].toUpperCase()), Integer.parseInt(split[1]));
 
             }

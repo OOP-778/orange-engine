@@ -70,7 +70,7 @@ public class SlotUpdate {
 
     }
 
-    static void sendPacket(Object player, Object packet) {
+    private static void sendPacket(Object player, Object packet) {
 
         try {
 

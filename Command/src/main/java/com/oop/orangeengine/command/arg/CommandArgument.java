@@ -1,7 +1,7 @@
 package com.oop.orangeengine.command.arg;
 
 import com.oop.orangeengine.command.OCommand;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 
 @Getter

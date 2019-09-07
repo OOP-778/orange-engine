@@ -1,13 +1,13 @@
 package com.oop.orangeengine.main.storage;
 
 import com.oop.orangeengine.main.util.OptionalConsumer;
+import com.oop.orangeengine.main.util.data.map.OConcurrentMap;
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
-public abstract class Storegable extends HashMap<String, Object> {
+public abstract class Storegable extends OConcurrentMap<String, Object> {
 
     public boolean containsData(String key) {
         return containsKey(key);

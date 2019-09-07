@@ -4,7 +4,7 @@ import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.line.LineContent;
 import com.oop.orangeengine.message.line.MessageLine;

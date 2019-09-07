@@ -1,7 +1,7 @@
 package com.oop.orangeengine.item;
 
 import com.oop.orangeengine.main.Helper;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.yaml.Typeable;

@@ -5,7 +5,7 @@ import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.events.SyncEvents;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.OptionalConsumer;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;

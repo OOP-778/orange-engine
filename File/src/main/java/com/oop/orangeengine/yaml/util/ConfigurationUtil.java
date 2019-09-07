@@ -1,6 +1,6 @@
 package com.oop.orangeengine.yaml.util;
 
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.OConfiguration;
 import com.oop.orangeengine.yaml.mapper.ObjectsMapper;

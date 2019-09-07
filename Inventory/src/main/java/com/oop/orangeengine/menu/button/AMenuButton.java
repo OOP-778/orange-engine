@@ -84,7 +84,14 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
 
     @Override
     public AMenuButton clone() {
-        AMenuButton aMenuButton = (AMenuButton) super.clone();
+        AMenuButton aMenuButton = null;
+        try {
+            aMenuButton = (AMenuButton) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        assert aMenuButton != null;
+
         aMenuButton.holder = null;
         aMenuButton.currentItem = currentItem.clone();
         return aMenuButton;

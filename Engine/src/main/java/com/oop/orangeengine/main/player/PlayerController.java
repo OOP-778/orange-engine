@@ -2,6 +2,7 @@ package com.oop.orangeengine.main.player;
 
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.events.AsyncEvents;
+import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 
 public class PlayerController extends AEngineComponent {
 
+    @DefaultInitialization
     public PlayerController() {
         super();
 
@@ -31,7 +33,6 @@ public class PlayerController extends AEngineComponent {
            });
 
         });
-
     }
 
     private OptionalConsumer<OPlayer> lookup(Player player) {

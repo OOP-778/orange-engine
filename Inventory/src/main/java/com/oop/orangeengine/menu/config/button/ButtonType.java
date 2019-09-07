@@ -1,6 +1,8 @@
-package com.oop.orangeengine.menu.config;
+package com.oop.orangeengine.menu.config.button;
 
 public enum ButtonType {
+
+    NORMAL,
     FILLER,
     SWAPPABLE;
 

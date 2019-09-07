@@ -1,10 +1,10 @@
-package com.oop.orangeengine.main.util.pair;
+package com.oop.orangeengine.main.util.data.pair;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor(staticName = "of")
+@AllArgsConstructor()
 public class OTriplePair<F, S, T> implements IPair {
 
     private F first;

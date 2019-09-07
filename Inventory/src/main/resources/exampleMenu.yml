@@ -2,9 +2,12 @@ menu1:
 
   # There's two types paged & normal
   type: paged
+
+  # If paged there's two placeholders for title: %currentPage%/%availablePages%
   title: "&eExample Menu Title"
 
   # Layout is a way to form your GUI this also defines inventory size
+  # If you want AIR the layout id for AIR is A
   layout:
     - "XXXXXXXXX"
     - ""
@@ -36,17 +39,19 @@ menu1:
       on click:
         execute action: "next page"
 
-    "previous page":
+    "P":
       # There's three types of buttons
       # filler = Dummy button
       # normal = An ordinary button
       # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
       type: swappable
-      layout id: "P"
       material: arrow
       display name: "&e<<"
       on swap:
         material: black_stained_class_pane
+
+      on click:
+        execute action: "previous page"
 
     "show player":
       # There's three types of buttons
@@ -55,7 +60,6 @@ menu1:
       # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
       type: normal
       template: true
-      layout id: "Q"
       material: player_head
 
 

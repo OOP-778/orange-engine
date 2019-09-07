@@ -20,9 +20,7 @@ public class PagedMenu extends AMenu {
     }
 
     @Override
-    protected void build() {
-
-    }
+    protected void build() {}
 
     @Override
     public WrappedInventory getWrapperFromBukkit(Inventory inventory) {

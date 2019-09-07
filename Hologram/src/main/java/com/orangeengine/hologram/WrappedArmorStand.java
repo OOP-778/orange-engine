@@ -2,7 +2,7 @@ package com.orangeengine.hologram;
 
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OSimpleReflection;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import static com.orangeengine.hologram.WrappedArmorStand.ReflectionConstant.*;
 

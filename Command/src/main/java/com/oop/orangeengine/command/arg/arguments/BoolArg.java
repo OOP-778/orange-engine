@@ -1,7 +1,7 @@
 package com.oop.orangeengine.command.arg.arguments;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
-import com.oop.orangeengine.main.util.pair.OPair;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 
 public class BoolArg extends CommandArgument<Boolean> {
 
