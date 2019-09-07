@@ -57,7 +57,7 @@ public class DataHandlerController {
 
         return handler;
     }
-    
+
     public <T> void registerDataHandler(Class<T> klass, IDataHandler<T> dataHandler) {
         dataHandlerMap.put(klass, dataHandler);
     }

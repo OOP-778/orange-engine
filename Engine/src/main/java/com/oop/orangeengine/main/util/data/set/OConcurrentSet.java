@@ -15,7 +15,7 @@ public class OConcurrentSet<T> implements Set<T> {
     private DataModificationHandler<T> handler;
 
     public OConcurrentSet() {
-        ConcurrentHashMap.newKeySet();
+        set = ConcurrentHashMap.newKeySet();
     }
 
     @Override
