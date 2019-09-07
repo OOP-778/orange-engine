@@ -43,15 +43,21 @@ public class DataHandlerController {
     }
 
     public <T> IDataHandler<T> findDataHandler(Class<T> klass) {
+        Class correctKey = dataHandlerMap.keySet().stream()
+                .filter(klass2 -> klass2.isAssignableFrom(klass))
+                .findFirst()
+                .orElse(null);
 
-        IDataHandler<T> handler = dataHandlerMap.get(klass);
+        if(correctKey == null)
+            return (IDataHandler<T>) defaultHandler;
+
+        IDataHandler<T> handler = dataHandlerMap.get(correctKey);
         if (handler == null)
             return (IDataHandler<T>) defaultHandler;
 
         return handler;
-
     }
-
+    
     public <T> void registerDataHandler(Class<T> klass, IDataHandler<T> dataHandler) {
         dataHandlerMap.put(klass, dataHandler);
     }

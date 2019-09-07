@@ -224,8 +224,6 @@ public abstract class DatabaseObject {
                 klass == long.class ||
 
                 klass == String.class;
-
-
     }
 
     public static List<OPair<Field, DatabaseValue>> getFields(Class klass) {

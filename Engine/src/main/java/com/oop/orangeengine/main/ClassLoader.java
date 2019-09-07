@@ -39,8 +39,7 @@ public class ClassLoader {
                         if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
                             try {
                                 constructor.newInstance();
-                            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
-                            }
+                            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
                         }
             }
 
