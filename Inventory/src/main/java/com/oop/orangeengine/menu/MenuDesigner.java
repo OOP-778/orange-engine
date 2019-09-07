@@ -19,7 +19,7 @@ public class MenuDesigner {
             int slot = 0;
 
             char[] chars = row.toCharArray();
-            if(chars.length == 0)
+            if (chars.length == 0)
                 chars = "AAAAAAAAA".toCharArray();
 
             for (char c : chars) {
@@ -43,13 +43,13 @@ public class MenuDesigner {
         for (char[] row : layout) {
             for (char chaz : row) {
 
-                if(chaz == 'A') {
+                if (chaz == 'A') {
                     menu.addButton(BukkitItem.newAir(realSlot));
 
                 } else {
                     AMenuButton button = buttonMap.get(chaz);
                     if (button == null)
-                        continue;
+                        menu.addButton(BukkitItem.newAir(realSlot));
 
                     else
                         menu.addButton(button.clone().slot(realSlot));
