@@ -114,6 +114,7 @@ public abstract class AMenu implements InventoryHolder {
             // Friendly warning so it's known
             Engine.getInstance().getLogger().printWarning("Duplicate slot was found in menu: " + identifier + ", slot: " + button.slot());
 
+        buttons.removeIf(button1 -> button1.slot() == button.slot());
         buttons.add(button);
     }
 
