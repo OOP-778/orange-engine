@@ -6,6 +6,8 @@ import com.oop.orangeengine.menu.WrappedInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 public class BasicMenu extends AMenu {
     public BasicMenu(String identifier, int size, AMenu parent) {
         super(identifier, size, parent);
@@ -27,6 +29,7 @@ public class BasicMenu extends AMenu {
         }
 
         // Set buttons
+        getEngine().getLogger().printWarning("Found " + buttons().size() + " buttons!");
         buttons().forEach(button -> wrappedInventory.setButton(button.slot(), button));
     }
 

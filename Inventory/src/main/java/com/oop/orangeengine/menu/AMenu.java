@@ -112,6 +112,7 @@ public abstract class AMenu implements InventoryHolder {
 
     public void addButton(AMenuButton button) {
         buttons.add(button);
+        System.out.println("Added button " + button.currentItem());
     }
 
     public void setButton(int slot, AMenuButton button) {
