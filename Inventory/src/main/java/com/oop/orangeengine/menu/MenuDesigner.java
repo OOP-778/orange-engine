@@ -48,7 +48,7 @@ public class MenuDesigner {
 
         OLogger logger = getEngine().getLogger();
         logger.printWarning("Filling menu!");
-        
+
         for (char[] row : layout) {
             for (char chaz : row) {
 

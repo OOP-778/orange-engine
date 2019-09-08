@@ -110,18 +110,11 @@ public abstract class AMenu implements InventoryHolder {
     }
 
     public void addButton(AMenuButton button) {
-
-        if (!isSlotEmpty(button.slot()))
-            // Friendly warning so it's known
-            Engine.getInstance().getLogger().printWarning("Duplicate slot was found in menu: " + identifier + ", slot: " + button.slot() + ", item: " + buttons.stream().filter(button1 -> button1.slot() == button.slot()).findFirst().orElse(BukkitItem.newAir(button.slot())).currentItem());
-
-        buttons.removeIf(button1 -> button1.slot() == button.slot());
         buttons.add(button);
     }
 
     public void setButton(int slot, AMenuButton button) {
         button.slot(slot);
-        buttons.removeIf(button1 -> button1.slot() == button.slot());
         buttons.add(button);
     }
 
