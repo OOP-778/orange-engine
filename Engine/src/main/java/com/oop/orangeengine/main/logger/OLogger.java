@@ -7,10 +7,10 @@ import org.apache.commons.lang.StringUtils;
 
 @Getter
 public class OLogger {
-    private String error_prefix = "&c[OLogger ERROR]: &7";
-    private String warn_prefix = "&4[OLogger WARN]: &7";
-    private String normal_prefix = "&e[OLogger]: &7";
-    private String debug_prefix = "&e[OLogger DEBUG]: &7";
+    private String error_prefix = "&c[OLogger ERROR]: &f";
+    private String warn_prefix = "&4[OLogger WARN]: &f";
+    private String normal_prefix = "&e[OLogger]: &f";
+    private String debug_prefix = "&e[OLogger DEBUG]: &f";
     private String loggerName;
 
     public OLogger(EnginePlugin plugin) {

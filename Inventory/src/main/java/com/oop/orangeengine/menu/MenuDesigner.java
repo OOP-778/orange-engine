@@ -1,11 +1,14 @@
 package com.oop.orangeengine.menu;
 
+import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class MenuDesigner {
     private char[][] layout;
@@ -43,19 +46,26 @@ public class MenuDesigner {
     public void fill(AMenu menu) {
         int realSlot = 0;
 
+        OLogger logger = getEngine().getLogger();
+        logger.printWarning("Filling menu!");
+        
         for (char[] row : layout) {
             for (char chaz : row) {
 
                 if (chaz == 'A') {
                     menu.addButton(BukkitItem.newAir(realSlot));
+                    logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to AIR");
 
                 } else {
                     AMenuButton button = buttonMap.get(chaz);
-                    if (button == null)
+                    if (button == null) {
                         menu.addButton(BukkitItem.newAir(realSlot));
+                        logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to AIR");
 
-                    else
+                    } else {
                         menu.addButton(button.clone().slot(realSlot));
+                        logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to " + button.currentItem().toString());
+                    }
                 }
 
                 realSlot++;

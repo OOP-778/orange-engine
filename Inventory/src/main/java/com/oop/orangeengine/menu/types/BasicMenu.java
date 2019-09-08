@@ -21,16 +21,13 @@ public class BasicMenu extends AMenu {
             throw new IllegalStateException("Failed to find title for menu " + identifier());
 
         // Set Wrapped Inventory
-        if(wrappedInventory == null) {
+        if (wrappedInventory == null) {
             Inventory inventory = provideNewInv();
             wrappedInventory = new WrappedInventory(this, inventory);
         }
 
         // Set buttons
-        buttons().forEach(button -> {
-            wrappedInventory.setButton(button.slot(), button);
-            System.out.println("SETTING BUTTON: " + button.slot() + ", to " + button.currentItem().toString());
-        });
+        buttons().forEach(button -> wrappedInventory.setButton(button.slot(), button));
     }
 
     @Override
