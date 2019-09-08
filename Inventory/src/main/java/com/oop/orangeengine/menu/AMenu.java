@@ -3,6 +3,7 @@ package com.oop.orangeengine.menu;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.button.AMenuButton;
+import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.MenuCloseEvent;
 import com.oop.orangeengine.menu.events.MenuOpenEvent;
@@ -112,7 +113,7 @@ public abstract class AMenu implements InventoryHolder {
 
         if (!isSlotEmpty(button.slot()))
             // Friendly warning so it's known
-            Engine.getInstance().getLogger().printWarning("Duplicate slot was found in menu: " + identifier + ", slot: " + button.slot() + ", item: " + buttons.stream().filter(button1 -> button1.slot() == button.slot()).findFirst().get().currentItem());
+            Engine.getInstance().getLogger().printWarning("Duplicate slot was found in menu: " + identifier + ", slot: " + button.slot() + ", item: " + buttons.stream().filter(button1 -> button1.slot() == button.slot()).findFirst().orElse(BukkitItem.newAir(button.slot())).currentItem());
 
         buttons.removeIf(button1 -> button1.slot() == button.slot());
         buttons.add(button);
