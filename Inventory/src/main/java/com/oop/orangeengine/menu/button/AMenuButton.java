@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu.button;
 
 import com.oop.orangeengine.main.storage.Storegable;
+import com.oop.orangeengine.main.util.data.map.OMap;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
@@ -19,7 +20,7 @@ import java.util.function.Consumer;
 public abstract class AMenuButton extends Storegable implements Cloneable {
 
     @Getter
-    private final Map<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new HashMap<>();
+    private final OMap<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new OMap<>();
 
     @Getter
     private ItemStack currentItem;
@@ -37,15 +38,11 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
 
     @Setter
     @Getter
-    private boolean pickable = true;
+    private boolean pickable = false;
 
     @Getter
     @Setter
     private boolean paged = false;
-
-    @Getter
-    @Setter
-    private boolean forceCancelEvent = false;
 
     public AMenuButton(ItemStack currentItem, int slot) {
         this.currentItem = currentItem;

@@ -3,11 +3,13 @@ package com.oop.orangeengine.menu;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.events.SyncEvents;
+import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
+import com.oop.orangeengine.menu.button.impl.FillableButton;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,7 +28,12 @@ public class InventoryController extends AEngineComponent {
 
     @DefaultInitialization
     public InventoryController() {
+
+        OLogger logger = getEngine().getLogger();
+        logger.printWarning("Registering Inventory Controller...");
+
         SyncEvents.listen(InventoryClickEvent.class, EventPriority.LOWEST, event -> {
+
             if (event.getSlot() < 0) return;
             if (!(event.getClickedInventory().getHolder() instanceof AMenu)) return;
 
@@ -34,10 +41,10 @@ public class InventoryController extends AEngineComponent {
             WrappedInventory wrappedInventory = menu.getWrapperFromBukkit(event.getClickedInventory());
 
             AMenuButton button = wrappedInventory.getButtonAt(event.getSlot());
-            if (button.currentItem().getType() == Material.AIR) return;
+            if (button.currentItem().getType() == Material.AIR && !(button instanceof FillableButton)) return;
 
-            if (button.pickable())
-                return;
+            if (!button.pickable())
+                event.setCancelled(true);
 
             ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked());
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
@@ -47,18 +54,15 @@ public class InventoryController extends AEngineComponent {
                 return;
             }
 
-            if(button.forceCancelEvent())
-                event.setCancelled(true);
-
             // Global click event
             menu.globalClickHandler().accept(buttonClickEvent);
 
             // Per button click event
-            Optional.of(button.clickHandler().get(ClickEnum.GLOBAL)).ifPresent(handler -> handler.accept(buttonClickEvent));
+            button.clickHandler().getAsOptional(ClickEnum.GLOBAL).ifPresent(handler -> handler.accept(buttonClickEvent));
 
             ClickEnum clickEnum = ClickEnum.match(event);
-            if(clickEnum != ClickEnum.GLOBAL)
-                Optional.of(button.clickHandler().get(clickEnum)).ifPresent(handler -> handler.accept(buttonClickEvent));
+            if (clickEnum != ClickEnum.GLOBAL)
+                button.clickHandler().getAsOptional(clickEnum).ifPresent(handler -> handler.accept(buttonClickEvent));
 
             if (button.sound() != null)
                 button.sound().play((Location) event.getWhoClicked());

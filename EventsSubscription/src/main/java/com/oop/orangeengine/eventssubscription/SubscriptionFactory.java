@@ -28,7 +28,6 @@ public class SubscriptionFactory extends AEngineComponent {
 
         INSTANCE = this;
         Engine.getInstance().findComponentByClass(Cleaner.class).registerClass(SubscriptionFactory.class);
-
     }
 
     public <T extends Event> SubscribedEvent<T> subscribeTo(Class<T> type, Consumer<T> listener, SubscriptionProperties<T> props) {

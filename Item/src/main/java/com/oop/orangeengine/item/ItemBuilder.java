@@ -102,7 +102,8 @@ public abstract class ItemBuilder implements Typeable {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
-        if (lore.size() == 0 || (lore.size() - 1 < index)) appendLore(text);
+        if (lore.size() == 0 || ((lore.size() - 1) < index))
+            return appendLore(text);
 
         lore.set(index, Helper.color(text));
         meta.setLore(lore);
@@ -210,13 +211,8 @@ public abstract class ItemBuilder implements Typeable {
         return itemStack.getType();
     }
 
+    @Deprecated
     public ItemBuilder addLore(String text) {
-        List<String> lore = getItemMeta().hasLore() ? getItemMeta().getLore() : new ArrayList<>();
-        lore.add(text);
-
-        ItemMeta meta = getItemMeta();
-        meta.setLore(lore);
-        setItemMeta(meta);
-        return this;
+        return appendLore(text);
     }
 }

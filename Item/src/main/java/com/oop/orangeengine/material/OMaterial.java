@@ -25,6 +25,7 @@ package com.oop.orangeengine.material;
  * DEALINGS IN THE SOFTWARE.
  */
 
+import com.oop.orangeengine.item.custom.OItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -1480,6 +1481,10 @@ public enum OMaterial {
     @Nullable
     public ItemStack parseItem() {
         return parseItem(false);
+    }
+
+    public ItemStack parseItemAsFiller() {
+        return new OItem(this).setDisplayName(" ").getItemStack();
     }
 
     /**

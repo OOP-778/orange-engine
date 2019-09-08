@@ -38,7 +38,7 @@ public abstract class AMenu implements InventoryHolder {
 
     @Getter
     @Setter
-    private Consumer<ButtonClickEvent> globalClickHandler;
+    private Consumer<ButtonClickEvent> globalClickHandler = (button) -> {};
 
     @Getter
     @Setter

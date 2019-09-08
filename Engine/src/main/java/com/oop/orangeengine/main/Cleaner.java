@@ -24,7 +24,7 @@ public class Cleaner extends AEngineComponent {
     public void registerClass(Class<?> clazz) {
 
         Set<Field> fields = toClean.get(clazz);
-        if(fields == null) {
+        if (fields == null) {
 
             fields = new HashSet<>();
             toClean.put(clazz, fields);
@@ -32,8 +32,8 @@ public class Cleaner extends AEngineComponent {
         }
 
         //Loop through fields
-        for(Field field : clazz.getFields()) {
-            if(Modifier.isStatic(field.getModifiers())) {
+        for (Field field : clazz.getFields()) {
+            if (Modifier.isStatic(field.getModifiers())) {
 
                 field.setAccessible(true);
                 fields.add(field);
