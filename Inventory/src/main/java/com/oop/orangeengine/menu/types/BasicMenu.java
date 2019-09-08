@@ -27,7 +27,10 @@ public class BasicMenu extends AMenu {
         }
 
         // Set buttons
-        buttons().forEach(button -> wrappedInventory.setButton(button.slot(), button));
+        buttons().forEach(button -> {
+            wrappedInventory.setButton(button.slot(), button);
+            System.out.println("SETTING BUTTON: " + button.slot() + ", to " + button.currentItem().toString());
+        });
     }
 
     @Override
