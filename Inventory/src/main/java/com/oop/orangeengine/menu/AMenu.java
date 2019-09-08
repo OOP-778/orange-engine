@@ -2,6 +2,7 @@ package com.oop.orangeengine.menu;
 
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.util.OptionalConsumer;
+import com.oop.orangeengine.main.util.data.set.OSet;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
@@ -53,7 +54,7 @@ public abstract class AMenu implements InventoryHolder {
     private Set<AMenu> children = new HashSet<>();
 
     @Getter
-    private Set<AMenuButton> buttons = new LinkedHashSet<>();
+    private Set<AMenuButton> buttons = new OSet<>();
 
     public AMenu(String identifier, int size, AMenu parent) {
         this.identifier = identifier;
