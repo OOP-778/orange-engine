@@ -215,4 +215,9 @@ public abstract class ItemBuilder implements Typeable {
     public ItemBuilder addLore(String text) {
         return appendLore(text);
     }
+
+    public ItemBuilder setAmount(int amount) {
+        this.getItemStack().setAmount(amount);
+        return this;
+    }
 }

@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu.packet;
 
 import com.oop.orangeengine.main.util.OSimpleReflection;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,6 +19,7 @@ public class SlotUpdate {
     //Fields
     private static Field PLAYER_CONNECTION_FIELD;
     private static Field PLAYER_ACTIVE_CONTAINER_FIELD;
+    private static Field PLAYER_DEFAULT_CONTAINER_FIELD;
     private static Field CONTAINER_WINDOWID_FIELD;
 
     //Const
@@ -44,6 +46,7 @@ public class SlotUpdate {
 
             PACKET_SET_SLOT_CONST = OSimpleReflection.getConstructor(PACKET_SET_SLOT_CLASS, int.class, int.class, ITEM_STACK_CLASS);
             CONTAINER_WINDOWID_FIELD = OSimpleReflection.getField(CONTAINER_CLASS, true, "windowId");
+            PLAYER_DEFAULT_CONTAINER_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, false, "defaultContainer");
 
             ITEM_STACK_AS_NMS_COPY = OSimpleReflection.getMethod(CRAFT_ITEM_CLASS, "asNMSCopy", ItemStack.class);
 
@@ -53,13 +56,19 @@ public class SlotUpdate {
 
     }
 
-    public static void update(Player player, int slot, ItemStack item) {
+    public static void update(Player player, int slot, ItemStack item, boolean top) {
 
         try {
 
             Object ENTITY_PLAYER = PLAYER_GET_HANDLE_METHOD.invoke(player);
-            Object ACTIVE_CONTAINER = PLAYER_ACTIVE_CONTAINER_FIELD.get(ENTITY_PLAYER);
-            int windowId = CONTAINER_WINDOWID_FIELD.getInt(ACTIVE_CONTAINER);
+            Object CONTAINER;
+            if(top)
+                CONTAINER = PLAYER_ACTIVE_CONTAINER_FIELD.get(ENTITY_PLAYER);
+
+            else
+                CONTAINER = PLAYER_DEFAULT_CONTAINER_FIELD.get(ENTITY_PLAYER);
+
+            int windowId = CONTAINER_WINDOWID_FIELD.getInt(CONTAINER);
             Object itemStack = ITEM_STACK_AS_NMS_COPY.invoke(item, item);
 
             sendPacket(PLAYER_GET_HANDLE_METHOD.invoke(player), PACKET_SET_SLOT_CONST.newInstance(windowId, slot, itemStack));

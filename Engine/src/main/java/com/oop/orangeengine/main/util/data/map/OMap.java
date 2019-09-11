@@ -13,6 +13,12 @@ public class OMap<K, V> extends HashMap<K, V> {
     @Setter
     private DataModificationHandler<V> handler;
 
+    public V putIfPresentReplace(K key, V object) {
+        remove(key);
+        put(key, object);
+        return object;
+    }
+
     public V putIfPresentUpdate(K key, V object, BiFunction<V, V, V> func) {
         AtomicReference<V> ref = new AtomicReference<>();
         getAsOptional(key).ifPresentOrElse(o2 -> ref.set(func.apply(object, o2)), () -> {
@@ -43,6 +49,7 @@ public class OMap<K, V> extends HashMap<K, V> {
         if (handler != null)
             handler.onAdd(v);
 
-        return super.put(k, v);
+        super.put(k, v);
+        return v;
     }
 }

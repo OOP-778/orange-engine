@@ -5,7 +5,11 @@ import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.packet.SlotUpdate;
 import lombok.Getter;
+import net.minecraft.server.v1_8_R3.Container;
+import net.minecraft.server.v1_8_R3.PlayerInventory;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -26,7 +30,7 @@ public class WrappedInventory implements Cloneable {
         this.bukkitInventory = inventory;
         this.buttons = new AMenuButton[inventory.getSize()];
 
-        //Initialize items so we don't get any nulls
+        // Initialize items so we don't get any nulls
         loadItems();
     }
 
@@ -43,6 +47,7 @@ public class WrappedInventory implements Cloneable {
                 buttons[slot] = new BukkitItem(itemStack, slot);
 
         }
+        ensureButtonsHaveHolder();
     }
 
     public Set<AMenuButton> getButtons(boolean filterOutItems) {
@@ -69,7 +74,7 @@ public class WrappedInventory implements Cloneable {
         bukkitInventory.setItem(button.slot(), button.currentItem());
 
         Set<Player> viewers = getViewers();
-        viewers.forEach(player -> SlotUpdate.update(player, button.slot(), button.currentItem()));
+        viewers.forEach(player -> SlotUpdate.update(player, button.slot(), button.currentItem(), true));
     }
 
     public Set<Player> getViewers() {
@@ -90,8 +95,8 @@ public class WrappedInventory implements Cloneable {
         if (button == null)
             button = BukkitItem.newAir(slot);
 
-        buttons[slot] = button;
         button.holder(this);
+        buttons[slot] = button;
         updateButton(button);
     }
 
@@ -135,4 +140,10 @@ public class WrappedInventory implements Cloneable {
                 .forEach(button -> wrappedInventory.setButton(button.slot(), button));
         return wrappedInventory;
     }
+
+    public void ensureButtonsHaveHolder() {
+        for (AMenuButton button : buttons)
+            button.holder(this);
+    }
+
 }

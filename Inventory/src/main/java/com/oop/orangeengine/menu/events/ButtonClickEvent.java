@@ -2,16 +2,19 @@ package com.oop.orangeengine.menu.events;
 
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.WrappedInventory;
+import com.oop.orangeengine.menu.button.AMenuButton;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 
-@RequiredArgsConstructor
 @Getter
+@RequiredArgsConstructor
 public class ButtonClickEvent extends Event implements Cancellable {
 
     private static HandlerList handlerList = new HandlerList();
@@ -21,6 +24,8 @@ public class ButtonClickEvent extends Event implements Cancellable {
     private final InventoryClickEvent originalEvent;
     private final Player player;
     private boolean cancelled = false;
+    private final AMenuButton clickedButton;
+    private final ItemStack beforeItem;
 
     @Override
     public HandlerList getHandlers() {
@@ -35,5 +40,22 @@ public class ButtonClickEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean b) {
         cancelled = b;
+    }
+
+    public void switchCursorWithSlot() {
+        int slot = originalEvent.getSlot();
+        ItemStack cursor = getOriginalEvent().getWhoClicked().getItemOnCursor().clone();
+        if (cursor.getType() != Material.AIR) return;
+
+        ItemStack atSlot = originalEvent.getClickedInventory().getItem(slot);
+        getOriginalEvent().getClickedInventory().setItem(slot, cursor.clone());
+        getOriginalEvent().getWhoClicked().setItemOnCursor(atSlot.clone());
+    }
+
+    public void switchCursorWith(ItemStack itemStack) {
+        ItemStack cursor = getOriginalEvent().getWhoClicked().getItemOnCursor().clone();
+        if (cursor.getType() != Material.AIR) return;
+
+        getOriginalEvent().getWhoClicked().setItemOnCursor(itemStack.clone());
     }
 }

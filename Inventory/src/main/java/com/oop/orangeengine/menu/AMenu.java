@@ -113,7 +113,6 @@ public abstract class AMenu implements InventoryHolder {
 
     public void addButton(AMenuButton button) {
         buttons.add(button);
-        System.out.println("Added button " + button.currentItem());
     }
 
     public void setButton(int slot, AMenuButton button) {
@@ -144,10 +143,7 @@ public abstract class AMenu implements InventoryHolder {
 
     @Override
     public Inventory getInventory() {
-        if (wrappedInventory != null)
-            return wrappedInventory.getBukkitInventory();
-
-        return null;
+        return getWrappedInventory().getBukkitInventory();
     }
 
     public AMenu parent(AMenu parent) {

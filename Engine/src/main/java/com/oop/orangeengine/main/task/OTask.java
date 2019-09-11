@@ -83,7 +83,8 @@ public class OTask extends Storegable {
     }
 
     public void cancel() {
-        bukkitTask.cancel();
+        if (bukkitTask != null)
+            bukkitTask.cancel();
     }
 
     public OTask runnable(Runnable runnable) {
@@ -131,7 +132,7 @@ public class OTask extends Storegable {
 
     public OTask whenFinished(Consumer<OTask> whenFinished, boolean sync) {
         this.whenFinished = (task) -> {
-            if(sync)
+            if (sync)
                 StaticTask.getInstance().sync(() -> whenFinished.accept(this));
 
             else
