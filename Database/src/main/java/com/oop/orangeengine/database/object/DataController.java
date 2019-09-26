@@ -4,6 +4,7 @@ import com.google.common.collect.HashBiMap;
 import com.oop.orangeengine.database.ODatabase;
 import com.oop.orangeengine.database.annotations.DatabaseTable;
 import com.oop.orangeengine.database.annotations.DatabaseValue;
+import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.DataModificationHandler;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
@@ -13,8 +14,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public abstract class DataController {
 
@@ -34,13 +39,17 @@ public abstract class DataController {
         for (String tableName : classToTable.keySet()) {
 
             updateTable(classToTable.get(tableName));
-            int rowCount = database.getRowCount(tableName);
-            if (rowCount <= 0) continue;
+            List<Integer> rowIds = database.getRowIds(tableName);
 
-            IntStream.range(1, rowCount + 1).parallel().forEach(rowId -> {
+            rowIds.parallelStream().forEach(rowId -> {
                 try {
                     Class klass = classToTable.get(tableName);
-                    Constructor<? extends DatabaseObject> declaredConstructor = klass.getDeclaredConstructor();
+                    Constructor<? extends DatabaseObject> declaredConstructor = null;
+                    try {
+                        declaredConstructor = klass.getDeclaredConstructor();
+                    } catch (NoSuchMethodException ex) {
+                        getEngine().getLogger().error(ex, "Failed to find Constructor for class " + klass.getSimpleName() + ". Contact Developer immediately!");
+                    }
                     if (declaredConstructor == null)
                         throw new IllegalStateException("Failed to find no args constructor for class " + klass.getName());
 
@@ -50,7 +59,7 @@ public abstract class DataController {
                     data.add(value);
 
                 } catch (Exception ex) {
-                    throw new IllegalStateException(ex);
+                    ex.printStackTrace();
                 }
             });
 
@@ -282,15 +291,48 @@ public abstract class DataController {
 
                 @Override
                 public void onRemove(DatabaseObject object) {
-                    if(object.getRowId() != -1) {
+                    if (object.getRowId() != -1) {
                         DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
                         assert table != null;
 
                         database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
                     }
-
-
                 }
             });
     }
+
+    public <T extends DatabaseObject> void removeIf(Class<T> type, Predicate<T> predicate) {
+        getData(type).stream()
+                .filter(predicate)
+                .findFirst()
+                .ifPresent(object -> {
+                    if (object.getRowId() != -1) {
+                        DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
+                        assert table != null;
+
+                        database.execute("DELETE FROM " + table.tableName() + " WHERE id = '" + object.getRowId() + "'");
+                    }
+                    getData().removeWithoutCheck(object);
+                });
+    }
+
+    public <T extends DatabaseObject> OptionalConsumer<T> get(Class<T> type, Predicate<T> predicate) {
+        return OptionalConsumer.of(getData(type).stream()
+                .filter(predicate)
+                .findFirst());
+    }
+
+    public <T extends DatabaseObject> T get(Class<T> type, Predicate<T> predicate, Supplier<T> ifNotPresent) {
+        T object = getData(type).stream()
+                .filter(predicate)
+                .findFirst()
+                .orElse(null);
+        if (object == null) {
+            object = ifNotPresent.get();
+            getData().add(object);
+        }
+
+        return object;
+    }
+
 }

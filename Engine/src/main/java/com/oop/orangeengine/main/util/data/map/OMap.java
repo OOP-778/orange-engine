@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class OMap<K, V> extends HashMap<K, V> {
     @Setter
@@ -29,6 +30,17 @@ public class OMap<K, V> extends HashMap<K, V> {
         });
 
         return ref.get();
+    }
+
+    public V putIfPresentGet(K key, Supplier<V> supplier) {
+        V object = get(key);
+
+        if (object == null) {
+            object = supplier.get();
+            put(key, object);
+        }
+
+        return object;
     }
 
     public OptionalConsumer<V> getAsOptional(K key) {

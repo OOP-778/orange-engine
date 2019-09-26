@@ -57,18 +57,16 @@ public abstract class AConfigButton {
             ConfigurationSection onClickSection = section.getSection("on click");
 
             // Open action
-            onClickSection.ifValuePresent("open", String.class, menuName -> clickHandler.put(ClickEnum.GLOBAL, event -> {
-                event.getMenu().getChild(menuName, true).ifPresentOrElse(
-                        (menu) -> {
-                            WrappedInventory inventory = menu.getWrappedInventory();
-                            if (inventory == null)
-                                throw new IllegalStateException("Menu by identifier " + menuName + " failed to provide an Inventory.");
+            onClickSection.ifValuePresent("open", String.class, menuName -> clickHandler.put(ClickEnum.GLOBAL, event -> event.getMenu().getChild(menuName, true).ifPresentOrElse(
+                    (menu) -> {
+                        WrappedInventory inventory = menu.getWrappedInventory();
+                        if (inventory == null)
+                            throw new IllegalStateException("Menu by identifier " + menuName + " failed to provide an Inventory.");
 
-                            event.getPlayer().openInventory(inventory.getBukkitInventory());
-                        },
-                        () -> event.getPlayer().sendMessage(Helper.color("&cError! Failed to find menu by name " + menuName + " please contact administrator!"))
-                );
-            }));
+                        event.getPlayer().openInventory(inventory.getBukkitInventory());
+                    },
+                    () -> event.getPlayer().sendMessage(Helper.color("&cError! Failed to find menu by name " + menuName + " please contact administrator!"))
+            )));
 
             // Execute Action
             onClickSection.ifValuePresent("execute action", String.class, actionIdentifier -> getEngine().findComponentByClass(InventoryController.class).findClickHandler(actionIdentifier, null).ifPresentOrElse(

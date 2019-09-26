@@ -65,6 +65,17 @@ public class OLogger {
 
     }
 
+    public void error(Throwable exception, String message) {
+
+        printError("Exception was caught in " + getLoggerName() + ": " + message);
+        for (StackTraceElement ste : exception.getStackTrace()) {
+            send("&c - " + ste.toString());
+        }
+
+        send("");
+
+    }
+
     public void throwError(String message) {
         throw new IllegalStateException(message);
     }

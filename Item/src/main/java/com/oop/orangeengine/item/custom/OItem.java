@@ -51,6 +51,9 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         //Load lore
         section.ifValuePresent("lore", List.class, this::setLore);
 
+        // Load amount
+        section.ifValuePresent("amount", Integer.class, this::setAmount);
+
         //Load glow
         section.ifValuePresent("glow", boolean.class, bool -> {
             if(bool)
@@ -86,6 +89,9 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         // Set if glow
         if (object.isGlow())
             section.setValue("glow", true);
+
+        if (object.getAmount() > 1)
+            section.setValue("amount", object.getAmount());
 
         // Set lore
         if (!object.getLore().isEmpty())

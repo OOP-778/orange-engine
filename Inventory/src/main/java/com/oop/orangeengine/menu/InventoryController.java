@@ -54,7 +54,7 @@ public class InventoryController extends AEngineComponent {
                     ItemStack cursor = event.getCursor().clone();
                     ItemStack originalCursor = event.getCursor().clone();
 
-                    if(cursor.getType() != Material.AIR) {
+                    if (cursor.getType() != Material.AIR) {
                         if (cursor.getAmount() < 64) {
 
                             cursor.setAmount(cursor.getMaxStackSize() - cursor.getAmount());
@@ -89,7 +89,7 @@ public class InventoryController extends AEngineComponent {
                     event.getClickedInventory().setItem(slot, cursor);
                     event.getWhoClicked().setItemOnCursor(currentAtSlot);
 
-                } else if(event.getAction() == InventoryAction.PLACE_ONE) {
+                } else if (event.getAction() == InventoryAction.PLACE_ONE) {
                     ItemStack onCursorCloned = cursor.clone();
                     onCursorCloned.setAmount(1);
 
@@ -105,9 +105,9 @@ public class InventoryController extends AEngineComponent {
                     onCursorCloned.setAmount(cursor.getAmount() - 1);
                     event.getWhoClicked().setItemOnCursor(onCursorCloned);
                 }
+                event.setCancelled(true);
             }
             button.updateButtonFromHolder();
-            System.out.println(button.currentItem());
 
             ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange);
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
@@ -135,7 +135,7 @@ public class InventoryController extends AEngineComponent {
             if (!(event.getInventory().getHolder() instanceof AMenu)) return;
 
             AMenu menu = (AMenu) event.getInventory().getHolder();
-            if(menu.closeEventHandler() != null)
+            if (menu.closeEventHandler() != null)
                 menu.closeEventHandler().accept(new MenuCloseEvent(menu, event));
 
         });
@@ -144,7 +144,7 @@ public class InventoryController extends AEngineComponent {
             if (!(event.getInventory().getHolder() instanceof AMenu)) return;
 
             AMenu menu = (AMenu) event.getInventory().getHolder();
-            if(menu.openEventHandler() != null)
+            if (menu.openEventHandler() != null)
                 menu.openEventHandler().accept(new MenuOpenEvent(menu, event));
 
         });
@@ -191,6 +191,7 @@ public class InventoryController extends AEngineComponent {
             if (stack.getAmount() <= 0) return removed;
 
             boolean doContinue = false;
+
             for (int i : slotsToIgnore)
                 if (i == slot) {
                     doContinue = true;
@@ -206,7 +207,6 @@ public class InventoryController extends AEngineComponent {
                 else
                     itemStack.setAmount(itemStack.getAmount() - stack.getAmount());
 
-                System.out.println("REMOVED " + stack.getAmount());
                 removed += stack.getAmount();
 
                 stack.setAmount(0);

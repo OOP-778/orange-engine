@@ -17,10 +17,12 @@ public class OFile {
     public OFile(File folder, String fileName) {
         this.fileName = fileName;
         this.folder = folder;
+        file = folder == null ? new File(fileName) : new File(folder, fileName);
     }
 
     public OFile(String fileName) {
         this.fileName = fileName;
+        this.file = new File(fileName);
     }
 
     public OFile(File file) {
@@ -60,7 +62,6 @@ public class OFile {
             if(folder != null && !folder.exists())
                 folder.mkdirs();
 
-            File file = folder == null ? new File(fileName) : new File(folder, fileName);
             if (!file.exists()) {
 
                 if (importFromResources)
@@ -81,5 +82,4 @@ public class OFile {
     public void delete() {
         file.delete();
     }
-
 }

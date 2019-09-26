@@ -8,8 +8,6 @@ public class Testing extends AEngineComponent {
     @DefaultInitialization
     public Testing() {
 
-        System.out.println("INITLAIZED");
-
     }
 
     @Override

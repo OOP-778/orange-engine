@@ -68,9 +68,9 @@ public class CommandController {
 
                     }
                     String secondArg = args[0];
-                    OCommand subCommand = command.getSubCommands().get(secondArg);
-                    if (subCommand != null)
-                        handleCommand(cutArray(args, 1), sender, subCommand);
+                    String subCommandName = command.getSubCommands().keySet().stream().filter(subC -> subC.equalsIgnoreCase(secondArg)).findFirst().orElse(null);
+                    if (subCommandName != null)
+                        handleCommand(cutArray(args, 1), sender, command.getSubCommands().get(subCommandName));
 
                     else {
 
@@ -169,8 +169,8 @@ public class CommandController {
                 return;
 
             }
-
         }
+
         if (args.length >= 1 && command.isSubCommand(args[0])) {
             handleCommand(cutArray(args, 1), sender, command.subCommand(args[0]));
             return;
@@ -202,13 +202,13 @@ public class CommandController {
                     OPair<Object, String> value = arg.getMapper().product(stringValue);
                     if (value.getFirst() == null) {
 
-                        sender.sendMessage(colorize("&c&l* &7Error: &c" + value.getFirst()));
+                        sender.sendMessage(colorize("&c&l* &7Error: &c" + value.getSecond()));
                         handleProperUsage(command, sender);
                         return;
 
                     } else {
 
-                        arguments.put(arg.getIdentifier(), value.getSecond());
+                        arguments.put(arg.getIdentifier(), value.getFirst());
                         argsCopy = cutArray(argsCopy, 1);
 
                     }
@@ -229,8 +229,6 @@ public class CommandController {
         if (command.getSubCommands().isEmpty()) {
             OMessage message = new OMessage();
             MessageLine line = new MessageLine();
-
-            Helper.print("HAS PARENT: " + command.getParent() != null);
             String allParents = command.getLabelWithParents();
 
             line.append(colorScheme.getMainColor() + "Usage: /" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
@@ -366,14 +364,15 @@ public class CommandController {
         //Format = <required> [optional]
         if (args.stream().anyMatch(CommandArgument::isRequired)) {
 
-            line.append(colorScheme.getMainColor());
+
+            line.append(colorScheme.getMainColor()).append(" ");
             args.stream().filter(CommandArgument::isRequired).forEach(arg -> {
 
                 line.append("<");
                 LineContent content = new LineContent("&f" + arg.getIdentifier()).
                         hoverText(colorScheme.getMainColor() + arg.getDescription());
                 line.append(content);
-                line.append(">");
+                line.append(colorScheme.getMainColor() + ">");
 
             });
             line.append(colorScheme.getMainColor());
@@ -382,14 +381,14 @@ public class CommandController {
 
         if (args.stream().anyMatch(a -> !a.isRequired())) {
 
-            line.append(colorScheme.getSecondColor());
+            line.append(colorScheme.getSecondColor()).append(" ");
             args.stream().filter(a -> !a.isRequired()).forEach(arg -> {
 
                 line.append("[");
                 LineContent content = new LineContent("&f" + arg.getIdentifier()).
                         hoverText(colorScheme.getSecondColor() + arg.getDescription());
                 line.append(content);
-                line.append("]");
+                line.append(colorScheme.getSecondColor() + "]");
 
             });
             line.append(colorScheme.getMarkupColor());

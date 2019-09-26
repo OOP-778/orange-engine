@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class TaskController implements ITaskController {
 
     private EnginePlugin owning;
+
     public TaskController(EnginePlugin owning) {
         this.owning = owning;
     }
@@ -16,7 +17,7 @@ public class TaskController implements ITaskController {
     @Override
     public OTask runTask(OTask task) {
         BukkitTask bukkitTask;
-        if(task.isSync())
+        if (task.isSync())
             bukkitTask = sync(task);
 
         else
@@ -27,33 +28,45 @@ public class TaskController implements ITaskController {
 
     }
 
-    private BukkitTask async(OTask task){
-        if(task.isRepeat())
+    private BukkitTask async(OTask task) {
+        if (task.isRepeat())
             return Bukkit.getScheduler().runTaskTimerAsynchronously(owning, task.run(), 0, task.getDelayAsTicks());
 
-        else
-            if(task.getDelay() != -1)
-                return Bukkit.getScheduler().runTaskLaterAsynchronously(owning, task.run(), task.getDelayAsTicks());
+        else if (task.getDelay() != -1)
+            return Bukkit.getScheduler().runTaskLaterAsynchronously(owning, task.run(), task.getDelayAsTicks());
 
-        else
+        // I ate shiet!
+        else if (!isAsyncThread())
             return Bukkit.getScheduler().runTaskAsynchronously(owning, task.run());
+
+        else {
+            task.run().run();
+            return null;
+        }
 
     }
 
     private BukkitTask sync(OTask task) {
-        if(task.isRepeat())
+        if (task.isRepeat())
             return Bukkit.getScheduler().runTaskTimer(owning, task.run(), 0, task.getDelayAsTicks());
 
-        else
-            if(task.getDelay() != -1)
-                return Bukkit.getScheduler().runTaskLater(owning, task.run(), task.getDelayAsTicks());
+        else if (task.getDelay() != -1)
+            return Bukkit.getScheduler().runTaskLater(owning, task.run(), task.getDelayAsTicks());
 
-            else
-                return Bukkit.getScheduler().runTask(owning, task.run());
+        else if (isAsyncThread())
+            return Bukkit.getScheduler().runTask(owning, task.run());
+
+        else {
+
+            task.run().run();
+            task.run();
+            return null;
+        }
+
 
     }
 
     private boolean isAsyncThread() {
-        return Thread.currentThread().getName().contains("Async");
+        return !Thread.currentThread().getName().startsWith("Server Thread");
     }
 }

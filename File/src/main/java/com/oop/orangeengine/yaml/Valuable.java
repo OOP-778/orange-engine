@@ -1,5 +1,6 @@
 package com.oop.orangeengine.yaml;
 
+import com.oop.orangeengine.yaml.mapper.PrimitveMapper;
 import com.oop.orangeengine.yaml.value.AConfigurationValue;
 
 import java.util.function.Consumer;
@@ -20,12 +21,17 @@ public interface Valuable {
         return type.cast(getValue(path, ifNotPresent));
     }
 
-    default <T> void ifValuePresent(String path, Class<T> type, Consumer<T> value) {
+    default <T> void ifValuePresent(String path, Class<T> type, Consumer<T> handler) {
+        Object value = getValueAsObject(path);
+        if(value != null) {
 
-        T object = type.cast(getValueAsObject(path));
-        if (object != null)
-            value.accept(object);
+            if (value.getClass().isAssignableFrom(type))
+                handler.accept((T) value);
 
+            else
+                handler.accept((T) PrimitveMapper.remap(value, type));
+
+        }
     }
 
     default <T> T getValueAsReq(String path) {
@@ -33,7 +39,12 @@ public interface Valuable {
     }
 
     default <T> T getValueAsReq(String path, Class<T> type) {
-        return type.cast(getValueAsObject(path));
+        Object value = getValueAsObject(path);
+        if (value.getClass().isAssignableFrom(type))
+            return type.cast(value);
+
+        else
+            return (T) PrimitveMapper.remap(value, type);
     }
 
     default <T> T getValueAsReq(String path, Object ifNotPresent) {

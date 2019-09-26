@@ -54,7 +54,7 @@ public abstract class DatabaseObject {
 
                     ClassFieldProvider classFieldProvider = FieldProviderController.getInstance().findProvider(holder);
                     if (classFieldProvider == null)
-                        throw new IllegalStateException("Failed to load database object field column" + cachedColumn.getSecond().columnName() + " cause Class Provider wasn't found!");
+                        throw new IllegalStateException("Failed to load database object field column " + cachedColumn.getSecond().columnName() + " cause Class Provider wasn't found!");
 
                     IDBFieldProvider fieldProvider = classFieldProvider.findProvider(cachedColumn.getSecond().columnName());
                     if (fieldProvider == null)
@@ -97,7 +97,7 @@ public abstract class DatabaseObject {
                 whenLoaded.run();
 
         } catch (Exception ex) {
-            throw new IllegalStateException(ex);
+           ex.printStackTrace();
         }
     }
 
@@ -216,9 +216,6 @@ public abstract class DatabaseObject {
 
                 klass == Float.class ||
                 klass == float.class ||
-
-                klass == Boolean.class ||
-                klass == boolean.class ||
 
                 klass == Long.class ||
                 klass == long.class ||

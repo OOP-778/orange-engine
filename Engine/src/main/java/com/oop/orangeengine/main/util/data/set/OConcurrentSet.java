@@ -64,6 +64,10 @@ public class OConcurrentSet<T> implements Set<T> {
         return set.remove(o);
     }
 
+    public boolean removeWithoutCheck(Object o) {
+        return set.remove(o);
+    }
+
     @Override
     public boolean containsAll(Collection<?> collection) {
         return set.containsAll(collection);

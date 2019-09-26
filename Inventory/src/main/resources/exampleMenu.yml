@@ -10,7 +10,7 @@ menu1:
   # If you want AIR the layout id for AIR is A
   layout:
     - "XXXXXXXXX"
-    - ""
+    - "AAAAFAAAA"
     - ""
     - "XXXPXNXXX"
 
@@ -52,6 +52,15 @@ menu1:
 
       on click:
         execute action: "previous page"
+
+    "F":
+      type: fillable
+      material: air
+      on fill:
+        execute action: "onFill"
+
+      on empty:
+
 
     "show player":
       # There's three types of buttons

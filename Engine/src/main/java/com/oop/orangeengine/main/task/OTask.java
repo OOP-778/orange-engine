@@ -122,6 +122,20 @@ public class OTask extends Storegable {
         return this;
     }
 
+    public OTask stopFor(TimeUnit unit, long time) {
+        cancel();
+        new OTask()
+                .delay(unit, time)
+                .runnable(this::execute)
+                .execute();
+
+        return this;
+    }
+
+    public OTask stopFor(long milis){
+        return stopFor(TimeUnit.MILLISECONDS, milis);
+    }
+
     public OTask whenFinished(Consumer<OTask> whenFinished) {
         return whenFinished(whenFinished, true);
     }

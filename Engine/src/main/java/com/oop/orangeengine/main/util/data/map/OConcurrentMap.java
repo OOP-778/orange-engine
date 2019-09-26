@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class OConcurrentMap<K, V> extends ConcurrentHashMap<K, V> {
     @Setter
@@ -24,8 +25,25 @@ public class OConcurrentMap<K, V> extends ConcurrentHashMap<K, V> {
         });
 
         return ref.get();
-
     }
+
+    public V putIfPresentGet(K key, Supplier<V> supplier) {
+        V object = get(key);
+
+        if (object == null) {
+            object = supplier.get();
+            put(key, object);
+        }
+
+        return object;
+    }
+
+    public V putIfPresentReplace(K key, V object) {
+        remove(key);
+        put(key, object);
+        return object;
+    }
+
 
     public OptionalConsumer<V> getAsOptional(K key) {
         return OptionalConsumer.of(Optional.ofNullable(get(key)));

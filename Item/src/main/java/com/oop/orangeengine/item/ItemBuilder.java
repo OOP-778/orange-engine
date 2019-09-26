@@ -217,7 +217,11 @@ public abstract class ItemBuilder implements Typeable {
     }
 
     public ItemBuilder setAmount(int amount) {
-        this.getItemStack().setAmount(amount);
+        getItemStack().setAmount(amount);
         return this;
+    }
+
+    public int getAmount() {
+        return getItemStack().getAmount();
     }
 }

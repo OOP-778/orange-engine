@@ -1,6 +1,7 @@
 package com.oop.orangeengine.database;
 
 import com.oop.orangeengine.database.annotations.DatabaseValue;
+import com.oop.orangeengine.database.object.AsyncQueue;
 import com.oop.orangeengine.database.types.SqlLiteDatabase;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @Getter
 public abstract class ODatabase {
+
+    private AsyncQueue queue = new AsyncQueue(this);
 
     protected abstract Connection provideConnection() throws SQLException;
 
@@ -51,20 +54,37 @@ public abstract class ODatabase {
         return -1;
     }
 
+    public List<Integer> getRowIds(String table) {
+        List<Integer> rowsIds = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM " + table)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next())
+                        rowsIds.add(resultSet.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowsIds;
+    }
+
     public boolean hasColumn(String table, String column) {
         return getColumns(table).contains(column);
     }
 
     public boolean tableHasValue(String table, String column, int id) {
         try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + column + " from " + table + " where id ='" + id + "'")) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     resultSet.next();
+                    if (resultSet.isClosed()) return false;
+
                     return resultSet.getObject(1) != null;
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            new SQLException("Failed to check if object has value (table=" + table + ", column=" + column + ", id=" + id + ") cause of " + e.getMessage()).printStackTrace();
         }
         return false;
     }
@@ -77,13 +97,15 @@ public abstract class ODatabase {
     }
 
     public void execute(String sql) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.execute();
+        queue.add(() -> {
+            try (Connection connection = getConnection()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public Object gatherColumnValue(String table, DatabaseValue databaseValue, String identifierColumn, String identifierValue) {
@@ -91,11 +113,11 @@ public abstract class ODatabase {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + databaseValue.columnName() + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     resultSet.next();
-                   return databaseValue.columnType().getObject(resultSet);
+                    return databaseValue.columnType().getObject(resultSet);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            new SQLException("Failed to gather column value (table=" + table + ", column=" + databaseValue.columnName() + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
         }
         return null;
     }
@@ -233,7 +255,6 @@ public abstract class ODatabase {
                 while (resultSet.next())
                     tables.add(resultSet.getString(3));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }

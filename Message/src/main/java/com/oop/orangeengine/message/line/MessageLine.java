@@ -1,7 +1,6 @@
 package com.oop.orangeengine.message.line;
 
 import com.google.common.primitives.Chars;
-import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.message.Centered;
 import com.oop.orangeengine.message.ColorFinder;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -121,11 +120,15 @@ public class MessageLine {
             List<String> checkThrough = new ArrayList<>();
             StringBuilder buffer = new StringBuilder();
 
-            if(lastColorL != null)
+            if (lastColorL != null)
                 buffer.append(lastColorL.color()).append(lastColorL.decoration());
 
-            if(clonedLC.getText().contains(" "))
+            if (clonedLC.getText().trim().length() == 0)
+                buffer.append(" ");
+
+            else if (clonedLC.getText().contains(" "))
                 checkThrough.addAll(Arrays.stream(clonedLC.getText().split(" ")).collect(toList()));
+
             else {
 
                 lastColorL = ColorFinder.find(clonedLC.getText());
@@ -133,9 +136,9 @@ public class MessageLine {
 
             }
 
-            for(String spacedString : checkThrough) {
+            for (String spacedString : checkThrough) {
 
-                if(lastColorL == null) {
+                if (lastColorL == null) {
 
                     lastColorL = ColorFinder.find(spacedString);
                     buffer.append(spacedString).append(" ");
@@ -145,7 +148,7 @@ public class MessageLine {
                     ColorFinder colorFinder = ColorFinder.find(spacedString);
                     StringBuilder spacedBuffer = new StringBuilder(lastColorL.color() + lastColorL.decoration());
 
-                    for(char character : spacedString.toCharArray()) {
+                    for (char character : spacedString.toCharArray()) {
 
                         if (!spacedBuffer.toString().contains(lastColorL.color() + lastColorL.decoration()))
                             spacedBuffer.append(lastColorL.color()).append(lastColorL.decoration()).append(character);
@@ -155,7 +158,7 @@ public class MessageLine {
 
                     }
 
-                    if(colorFinder.color() != "")
+                    if (colorFinder.color() != "")
                         lastColorL = colorFinder;
 
                     buffer.append(spacedBuffer).append(checkThrough.size() == 1 ? checkThrough.get(0).contains(" ") ? "" : "" : " ");
@@ -218,13 +221,13 @@ public class MessageLine {
         StringBuilder result = new StringBuilder();
         int length = input.length();
 
-        for(int index = length - 1; index > -1; --index) {
+        for (int index = length - 1; index > -1; --index) {
             char section = input.charAt(index);
             if ((section == '&' || section == '§') && index < length - 1) {
 
                 char c = input.charAt(index + 1);
                 ChatColor color = ChatColor.getByChar(c);
-                if(color == null) continue;
+                if (color == null) continue;
 
                 result.insert(0, color.toString());
                 if (color.isColor() || color.equals(ChatColor.RESET))

@@ -46,25 +46,19 @@ public class MenuDesigner {
     public void fill(AMenu menu) {
         int realSlot = 0;
 
-        OLogger logger = getEngine().getLogger();
-        logger.printWarning("Filling menu!");
-
         for (char[] row : layout) {
             for (char chaz : row) {
 
                 if (chaz == 'A') {
                     menu.addButton(BukkitItem.newAir(realSlot));
-                    logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to AIR");
 
                 } else {
                     AMenuButton button = buttonMap.get(chaz);
                     if (button == null) {
                         menu.addButton(BukkitItem.newAir(realSlot));
-                        logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to AIR");
 
                     } else {
                         menu.addButton(button.clone().slot(realSlot));
-                        logger.printWarning("Setting slot: " + realSlot + " char " + chaz + " to " + button.currentItem().toString());
                     }
                 }
 

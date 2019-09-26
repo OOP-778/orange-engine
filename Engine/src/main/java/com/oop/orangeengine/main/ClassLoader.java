@@ -36,13 +36,10 @@ public class ClassLoader {
             for (String className : classNames) {
 
                 Class klass = Class.forName(className);
-
-                System.out.println("Checking " + klass);
                 for (Constructor constructor : klass.getConstructors())
                     if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
                         try {
                             constructor.newInstance();
-                            System.out.println("Initialized " + klass);
                         } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {}
                     }
             }

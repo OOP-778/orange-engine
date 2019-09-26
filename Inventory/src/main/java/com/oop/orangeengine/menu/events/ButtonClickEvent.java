@@ -48,6 +48,8 @@ public class ButtonClickEvent extends Event implements Cancellable {
         if (cursor.getType() != Material.AIR) return;
 
         ItemStack atSlot = originalEvent.getClickedInventory().getItem(slot);
+        if (atSlot == null) return;
+
         getOriginalEvent().getClickedInventory().setItem(slot, cursor.clone());
         getOriginalEvent().getWhoClicked().setItemOnCursor(atSlot.clone());
     }

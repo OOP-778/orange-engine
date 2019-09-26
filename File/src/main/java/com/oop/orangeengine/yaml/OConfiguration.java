@@ -2,10 +2,12 @@ package com.oop.orangeengine.yaml;
 
 import com.oop.orangeengine.file.OFile;
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.util.JarUtil;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
+import com.oop.orangeengine.yaml.updater.ConfigurationUpdater;
 import com.oop.orangeengine.yaml.util.ConfigurationUtil;
 import com.oop.orangeengine.yaml.util.CustomWriter;
 import com.oop.orangeengine.yaml.util.OIterator;
@@ -13,11 +15,9 @@ import com.oop.orangeengine.yaml.util.UnreadString;
 import com.oop.orangeengine.yaml.value.AConfigurationValue;
 import com.oop.orangeengine.yaml.value.ConfigurationList;
 import com.oop.orangeengine.yaml.value.ConfigurationValue;
+import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -90,15 +90,16 @@ public class OConfiguration implements Valuable {
                 UnreadString line = looper.next();
                 if (line == null) continue;
 
-                if (line.value().contains("#")) {
+                if (line.value().trim().startsWith("#")) {
                     OPair<String, Integer> parsed = parse(line.value().substring(1));
                     if (parsed.getFirst().equalsIgnoreCase("------------------")) continue;
 
                     description.add(parsed.getFirst());
 
-                } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
+                } else
+                    if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
 
-                if (line.value().contains(":")) {
+                else if (line.value().contains(":")) {
 
                     String[] split = line.value().split(":");
                     if (split.length == 1) {
@@ -164,7 +165,6 @@ public class OConfiguration implements Valuable {
 
             for (OPair<UnreadString, List<String>> headSection : mainSections) {
 
-                System.out.println(headSection.getFirst() + ", " + headSection.getSecond());
                 int startingIndex = Arrays.asList(array).indexOf(headSection.getFirst());
                 int endIndex = ConfigurationUtil.findSectionEnd(startingIndex, looper);
                 ConfigurationSection section = ConfigurationUtil.loadSection(this, new OIterator(ConfigurationUtil.copy(array, startingIndex, endIndex)));
@@ -508,6 +508,24 @@ public class OConfiguration implements Valuable {
                 .filter(serializer -> serializer.isAssignableFrom(klass) || serializer.getSuperclass() == klass)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public int update(String fileName, Class source) {
+        File folder = getOFile().getFolder();
+        JarUtil.copyFileFromJar(fileName, folder, JarUtil.CopyOption.REPLACE_IF_EXIST, "new" + fileName, source);
+        OFile newConfigFile = new OFile(folder, "new" + fileName);
+
+        OConfiguration newConfig = new OConfiguration(newConfigFile);
+        ConfigurationUpdater updater = new ConfigurationUpdater(newConfig, this);
+        int updated = updater.update();
+
+        try {
+            FileUtils.touch(newConfigFile.getFile());
+            newConfigFile.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return updated;
     }
 
 }

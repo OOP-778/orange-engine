@@ -36,6 +36,17 @@ public class DataHandlerController {
                 return object.toString();
             }
         });
+        dataHandlerMap.put(Boolean.class, new IDataHandler() {
+            @Override
+            public Object load(String serialized) {
+                return Boolean.parseBoolean(serialized);
+            }
+
+            @Override
+            public String serialize(Object object) {
+                return object.toString();
+            }
+        });
     }
 
     public static DataHandlerController getInstance() {

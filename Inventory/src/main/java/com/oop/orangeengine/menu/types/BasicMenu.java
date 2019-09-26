@@ -29,7 +29,6 @@ public class BasicMenu extends AMenu {
         }
 
         // Set buttons
-        getEngine().getLogger().printWarning("Found " + buttons().size() + " buttons!");
         buttons().forEach(button -> wrappedInventory.setButton(button.slot(), button));
     }
 

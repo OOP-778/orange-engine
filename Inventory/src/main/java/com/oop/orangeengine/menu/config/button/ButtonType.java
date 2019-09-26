@@ -4,7 +4,8 @@ public enum ButtonType {
 
     NORMAL,
     FILLER,
-    SWAPPABLE;
+    SWAPPABLE,
+    FILLABLE;
 
     public static ButtonType matchType(String type) {
         for (ButtonType type2 : values())

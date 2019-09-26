@@ -36,8 +36,8 @@ public abstract class EnginePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        runOnDisable.forEach(Runnable::run);
         disable();
+        runOnDisable.forEach(Runnable::run);
     }
 
     public void onDisable(Runnable runnable) {

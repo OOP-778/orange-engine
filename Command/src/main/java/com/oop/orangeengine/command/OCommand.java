@@ -116,7 +116,8 @@ public class OCommand {
         return this;
     }
 
-    public OCommand ableToExecute(Class<? extends CommandSender>... ableToExecute) {
+    @SafeVarargs
+    public final OCommand ableToExecute(Class<? extends CommandSender>... ableToExecute) {
         this.ableToExecute = ableToExecute;
         return this;
     }
@@ -147,7 +148,6 @@ public class OCommand {
 
     private String getLabelWithParents(String current) {
 
-        Helper.print(getParent().getLabel());
         if (getParent() == null)
             return current + getLabel() + " ";
         else
