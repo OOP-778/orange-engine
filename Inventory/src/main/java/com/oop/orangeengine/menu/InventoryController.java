@@ -81,6 +81,7 @@ public class InventoryController extends AEngineComponent {
 
             if (button.pickable()) {
 
+                System.out.println("action: " + event.getAction());
                 ItemStack currentAtSlot = event.getCurrentItem().clone();
                 ItemStack cursor = event.getCursor().clone();
                 int slot = event.getSlot();
@@ -98,18 +99,18 @@ public class InventoryController extends AEngineComponent {
                     event.getWhoClicked().setItemOnCursor(onCursorCloned);
 
                 } else if (event.getAction() == InventoryAction.PICKUP_ONE) {
-                    ItemStack onCursorCloned = cursor.clone();
-                    onCursorCloned.setAmount(1);
+                    ItemStack currentItemClone = currentAtSlot.clone();
+                    currentItemClone.setAmount(1);
 
-                    event.getClickedInventory().setItem(slot, onCursorCloned.clone());
-                    onCursorCloned.setAmount(cursor.getAmount() - 1);
-                    event.getWhoClicked().setItemOnCursor(onCursorCloned);
+                    event.getWhoClicked().setItemOnCursor(currentItemClone.clone());
+
+                    currentItemClone.setAmount(cursor.getAmount() - 1);
+                    event.getClickedInventory().setItem(slot, currentItemClone);
                 }
-                event.setCancelled(true);
             }
             button.updateButtonFromHolder();
 
-            ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange);
+            ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange, ClickEnum.match(event));
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
 
             if (buttonClickEvent.isCancelled()) {

@@ -39,7 +39,7 @@ public class FillableButton extends AMenuButton {
             ButtonFillEvent buttonFillEvent = new ButtonFillEvent(event, filledWith);
 
             if (filter != null && !filter.test(buttonFillEvent)) {
-                event.switchCursorWithSlot();
+                event.pickupAtSlot();
                 return;
             }
 
@@ -61,5 +61,4 @@ public class FillableButton extends AMenuButton {
     public void clean() {
         currentItem(OMaterial.AIR.parseItem());
     }
-
 }

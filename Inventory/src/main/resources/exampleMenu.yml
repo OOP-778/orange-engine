@@ -1,3 +1,8 @@
+
+# Buttons that can be used anywhere here
+global buttons:
+
+
 menu1:
 
   # There's two types paged & normal
@@ -60,7 +65,7 @@ menu1:
         execute action: "onFill"
 
       on empty:
-
+        execute action: "onEmpty"
 
     "show player":
       # There's three types of buttons
@@ -70,6 +75,3 @@ menu1:
       type: normal
       template: true
       material: player_head
-
-
-

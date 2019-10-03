@@ -39,7 +39,7 @@ public class OptionalConsumer<T> implements Consumer<Optional<T>> {
         return this;
     }
 
-    public <T> T get() {
+    public  T get() {
         return (T) optional.get();
     }
 

@@ -13,5 +13,4 @@ public class Runner {
 
         MenuDesigner menuDesigner = new MenuDesigner(rows);
     }
-
 }

@@ -29,5 +29,4 @@ public class OPlayer extends Storegable {
     public void unregisterEventConsumer(Class<? extends Event> eventClass) {
         registeredConsumers.remove(eventClass);
     }
-
 }

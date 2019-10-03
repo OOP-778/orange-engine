@@ -4,6 +4,7 @@ import com.oop.orangeengine.main.Helper;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import javax.swing.plaf.synth.SynthUI;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -67,10 +68,10 @@ public class ItemStackUtil {
             LOAD_ITEM_FROM_JSON = mojangsonParser.getDeclaredMethod("parse", String.class);
 
             try {
-                CONSTRUCTOR_ITEM = CLASS_ITEM.getConstructor(nbt);
+                CONSTRUCTOR_ITEM = CLASS_ITEM.getDeclaredConstructor(nbt);
                 CONSTRUCTOR_ITEM.setAccessible(true);
                 METHOD_ITEM_CREATE = null;
-            } catch (Throwable ignored) {
+            } catch (NoSuchMethodException ignored) {
                 CONSTRUCTOR_ITEM = null;
                 METHOD_ITEM_CREATE = CLASS_ITEM.getDeclaredMethod("createStack", nbt);
                 METHOD_ITEM_CREATE.setAccessible(true);

@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu;
 
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.list.OList;
 import com.oop.orangeengine.main.util.data.set.OSet;
@@ -20,7 +21,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @Accessors(fluent = true, chain = true)
-public abstract class AMenu implements InventoryHolder {
+public abstract class AMenu extends Storegable implements InventoryHolder {
 
     final private int maxSize = 54;
     @Getter

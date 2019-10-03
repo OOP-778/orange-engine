@@ -23,5 +23,4 @@ public class SwappableButton extends AMenuButton {
 
         toSwap = swapWith;
     }
-
 }

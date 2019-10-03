@@ -108,6 +108,16 @@ public abstract class ODatabase {
         });
     }
 
+    public void executeNow(String sql) {
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Object gatherColumnValue(String table, DatabaseValue databaseValue, String identifierColumn, String identifierValue) {
         try (Connection connection = getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + databaseValue.columnName() + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
@@ -236,7 +246,7 @@ public abstract class ODatabase {
                 queryBuilder.append(", PRIMARY KEY (id)");
 
             queryBuilder.append(")");
-            database.execute(queryBuilder.toString());
+            database.executeNow(queryBuilder.toString());
 
             return database;
         }

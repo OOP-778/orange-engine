@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OConcurrentSet<T> implements Set<T> {
+public class OConcurrentSet<T> extends OSet<T> {
     private Set<T> set;
 
     @Setter

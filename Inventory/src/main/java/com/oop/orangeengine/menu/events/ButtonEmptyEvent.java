@@ -9,7 +9,7 @@ public class ButtonEmptyEvent extends ButtonClickEvent {
     private final ItemStack emptied;
 
     public ButtonEmptyEvent(ButtonClickEvent buttonClickEvent, ItemStack emptied) {
-        super(buttonClickEvent.getWrappedInventory(), buttonClickEvent.getMenu(), buttonClickEvent.getOriginalEvent(), buttonClickEvent.getPlayer(), buttonClickEvent.getClickedButton(), buttonClickEvent.getBeforeItem());
+        super(buttonClickEvent.getWrappedInventory(), buttonClickEvent.getMenu(), buttonClickEvent.getOriginalEvent(), buttonClickEvent.getPlayer(), buttonClickEvent.getClickedButton(), buttonClickEvent.getBeforeItem(), buttonClickEvent.getClickType());
         this.emptied = emptied;
     }
 
