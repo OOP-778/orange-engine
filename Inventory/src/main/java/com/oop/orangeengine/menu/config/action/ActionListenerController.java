@@ -4,6 +4,7 @@ import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import com.oop.orangeengine.main.util.data.set.OSet;
 import com.oop.orangeengine.menu.WrappedInventory;
+import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.types.PagedMenu;
 
 public class ActionListenerController {
@@ -15,7 +16,7 @@ public class ActionListenerController {
 
         // Next Page Handler
         actionPropertiesOSet.add(
-                new ActionProperties()
+                new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
                         .actionId("nextPage")
                         .buttonAction(event -> {
                             if (!(event.getMenu() instanceof PagedMenu)) return;
@@ -30,7 +31,7 @@ public class ActionListenerController {
 
         // Last Page Handler
         actionPropertiesOSet.add(
-                new ActionProperties()
+                new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
                         .actionId("lastPage")
                         .buttonAction(event -> {
                             if (!(event.getMenu() instanceof PagedMenu)) return;
@@ -45,7 +46,7 @@ public class ActionListenerController {
 
         // Return to child handler
         actionPropertiesOSet.add(
-                new ActionProperties()
+                new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
                         .actionId("return")
                         .buttonAction(event -> {
                             if (event.getMenu().parent() != null)
@@ -55,7 +56,7 @@ public class ActionListenerController {
 
         // Open a menu from a tree
         actionPropertiesOSet.add(
-                new ActionProperties()
+                new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
                         .actionId("open")
                         .buttonAction(event -> {
                             OptionalConsumer<String> targetMenu = event.getClickedButton().grab("targetMenu", String.class);
@@ -70,14 +71,20 @@ public class ActionListenerController {
         this.actionPropertiesOSet.add(properties);
     }
 
-    public void listen(String actionId, IButtonAction action) {
-        ActionProperties properties = new ActionProperties();
+    public void listen(String actionId, IButtonAction<ButtonClickEvent> action) {
+        ActionProperties<ButtonClickEvent> properties = new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class);
         properties.buttonAction(action);
         listen(properties);
     }
 
-    public void listen(String menuId, String actionId, IButtonAction action) {
-        ActionProperties properties = new ActionProperties();
+    public <T extends ButtonClickEvent> void listen(String actionId, Class<T> klass, IButtonAction<T> action){
+        ActionProperties<T> properties = new ActionProperties<>(klass);
+        properties.actionId(actionId);
+        listen(properties);
+    }
+
+    public void listen(String menuId, String actionId, IButtonAction<ButtonClickEvent> action) {
+        ActionProperties<ButtonClickEvent> properties = new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class);
         properties.buttonAction(action);
         properties.menuId(menuId);
         properties.actionId(actionId);

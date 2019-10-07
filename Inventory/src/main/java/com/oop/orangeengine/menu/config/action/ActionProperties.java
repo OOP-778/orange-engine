@@ -11,13 +11,18 @@ import java.util.function.Predicate;
 
 @Data
 @Accessors(chain = true, fluent = true)
-public class ActionProperties {
+public class ActionProperties<T extends ButtonClickEvent> {
 
     private String menuId;
     private ClickEnum clickEnum;
     private String actionId;
-    private IButtonAction buttonAction;
+    private IButtonAction<T> buttonAction;
     private Predicate<AMenuButton> customFilter;
+    private Class<T> buttonEventClass;
+
+    public ActionProperties(Class<T> buttonEventClass) {
+        this.buttonEventClass = buttonEventClass;
+    }
 
     public boolean accepts(ButtonClickEvent event) {
         if (menuId != null) {
@@ -30,6 +35,9 @@ public class ActionProperties {
             return false;
 
         if (customFilter != null && !customFilter.test(event.getClickedButton()))
+            return false;
+
+        if (!buttonEventClass.isAssignableFrom(event.getClass()))
             return false;
 
         if (actionId != null) {
