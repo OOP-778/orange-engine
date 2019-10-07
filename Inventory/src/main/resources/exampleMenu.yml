@@ -72,6 +72,7 @@ menu1:
       # filler = Dummy button
       # normal = An ordinary button
       # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+      display name: "&e%player%"
       type: normal
       template: true
       material: player_head

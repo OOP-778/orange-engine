@@ -81,7 +81,6 @@ public class InventoryController extends AEngineComponent {
 
             if (button.pickable()) {
 
-                System.out.println("action: " + event.getAction());
                 ItemStack currentAtSlot = event.getCurrentItem().clone();
                 ItemStack cursor = event.getCursor().clone();
                 int slot = event.getSlot();
