@@ -109,9 +109,8 @@ public class WrappedInventory implements Cloneable {
 
     public List<Integer> listEmptySlots() {
         ensureNotEmpty();
-        //TODO add if button is placeholder it acts as empty slot
         return Arrays.stream(buttons)
-                .filter(button -> button.currentItem().getType() == Material.AIR)
+                .filter(button -> button.currentItem().getType() == Material.AIR || button.placeholder())
                 .map(AMenuButton::slot)
                 .collect(Collectors.toList());
     }

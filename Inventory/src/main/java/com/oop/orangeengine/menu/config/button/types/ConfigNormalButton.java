@@ -30,9 +30,9 @@ public class ConfigNormalButton extends AConfigButton {
         for (ClickEnum clickEnum : clickHandler().keySet())
             button.clickHandler().put(clickEnum, clickHandler().get(clickEnum));
 
-
         // Set sound
-
+        if (sound() != null)
+            button.sound(sound());
 
     }
 }

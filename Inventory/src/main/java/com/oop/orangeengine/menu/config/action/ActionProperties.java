@@ -3,6 +3,7 @@ package com.oop.orangeengine.menu.config.action;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
+import com.oop.orangeengine.menu.config.ConfigMenuTemplate;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -50,4 +51,12 @@ public class ActionProperties<T extends ButtonClickEvent> {
 
         return true;
     }
+
+    public boolean accepts(ConfigMenuTemplate template) {
+        if (menuId != null && !menuId.equalsIgnoreCase(template.getMenuIdentifier()))
+            return false;
+
+        return true;
+    }
+
 }

@@ -7,6 +7,7 @@ import com.oop.orangeengine.main.util.data.list.OList;
 import com.oop.orangeengine.main.util.data.set.OSet;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
+import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.MenuCloseEvent;
 import com.oop.orangeengine.menu.events.MenuOpenEvent;
@@ -58,6 +59,13 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     @Getter
     private List<AMenuButton> buttons = new OList<>();
 
+    @Getter
+    private Set<ActionProperties> actionSet = new HashSet<>();
+
+    @Getter
+    @Setter
+    private MenuDesigner designer;
+
     public AMenu(String identifier, int size, AMenu parent) {
         this.identifier = identifier;
         this.parent = parent;
@@ -108,8 +116,12 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
             return OptionalConsumer.of(Optional.empty());
     }
 
+    public void addChild(AMenu menu) {
+        children.add(menu);
+    }
+
     public boolean isSlotEmpty(int slot) {
-        return buttons.stream().anyMatch(button -> button.slot() == slot && button.currentItem().getType() == Material.AIR);
+        return buttons.stream().anyMatch(button -> button.slot() == slot && (button.currentItem().getType() == Material.AIR || button.placeholder()));
     }
 
     public void addButton(AMenuButton button) {
@@ -135,11 +147,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     }
 
     public WrappedInventory getWrappedInventory() {
-        if (wrappedInventory == null)
-            build();
-
-        assert wrappedInventory != null;
-        return wrappedInventory;
+        return getWrappedInventory(false);
     }
 
     @Override

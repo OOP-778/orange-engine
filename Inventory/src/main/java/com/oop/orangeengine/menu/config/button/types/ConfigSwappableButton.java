@@ -31,7 +31,7 @@ public class ConfigSwappableButton extends ConfigNormalButton {
     @Override
     public SwappableButton privConstructButton() {
         SwappableButton swappableButton = new SwappableButton(item().getItemStack(), -1);
-        if(swapItem != null)
+        if (swapItem != null)
             swappableButton.toSwap(swapItem.getItemStack());
 
         return swappableButton;

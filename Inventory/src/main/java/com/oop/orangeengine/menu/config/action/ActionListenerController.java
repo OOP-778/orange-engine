@@ -6,10 +6,13 @@ import com.oop.orangeengine.main.util.data.set.OSet;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.types.PagedMenu;
+import lombok.Getter;
 
 public class ActionListenerController {
 
     private static final ActionListenerController instance = new ActionListenerController();
+
+    @Getter
     private OSet<ActionProperties> actionPropertiesOSet = new OConcurrentSet<>();
 
     private ActionListenerController() {

@@ -38,6 +38,15 @@ public class FillableButton extends AMenuButton {
             ItemStack filledWith = event.getClickedButton().currentItem();
             ButtonFillEvent buttonFillEvent = new ButtonFillEvent(event, filledWith);
 
+            event.getMenu().actionSet().stream()
+                    .filter(props -> props.accepts(buttonFillEvent))
+                    .forEach(props -> props.buttonAction().onAction(buttonFillEvent));
+
+            if (buttonFillEvent.isCancelled()) {
+                event.pickupAtSlot();
+                return;
+            }
+
             if (filter != null && !filter.test(buttonFillEvent)) {
                 event.pickupAtSlot();
                 return;
@@ -47,8 +56,18 @@ public class FillableButton extends AMenuButton {
             if (beforeItem.getType() == Material.AIR && filledWith.getType() == Material.AIR) return;
 
             if (beforeItem.getType() != Material.AIR && filledWith.getType() == Material.AIR) {
-                if (buttonEmptyHandler != null)
-                    buttonEmptyHandler.accept(new ButtonEmptyEvent(event, beforeItem.clone()));
+                ButtonEmptyEvent buttonEmptyEvent = new ButtonEmptyEvent(event, beforeItem.clone());
+                event.getMenu().actionSet().stream()
+                        .filter(props -> props.accepts(buttonEmptyEvent))
+                        .forEach(props -> props.buttonAction().onAction(buttonEmptyEvent));
+
+                if (buttonEmptyEvent.isCancelled()) {
+                    event.pickupAtSlot();
+                    return;
+                }
+                if (buttonEmptyHandler != null) {
+                    buttonEmptyHandler.accept(buttonEmptyEvent);
+                }
 
                 return;
             }
@@ -60,5 +79,9 @@ public class FillableButton extends AMenuButton {
 
     public void clean() {
         currentItem(OMaterial.AIR.parseItem());
+    }
+
+    public boolean isFilled() {
+        return currentItem().getType() != Material.AIR;
     }
 }
