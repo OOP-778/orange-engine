@@ -34,7 +34,8 @@ public class WrappedInventory implements Cloneable {
         loadItems();
     }
 
-    private WrappedInventory() {}
+    private WrappedInventory() {
+    }
 
     private void loadItems() {
         for (int slot = 0; slot < buttons.length; slot++) {
@@ -84,7 +85,7 @@ public class WrappedInventory implements Cloneable {
     }
 
     private void ensureNotEmpty() {
-        if(buttons == null) {
+        if (buttons == null) {
             buttons = new AMenuButton[bukkitInventory.getSize()];
             loadItems();
         }
@@ -130,7 +131,7 @@ public class WrappedInventory implements Cloneable {
     }
 
     @Override
-    protected WrappedInventory clone() {
+    public WrappedInventory clone() {
         WrappedInventory wrappedInventory = new WrappedInventory();
         wrappedInventory.owner = owner;
         wrappedInventory.bukkitInventory = owner.provideNewInv();
@@ -145,4 +146,39 @@ public class WrappedInventory implements Cloneable {
             button.holder(this);
     }
 
+    public void removeIf(Predicate<AMenuButton> filter) {
+        List<Integer> updatedSlots = new ArrayList<>();
+
+        // Update virtually
+        for (int i = 0; i < buttons.length; i++) {
+            AMenuButton button = buttons[i];
+            if (filter.test(button)) {
+                buttons[i] = BukkitItem.newAir(button.slot());
+                updatedSlots.add(i);
+            }
+        }
+
+        // Update in inventory
+        for (int slot : updatedSlots)
+            updateAtSlot(slot);
+    }
+
+    public void updateAtSlot(int slot) {
+        AMenuButton button = buttons[slot];
+
+        if (button.slot() == -1 || button.currentItem() == null) return;
+        bukkitInventory.setItem(button.slot(), button.currentItem());
+
+        Set<Player> viewers = getViewers();
+        viewers.forEach(player -> SlotUpdate.update(player, button.slot(), button.currentItem(), true));
+    }
+
+    public int firstEmpty() {
+        ensureNotEmpty();
+        return Arrays.stream(buttons)
+                .filter(button -> button.currentItem().getType() == Material.AIR || button.placeholder())
+                .map(AMenuButton::slot)
+                .findFirst()
+                .orElse(-1);
+    }
 }
