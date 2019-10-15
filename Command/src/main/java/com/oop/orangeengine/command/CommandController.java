@@ -113,9 +113,6 @@ public class CommandController {
 
                 }
 
-                if(completion.isEmpty())
-                    completion.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
-
                 return completion;
             }
         };
