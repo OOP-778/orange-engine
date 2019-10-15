@@ -17,7 +17,7 @@ public class TestingPlugin extends EnginePlugin {
         CommandController commandController = new CommandController(this);
         commandController.register(
                 new OCommand()
-                        .label("testingStuff")
+                        .label("create")
                         .description("Testing Command")
                         .argument(new OffPlayerArg().setIsRequired(true))
                         .listen(command -> {
