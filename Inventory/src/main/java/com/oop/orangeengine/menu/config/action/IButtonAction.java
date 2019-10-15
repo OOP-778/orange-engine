@@ -5,8 +5,8 @@ import com.oop.orangeengine.menu.events.ButtonClickEvent;
 
 import java.util.function.Predicate;
 
-public interface IButtonAction {
+public interface IButtonAction<T extends ButtonClickEvent> {
 
-    void onAction(ButtonClickEvent event);
+    void onAction(T event);
 
 }

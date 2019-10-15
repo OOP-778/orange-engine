@@ -12,7 +12,6 @@ public class ConfigFillableButton extends ConfigNormalButton {
         String onFill, onEmpty;
         if (section.hasChild("on fill")) {
 
-
         }
 
         if (section.hasChild("on empty")) {

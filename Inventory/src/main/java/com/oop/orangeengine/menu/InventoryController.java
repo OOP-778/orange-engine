@@ -109,6 +109,7 @@ public class InventoryController extends AEngineComponent {
             }
             button.updateButtonFromHolder();
 
+            // Call for config events
             ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange, ClickEnum.match(event));
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
 
@@ -119,6 +120,10 @@ public class InventoryController extends AEngineComponent {
 
             // Global click event
             menu.globalClickHandler().accept(buttonClickEvent);
+
+            menu.actionSet().stream()
+                    .filter(props -> props.accepts(buttonClickEvent))
+                    .forEach(props -> props.buttonAction().onAction(buttonClickEvent));
 
             // Per button click event
             button.clickHandler().getAsOptional(ClickEnum.GLOBAL).ifPresent(handler -> handler.accept(buttonClickEvent));

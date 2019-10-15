@@ -3,6 +3,7 @@ package com.oop.orangeengine.menu.config.action;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
+import com.oop.orangeengine.menu.config.ConfigMenuTemplate;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -11,13 +12,18 @@ import java.util.function.Predicate;
 
 @Data
 @Accessors(chain = true, fluent = true)
-public class ActionProperties {
+public class ActionProperties<T extends ButtonClickEvent> {
 
     private String menuId;
     private ClickEnum clickEnum;
     private String actionId;
-    private IButtonAction buttonAction;
+    private IButtonAction<T> buttonAction;
     private Predicate<AMenuButton> customFilter;
+    private Class<T> buttonEventClass;
+
+    public ActionProperties(Class<T> buttonEventClass) {
+        this.buttonEventClass = buttonEventClass;
+    }
 
     public boolean accepts(ButtonClickEvent event) {
         if (menuId != null) {
@@ -32,6 +38,9 @@ public class ActionProperties {
         if (customFilter != null && !customFilter.test(event.getClickedButton()))
             return false;
 
+        if (!buttonEventClass.isAssignableFrom(event.getClass()))
+            return false;
+
         if (actionId != null) {
             OptionalConsumer<String> optionalActionId = event.getClickedButton().grab("actionId", String.class);
             if (!optionalActionId.isPresent())
@@ -42,4 +51,12 @@ public class ActionProperties {
 
         return true;
     }
+
+    public boolean accepts(ConfigMenuTemplate template) {
+        if (menuId != null && !menuId.equalsIgnoreCase(template.getMenuIdentifier()))
+            return false;
+
+        return true;
+    }
+
 }
