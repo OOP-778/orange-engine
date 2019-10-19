@@ -76,3 +76,9 @@ menu1:
       type: normal
       template: true
       material: player_head
+
+      on click:
+        execute action: "show player kills"
+
+
+  children:

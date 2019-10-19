@@ -12,6 +12,8 @@ import lombok.experimental.Accessors;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @EqualsAndHashCode
@@ -19,7 +21,7 @@ import java.util.function.Consumer;
 public abstract class AMenuButton extends Storegable implements Cloneable {
 
     @Getter
-    private final OMap<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new OMap<>();
+    private Set<ClickListener> clickListeners = new HashSet<>();
 
     @Getter
     private ItemStack currentItem;
@@ -52,17 +54,21 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
         this.slot = slot;
     }
 
-    public AMenuButton clickHandler(ClickEnum clickEnum, Consumer<ButtonClickEvent> event) {
-        clickHandler.remove(clickEnum);
-        clickHandler.put(clickEnum, event);
+    public <T extends ButtonClickEvent> AMenuButton clickHandler(ClickEnum clickEnum, Class<T> type, Consumer<T> event) {
+        ClickListener<T> clickListener = new ClickListener<>(type);
+        clickListener.clickEnum(clickEnum);
+        clickListener.consumer(event);
 
+        clickListeners.add(clickListener);
         return this;
     }
 
-    public AMenuButton clickHandler(Consumer<ButtonClickEvent> event) {
-        clickHandler.remove(ClickEnum.GLOBAL);
-        clickHandler.put(ClickEnum.GLOBAL, event);
+    public <T extends ButtonClickEvent> AMenuButton clickHandler(Class<T> type, Consumer<ButtonClickEvent> event) {
+        ClickListener<T> clickListener = new ClickListener<>(type);
+        clickListener.clickEnum(ClickEnum.GLOBAL);
+        clickListener.consumer(event);
 
+        clickListeners.add(clickListener);
         return this;
     }
 

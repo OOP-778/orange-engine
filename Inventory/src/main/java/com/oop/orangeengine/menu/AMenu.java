@@ -109,7 +109,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
             return OptionalConsumer.of(children.stream()
                     .map(child -> child.getChild(identifier, true))
                     .filter(OptionalConsumer::isPresent)
-                    .map(optional -> (AMenu) optional.get())
+                    .map(optional -> optional.get())
                     .findFirst());
 
         } else

@@ -27,8 +27,7 @@ public class ConfigNormalButton extends AConfigButton {
     protected void toButton(AMenuButton button) {
 
         // Set click handler
-        for (ClickEnum clickEnum : clickHandler().keySet())
-            button.clickHandler().put(clickEnum, clickHandler().get(clickEnum));
+        button.clickListeners().addAll(clickListeners());
 
         // Set sound
         if (sound() != null)

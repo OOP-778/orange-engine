@@ -3,12 +3,12 @@ package com.oop.orangeengine.menu.config.button.types;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.SwappableButton;
+import com.oop.orangeengine.menu.events.ButtonItemSwapEvent;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 
 public class ConfigSwappableButton extends ConfigNormalButton {
 
     private OItem swapItem;
-
     public ConfigSwappableButton(ConfigurationSection section) {
         super(section);
 
@@ -31,8 +31,9 @@ public class ConfigSwappableButton extends ConfigNormalButton {
     @Override
     public SwappableButton privConstructButton() {
         SwappableButton swappableButton = new SwappableButton(item().getItemStack(), -1);
-        if (swapItem != null)
+        if (swapItem != null) {
             swappableButton.toSwap(swapItem.getItemStack());
+        }
 
         return swappableButton;
     }

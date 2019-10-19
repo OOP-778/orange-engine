@@ -6,6 +6,7 @@ import com.oop.orangeengine.menu.InventoryController;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
+import com.oop.orangeengine.menu.button.ClickListener;
 import com.oop.orangeengine.menu.config.button.types.ConfigFillerButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigNormalButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigSwappableButton;
@@ -18,7 +19,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
@@ -35,7 +38,7 @@ public abstract class AConfigButton {
     private boolean placeholder = false;
     private WrappedSound sound;
 
-    private Map<ClickEnum, Consumer<ButtonClickEvent>> clickHandler = new HashMap<>();
+    private Set<ClickListener> clickListeners = new HashSet<>();
 
     private AMenuButton constructedButton;
 
@@ -56,25 +59,9 @@ public abstract class AConfigButton {
         if (section.hasChild("on click")) {
             ConfigurationSection onClickSection = section.getSection("on click");
 
-            // Open action
-            onClickSection.ifValuePresent("open", String.class, menuName -> clickHandler.put(ClickEnum.GLOBAL, event -> event.getMenu().getChild(menuName, true).ifPresentOrElse(
-                    (menu) -> {
-                        WrappedInventory inventory = menu.getWrappedInventory();
-                        if (inventory == null)
-                            throw new IllegalStateException("Menu by identifier " + menuName + " failed to provide an Inventory.");
+            for (String actionType : ActionTypesController.getActionTypes().keySet())
+                onClickSection.ifValuePresent(actionType, String.class, text -> clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text))));
 
-                        event.getPlayer().openInventory(inventory.getBukkitInventory());
-                    },
-                    () -> event.getPlayer().sendMessage(Helper.color("&cError! Failed to find menu by name " + menuName + " please contact administrator!"))
-            )));
-
-            // Execute Action
-            onClickSection.ifValuePresent("execute action", String.class, actionIdentifier -> getEngine().findComponentByClass(InventoryController.class).findClickHandler(actionIdentifier, null).ifPresentOrElse(
-                    (consumer) -> clickHandler.put(ClickEnum.GLOBAL, consumer),
-                    () -> {
-                        throw new IllegalStateException("Failed to find action handler by (" + onClickSection.getPath() + "= " + actionIdentifier + ")");
-                    }
-            ));
         }
 
         for (ClickEnum clickEnum : ClickEnum.values()) {
@@ -83,27 +70,9 @@ public abstract class AConfigButton {
             if (section.hasChild(normalized)) {
                 ConfigurationSection onClickSection = section.getSection(normalized);
 
-                // Open action
-                onClickSection.ifValuePresent("open", String.class, menuName -> clickHandler.put(ClickEnum.GLOBAL, event -> {
-                    event.getMenu().getChild(menuName, true).ifPresentOrElse(
-                            (menu) -> {
-                                WrappedInventory inventory = menu.getWrappedInventory();
-                                if (inventory == null)
-                                    throw new IllegalStateException("Menu by identifier " + menuName + " failed to provide an Inventory.");
+                for (String actionType : ActionTypesController.getActionTypes().keySet())
+                    onClickSection.ifValuePresent(actionType, String.class, text -> clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(clickEnum).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text))));
 
-                                event.getPlayer().openInventory(inventory.getBukkitInventory());
-                            },
-                            () -> event.getPlayer().sendMessage(Helper.color("&cError! Failed to find menu by name " + menuName + " please contact administrator!"))
-                    );
-                }));
-
-                // Execute Action
-                onClickSection.ifValuePresent("execute action", String.class, actionIdentifier -> getEngine().findComponentByClass(InventoryController.class).findClickHandler(actionIdentifier, null).ifPresentOrElse(
-                        (consumer) -> clickHandler.put(ClickEnum.GLOBAL, consumer),
-                        () -> {
-                            throw new IllegalStateException("Failed to find action handler by (" + onClickSection.getPath() + "= " + actionIdentifier + ")");
-                        }
-                ));
             }
         }
 

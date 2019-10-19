@@ -61,7 +61,7 @@ public class PagedMenu extends AMenu {
                 if (nextPage == null) {
                     currentPage = new OPair<>(currentPage.getFirst() + 1, placeholderInventory.clone());
                     pages.put(currentPage.getKey(), currentPage.getValue());
-                    
+
                 } else {
                     currentPage = new OPair<>(currentPage.getFirst() + 1, nextPage);
                 }

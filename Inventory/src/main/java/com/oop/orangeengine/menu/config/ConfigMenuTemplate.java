@@ -8,6 +8,7 @@ import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.config.button.AConfigButton;
 import com.oop.orangeengine.menu.types.BasicMenu;
 import com.oop.orangeengine.menu.types.PagedMenu;
+import com.oop.orangeengine.yaml.OConfiguration;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -25,6 +26,16 @@ public class ConfigMenuTemplate {
 
     private List<ConfigMenuTemplate> children = new ArrayList<>();
 
+    public ConfigMenuTemplate(OConfiguration configuration) {
+
+        assert configuration.hasValue("type");
+
+
+        menuType = MenuType.valueOf(configuration.getValueAsReq("type").toString().toUpperCase());
+
+
+    }
+
     public AMenu build() {
         AMenu menu = getMenu();
 
@@ -35,7 +46,6 @@ public class ConfigMenuTemplate {
         ActionListenerController.getInstance().getActionPropertiesOSet().stream()
                 .filter(props -> props.accepts(this))
                 .forEach(props -> menu.actionSet().add(props));
-
 
         // Build all Buttons
         buttons.forEach(button -> menu.addButton(button.toButton()));

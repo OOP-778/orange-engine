@@ -80,7 +80,7 @@ public class ActionListenerController {
         listen(properties);
     }
 
-    public <T extends ButtonClickEvent> void listen(String actionId, Class<T> klass, IButtonAction<T> action){
+    public <T extends ButtonClickEvent> void listen(String actionId, Class<T> klass, IButtonAction<T> action) {
         ActionProperties<T> properties = new ActionProperties<>(klass);
         properties.actionId(actionId);
         listen(properties);
