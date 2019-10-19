@@ -3,9 +3,9 @@ package com.oop.orangeengine.menu.config.button;
 public enum ButtonType {
 
     NORMAL,
+    FILLABLE,
     FILLER,
-    SWAPPABLE,
-    FILLABLE;
+    SWAPPABLE;
 
     public static ButtonType matchType(String type) {
         for (ButtonType type2 : values())

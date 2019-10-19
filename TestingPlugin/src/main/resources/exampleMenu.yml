@@ -5,7 +5,7 @@ global buttons:
 menu1:
 
   # There's two types paged & normal
-  type: paged
+  type: basic
 
   # If paged there's two placeholders for title: %currentPage%/%availablePages%
   title: "&eExample Menu Title"
@@ -26,7 +26,7 @@ menu1:
       # filler = Dummy button
       # normal = An ordinary button
       # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
-      type: fillable
+      type: filler
       material: YELLOW_STAINED_GLASS_PANE
 
     "N":
@@ -41,7 +41,7 @@ menu1:
         material: black_stained_glass_pane
 
       on click:
-        execute action: "next page"
+        execute action: "test"
 
     "P":
       # There's three types of buttons

@@ -23,7 +23,7 @@ public class WrappedInventory implements Cloneable {
 
     private AMenu owner;
     private Inventory bukkitInventory;
-    private AMenuButton[] buttons;
+    private AMenuButton[] buttons = null;
 
     public WrappedInventory(AMenu owner, Inventory inventory) {
         this.owner = owner;

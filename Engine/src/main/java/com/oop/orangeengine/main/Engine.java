@@ -8,6 +8,7 @@ import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.StaticTask;
 import com.oop.orangeengine.main.task.TaskController;
 import lombok.Getter;
+import org.bukkit.inventory.Inventory;
 import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.ArrayList;
@@ -46,7 +47,6 @@ public class Engine {
         logger = new OLogger(owning);
 
         ClassLoader.load();
-
     }
 
     public static Engine getInstance() {

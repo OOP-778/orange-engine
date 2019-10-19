@@ -5,8 +5,10 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -44,6 +46,8 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         assert material != null;
 
         setItemStack(material.parseItem());
+        if (getItemStack().getItemMeta() == null)
+            getItemStack().setItemMeta(Bukkit.getItemFactory().getItemMeta(material.parseMaterial()));
 
         //Load Display name
         section.ifValuePresent("display name", String.class, this::setDisplayName);
@@ -73,7 +77,6 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         }));
 
         return this;
-
     }
 
     @Override

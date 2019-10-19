@@ -2,6 +2,7 @@ package com.oop.orangeengine.menu.button.impl;
 
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.menu.button.AMenuButton;
+import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.ButtonEmptyEvent;
 import com.oop.orangeengine.menu.events.ButtonFillEvent;
 import lombok.EqualsAndHashCode;
@@ -34,7 +35,7 @@ public class FillableButton extends AMenuButton {
         super(OMaterial.AIR.parseItem(), -1);
 
         pickable(true);
-        clickHandler(event -> {
+        clickHandler(ButtonClickEvent.class, event -> {
             ItemStack filledWith = event.getClickedButton().currentItem();
             ButtonFillEvent buttonFillEvent = new ButtonFillEvent(event, filledWith);
 
@@ -57,9 +58,8 @@ public class FillableButton extends AMenuButton {
 
             if (beforeItem.getType() != Material.AIR && filledWith.getType() == Material.AIR) {
                 ButtonEmptyEvent buttonEmptyEvent = new ButtonEmptyEvent(event, beforeItem.clone());
-                event.getMenu().actionSet().stream()
-                        .filter(props -> props.accepts(buttonEmptyEvent))
-                        .forEach(props -> props.buttonAction().onAction(buttonEmptyEvent));
+                event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonEmptyEvent)).forEach(listener -> listener.consumer().accept(buttonEmptyEvent));
+
 
                 if (buttonEmptyEvent.isCancelled()) {
                     event.pickupAtSlot();
@@ -72,8 +72,10 @@ public class FillableButton extends AMenuButton {
                 return;
             }
 
-            if (buttonFillHandler != null)
+            if (buttonFillHandler != null) {
+                event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonFillEvent)).forEach(listener -> listener.consumer().accept(buttonFillEvent));
                 buttonFillHandler.accept(buttonFillEvent);
+            }
         });
     }
 

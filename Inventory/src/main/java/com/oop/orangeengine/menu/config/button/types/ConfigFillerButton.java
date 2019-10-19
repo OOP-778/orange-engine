@@ -10,6 +10,8 @@ public class ConfigFillerButton extends ConfigNormalButton {
 
     @Override
     public AMenuButton toButton() {
+        if(item() != null)
+            item().setDisplayName(" ");
         return super.toButton();
     }
 }

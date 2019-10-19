@@ -27,13 +27,13 @@ public class Helper {
     }
 
     public static <T> T[] toArray(Collection<T> c, T[] a) {
-        return c.size()>a.length ?
-                c.toArray((T[])Array.newInstance(a.getClass().getComponentType(), c.size())) :
+        return c.size() > a.length ?
+                c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size())) :
                 c.toArray(a);
     }
 
     public static <T> T[] toArray(Collection<T> c, Class klass) {
-        return toArray(c, (T[])Array.newInstance(klass, c.size()));
+        return toArray(c, (T[]) Array.newInstance(klass, c.size()));
     }
 
     public static <T> T[] toArray(Collection<T> c) {
@@ -54,6 +54,14 @@ public class Helper {
 
     public static OptionalConsumer<OfflinePlayer> getOfflinePlayer(Predicate<OfflinePlayer> filter) {
         return OptionalConsumer.of(getOfflinePlayers().stream().filter(filter).findFirst());
+    }
+
+    public static boolean assertTrue(boolean predicate, String message) {
+        if (!predicate) {
+            throw new IllegalStateException(message);
+        }
+
+        return true;
     }
 
 }

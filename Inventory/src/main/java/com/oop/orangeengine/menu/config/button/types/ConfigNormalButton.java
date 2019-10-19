@@ -33,5 +33,6 @@ public class ConfigNormalButton extends AConfigButton {
         if (sound() != null)
             button.sound(sound());
 
+        button.template(template());
     }
 }

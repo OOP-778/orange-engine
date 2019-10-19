@@ -70,7 +70,6 @@ allprojects {
 
     shadowJar {
 
-        minimize()
         archiveName = "OrangeEngine-${project.name}.jar"
 
         destinationDirectory = file('../target')

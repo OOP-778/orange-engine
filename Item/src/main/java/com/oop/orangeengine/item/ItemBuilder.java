@@ -7,6 +7,7 @@ import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.yaml.Typeable;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -47,7 +48,13 @@ public abstract class ItemBuilder implements Typeable {
     }
 
     public ItemMeta getItemMeta() {
-        return itemStack.getItemMeta();
+        if (itemStack.hasItemMeta())
+            return itemStack.getItemMeta();
+
+        else {
+            itemStack.setItemMeta(Bukkit.getItemFactory().getItemMeta(itemStack.getType()));
+            return itemStack.getItemMeta();
+        }
     }
 
     public <T extends ItemMeta> T getItemMeta(Class<T> type) {
@@ -125,6 +132,8 @@ public abstract class ItemBuilder implements Typeable {
 
     public ItemBuilder setDisplayName(String displayName) {
         ItemMeta meta = getItemMeta();
+        System.out.println(meta);
+        System.out.println(itemStack.getType());
         meta.setDisplayName(Helper.color(displayName));
 
         setItemMeta(meta);

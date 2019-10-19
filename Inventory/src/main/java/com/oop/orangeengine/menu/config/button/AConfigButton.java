@@ -2,11 +2,10 @@ package com.oop.orangeengine.menu.config.button;
 
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.main.Helper;
-import com.oop.orangeengine.menu.InventoryController;
-import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.button.ClickListener;
+import com.oop.orangeengine.menu.config.button.types.ConfigFillableButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigFillerButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigNormalButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigSwappableButton;
@@ -18,13 +17,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
-
-import static com.oop.orangeengine.main.Engine.getEngine;
 
 @Accessors(fluent = true, chain = true)
 @Getter
@@ -59,9 +53,13 @@ public abstract class AConfigButton {
         if (section.hasChild("on click")) {
             ConfigurationSection onClickSection = section.getSection("on click");
 
-            for (String actionType : ActionTypesController.getActionTypes().keySet())
-                onClickSection.ifValuePresent(actionType, String.class, text -> clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text))));
+            Helper.print("Found on click");
 
+            for (String actionType : ActionTypesController.getActionTypes().keySet()) {
+                onClickSection.ifValuePresent(actionType, String.class, text -> {
+                    clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                });
+            }
         }
 
         for (ClickEnum clickEnum : ClickEnum.values()) {
@@ -81,7 +79,7 @@ public abstract class AConfigButton {
     }
 
     public static AConfigButton fromConfig(ConfigurationSection section) {
-        ButtonType type = ButtonType.valueOf(section.getValueAsReq("type").toString().toUpperCase());
+        ButtonType type = ButtonType.matchType(section.getValueAsReq("type").toString());
         if (type == ButtonType.NORMAL)
             return new ConfigNormalButton(section);
 
@@ -90,6 +88,9 @@ public abstract class AConfigButton {
 
         else if (type == ButtonType.FILLER)
             return new ConfigFillerButton(section);
+
+        else if (type == ButtonType.FILLABLE)
+            return new ConfigFillableButton(section);
 
         return null;
     }

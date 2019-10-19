@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class OConcurrentSet<T> extends OSet<T> {
     private Set<T> set;
@@ -91,5 +92,15 @@ public class OConcurrentSet<T> extends OSet<T> {
     @Override
     public void clear() {
         set.clear();
+    }
+
+    @Override
+    public Stream<T> stream() {
+        return set.stream();
+    }
+
+    @Override
+    public Stream<T> parallelStream() {
+        return set.parallelStream();
     }
 }

@@ -10,11 +10,12 @@ dependencies {
     compile project(":File")
     compile project(":EventsSubscription")
     compile project(":Command")
+    compile project(":Inventory")
+    compile project(":Item")
 }
 
 shadowJar {
 
-    minimize()
     relocate("com.oop.orangeengine", "com.oop.testingPlugin.engine")
     archiveName = "OrangeEngine-TestingPlugin.jar"
 

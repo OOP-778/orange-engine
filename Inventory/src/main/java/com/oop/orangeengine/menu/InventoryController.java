@@ -39,11 +39,16 @@ public class InventoryController extends AEngineComponent {
     public InventoryController() {
         SyncEvents.listen(InventoryClickEvent.class, EventPriority.LOWEST, event -> {
 
+            Helper.print("Log 0");
             if (event.isCancelled()) return;
+            Helper.print("Log 1");
             if (event.getSlot() < 0) return;
+            Helper.print("Log 1");
             if (event.getWhoClicked().getOpenInventory().getTopInventory() == null) return;
+            Helper.print("Log 1");
             if (!(event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof AMenu)) return;
 
+            Helper.print("Log 2");
             if (event.getWhoClicked().getOpenInventory().getTopInventory() != null && event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof AMenu) {
                 if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
 
@@ -125,12 +130,8 @@ public class InventoryController extends AEngineComponent {
                     .filter(props -> props.accepts(buttonClickEvent))
                     .forEach(props -> props.buttonAction().onAction(buttonClickEvent));
 
-            // Per button click event
-            button.clickHandler().getAsOptional(ClickEnum.GLOBAL).ifPresent(handler -> handler.accept(buttonClickEvent));
-
-            ClickEnum clickEnum = ClickEnum.match(event);
-            if (clickEnum != ClickEnum.GLOBAL)
-                button.clickHandler().getAsOptional(clickEnum).ifPresent(handler -> handler.accept(buttonClickEvent));
+            System.out.println(button.clickListeners().size() + " Listeners");
+            button.clickListeners().stream().filter(listener -> listener.accepts(buttonClickEvent)).forEach(listener -> listener.consumer().accept(buttonClickEvent));
 
             if (button.sound() != null)
                 button.sound().play((Location) event.getWhoClicked());

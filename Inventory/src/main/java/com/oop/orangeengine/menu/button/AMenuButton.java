@@ -49,6 +49,10 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
     @Setter
     private boolean placeholder = false;
 
+    @Getter
+    @Setter
+    private boolean template = false;
+
     public AMenuButton(ItemStack currentItem, int slot) {
         this.currentItem = currentItem;
         this.slot = slot;

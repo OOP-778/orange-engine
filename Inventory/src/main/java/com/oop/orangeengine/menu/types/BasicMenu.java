@@ -19,8 +19,9 @@ public class BasicMenu extends AMenu {
 
     @Override
     protected void build() {
-        if (title() == null)
-            throw new IllegalStateException("Failed to find title for menu " + identifier());
+        // Apply designer
+        if (designer() != null)
+            designer().fill(this);
 
         // Set Wrapped Inventory
         if (wrappedInventory == null) {

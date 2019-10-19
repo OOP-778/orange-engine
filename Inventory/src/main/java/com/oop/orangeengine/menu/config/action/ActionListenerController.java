@@ -56,26 +56,16 @@ public class ActionListenerController {
                                 event.getMenu().parent().getWrappedInventory().open(event.getPlayer());
                         })
         );
-
-        // Open a menu from a tree
-        actionPropertiesOSet.add(
-                new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
-                        .actionId("open")
-                        .buttonAction(event -> {
-                            OptionalConsumer<String> targetMenu = event.getClickedButton().grab("targetMenu", String.class);
-                            if (!targetMenu.isPresent()) return;
-
-                            event.getMenu().getChild(targetMenu.get(), true).ifPresent(menu -> menu.getWrappedInventory().open(event.getPlayer()));
-                        })
-        );
     }
 
-    public void listen(ActionProperties properties) {
+    public ActionListenerController listen(ActionProperties properties) {
         this.actionPropertiesOSet.add(properties);
+        return this;
     }
 
     public void listen(String actionId, IButtonAction<ButtonClickEvent> action) {
         ActionProperties<ButtonClickEvent> properties = new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class);
+        properties.actionId(actionId);
         properties.buttonAction(action);
         listen(properties);
     }
@@ -83,6 +73,7 @@ public class ActionListenerController {
     public <T extends ButtonClickEvent> void listen(String actionId, Class<T> klass, IButtonAction<T> action) {
         ActionProperties<T> properties = new ActionProperties<>(klass);
         properties.actionId(actionId);
+        properties.buttonAction(action);
         listen(properties);
     }
 

@@ -21,4 +21,15 @@ public class ClickListener<T extends ButtonClickEvent> {
         this.type = type;
     }
 
+    public boolean accepts(ButtonClickEvent event) {
+        if (shiftRequired && !event.getOriginalEvent().isShiftClick())
+            return false;
+
+        if (clickEnum != ClickEnum.GLOBAL)
+            if (clickEnum != event.getClickType())
+                return false;
+
+        return type == event.getClass();
+    }
+
 }

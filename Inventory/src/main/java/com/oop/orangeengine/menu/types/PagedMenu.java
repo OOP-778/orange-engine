@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu.types;
 
 import com.google.common.collect.HashBiMap;
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.menu.AMenu;
@@ -25,10 +26,15 @@ public class PagedMenu extends AMenu {
 
     @Override
     protected void build() {
+        if (designer() != null)
+            designer().fill(this);
 
         WrappedInventory placeholderInventory = new WrappedInventory(this, provideNewInv());
         for (AMenuButton button : buttons()) {
             if (button.paged()) continue;
+            if (button.template()) continue;
+
+            Helper.print("Setting: " + button.getClass() + ", " + button.slot());
 
             placeholderInventory.setButton(button.slot(), button);
         }

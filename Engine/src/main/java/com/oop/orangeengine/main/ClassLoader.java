@@ -12,20 +12,22 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 public class ClassLoader {
 
     public static void load() {
-        JarFile jarFile = JarUtil.getJarFile(ClassLoader.class);
+        JarFile jarFile = JarUtil.getJarFile(getEngine().getOwning().getClass());
 
         final Enumeration<JarEntry> entries = jarFile.entries();
         List<String> classNames = new ArrayList<>();
 
         while (entries.hasMoreElements()) {
-
             JarEntry entry = entries.nextElement();
-            if (entry.getName().contains(".class"))
-                classNames.add(entry.getName().replace("/", ".").replace(".class", ""));
 
+            if (entry.getName().contains(".class")) {
+                classNames.add(entry.getName().replace("/", ".").replace(".class", ""));
+            }
         }
 
         try {
@@ -41,7 +43,7 @@ public class ClassLoader {
                     if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
                         try {
                             constructor.newInstance();
-                        } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+                        } catch (InstantiationException | InvocationTargetException | IllegalAccessException ex) {
                         }
                     }
             } catch (Throwable ex) {
