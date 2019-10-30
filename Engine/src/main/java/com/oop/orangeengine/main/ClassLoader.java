@@ -47,7 +47,7 @@ public class ClassLoader {
                         }
                     }
             } catch (Throwable ex) {
-                if (!(ex instanceof NoClassDefFoundError))
+                if (!ex.getClass().getSimpleName().contains("Found"))
                     ex.printStackTrace();
             }
         }

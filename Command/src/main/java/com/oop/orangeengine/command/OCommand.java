@@ -100,6 +100,7 @@ public class OCommand {
         return this;
     }
 
+    @Deprecated
     public OCommand listen(Consumer<WrappedCommand> listener) {
         this.listener = listener;
         return this;
@@ -153,6 +154,11 @@ public class OCommand {
         else
             return getParent().getLabelWithParents(current + getLabel() + " ");
 
+    }
+
+    public OCommand onCommand(Consumer<WrappedCommand> consumer) {
+        this.listener = consumer;
+        return this;
     }
 
 }

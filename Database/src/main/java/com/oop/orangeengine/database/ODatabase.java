@@ -90,7 +90,7 @@ public abstract class ODatabase {
     }
 
     public void createColumn(String table, String column, OColumn columnType) {
-        //Make sure the column doesn't exist so we don't get exception
+        // Make sure the column doesn't exist so we don't get exception
         if (hasColumn(table, column)) return;
 
         execute("ALTER TABLE " + table + " ADD " + column + " " + columnType.getSql());

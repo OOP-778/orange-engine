@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,6 +75,10 @@ public abstract class DatabaseObject {
                     continue;
 
                 Field field = cachedColumn.getFirst();
+                if (object.toString().contentEquals("null")) {
+                    field.set(this, null);
+                    continue;
+                }
 
                 if (objectTypeMatches(field.getType(), object.getClass())) {
                     field.set(this, object);
@@ -158,6 +163,7 @@ public abstract class DatabaseObject {
             cachedColumns.put(holder, Collections.synchronizedList(holderValue));
 
             for (Field field : holder.getDeclaredFields()) {
+                if (Modifier.isTransient(field.getModifiers())) continue;
 
                 field.setAccessible(true);
                 DatabaseValue databaseValue = field.getDeclaredAnnotation(DatabaseValue.class);
@@ -175,6 +181,7 @@ public abstract class DatabaseObject {
             cachedColumns.put(holder.getSuperclass(), Collections.synchronizedList(parentValue));
 
             for (Field field : holder.getSuperclass().getDeclaredFields()) {
+                if (Modifier.isTransient(field.getModifiers())) continue;
 
                 DatabaseValue databaseValue = field.getDeclaredAnnotation(DatabaseValue.class);
                 if (databaseValue == null) continue;
@@ -189,6 +196,9 @@ public abstract class DatabaseObject {
     public Object wrapFieldObject(Field field) throws IllegalAccessException {
 
         Object value = field.get(this);
+        if (value == null)
+            return "null";
+
         if (isRaw(value))
             return value;
 
