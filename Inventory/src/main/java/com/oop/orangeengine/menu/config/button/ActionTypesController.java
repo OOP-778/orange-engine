@@ -5,6 +5,7 @@ import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.config.action.ActionListenerController;
 import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
+import com.oop.orangeengine.menu.events.ButtonEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,12 +35,18 @@ public class ActionTypesController {
                     .orElse(null));
 
             return event -> {
+
                 if (!properties.isPresent()) {
                     event.getPlayer().sendMessage(Helper.color("&cError happened! Contact administration!"));
                     throw new IllegalStateException("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
 
-                } else
-                    properties.get().buttonAction().onAction(event);
+                } else {
+                    ActionProperties<ButtonEvent> props = properties.get();
+                    if (!props.buttonEventClass().isAssignableFrom(event.getClass()))
+                        return;
+
+                    props.buttonAction().onAction(event);
+                }
             };
         });
     }

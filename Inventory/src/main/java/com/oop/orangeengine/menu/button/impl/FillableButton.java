@@ -39,10 +39,6 @@ public class FillableButton extends AMenuButton {
             ItemStack filledWith = event.getClickedButton().currentItem();
             ButtonFillEvent buttonFillEvent = new ButtonFillEvent(event, filledWith);
 
-            event.getMenu().actionSet().stream()
-                    .filter(props -> props.accepts(buttonFillEvent))
-                    .forEach(props -> props.buttonAction().onAction(buttonFillEvent));
-
             if (buttonFillEvent.isCancelled()) {
                 event.pickupAtSlot();
                 return;
@@ -58,8 +54,14 @@ public class FillableButton extends AMenuButton {
 
             if (beforeItem.getType() != Material.AIR && filledWith.getType() == Material.AIR) {
                 ButtonEmptyEvent buttonEmptyEvent = new ButtonEmptyEvent(event, beforeItem.clone());
+
+                // Per button listener
                 event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonEmptyEvent)).forEach(listener -> listener.consumer().accept(buttonEmptyEvent));
 
+                // Global button events
+                event.getMenu().actionSet().stream()
+                        .filter(props -> props.accepts(buttonEmptyEvent))
+                        .forEach(props -> props.buttonAction().onAction(buttonEmptyEvent));
 
                 if (buttonEmptyEvent.isCancelled()) {
                     event.pickupAtSlot();
@@ -73,7 +75,22 @@ public class FillableButton extends AMenuButton {
             }
 
             if (buttonFillHandler != null) {
-                event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonFillEvent)).forEach(listener -> listener.consumer().accept(buttonFillEvent));
+                event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonFillEvent)).forEach(listener -> {
+                    if (!buttonFillEvent.isCancelled())
+                        listener.consumer().accept(buttonFillEvent);
+                });
+                event.getMenu().actionSet().stream()
+                        .filter(props -> props.accepts(buttonFillEvent))
+                        .forEach(props -> {
+                            if (!buttonFillEvent.isCancelled())
+                                props.buttonAction().onAction(buttonFillEvent);
+                        });
+
+                // Cancel operation if the fill event is cancelled
+                if (buttonFillEvent.isCancelled()) {
+                    event.pickupAtSlot();
+                    return;
+                }
                 buttonFillHandler.accept(buttonFillEvent);
             }
         });

@@ -5,6 +5,7 @@ import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.config.ConfigMenuTemplate;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
+import com.oop.orangeengine.menu.events.ButtonEvent;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,7 +13,7 @@ import java.util.function.Predicate;
 
 @Data
 @Accessors(chain = true, fluent = true)
-public class ActionProperties<T extends ButtonClickEvent> {
+public class ActionProperties<T extends ButtonEvent> {
 
     private String menuId;
     private ClickEnum clickEnum;
@@ -58,5 +59,4 @@ public class ActionProperties<T extends ButtonClickEvent> {
 
         return true;
     }
-
 }

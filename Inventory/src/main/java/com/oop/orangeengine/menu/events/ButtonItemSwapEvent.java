@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 @Getter
 @AllArgsConstructor
-public class ButtonItemSwapEvent extends Event {
+public class ButtonItemSwapEvent extends ButtonEvent {
 
     private ItemStack swappedWith;
     private ItemStack previous;

@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 @Getter
 @RequiredArgsConstructor
-public class ButtonClickEvent extends Event implements Cancellable {
+public class ButtonClickEvent extends ButtonEvent implements Cancellable {
 
     private static HandlerList handlerList = new HandlerList();
 
