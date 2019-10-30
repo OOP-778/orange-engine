@@ -78,8 +78,6 @@ public abstract class ODatabase {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     resultSet.next();
-                    if (resultSet.isClosed()) return false;
-
                     return resultSet.getObject(1) != null;
                 }
             }
@@ -90,7 +88,7 @@ public abstract class ODatabase {
     }
 
     public void createColumn(String table, String column, OColumn columnType) {
-        //Make sure the column doesn't exist so we don't get exception
+        // Make sure the column doesn't exist so we don't get exception
         if (hasColumn(table, column)) return;
 
         execute("ALTER TABLE " + table + " ADD " + column + " " + columnType.getSql());

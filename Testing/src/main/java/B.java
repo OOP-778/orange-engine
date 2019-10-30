@@ -1,10 +1,11 @@
-import s.A;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class B<T> extends A {
+public class B implements Serializable {
 
-    public B() {
-
-        System.out.println(getClass().getSuperclass().getName());
-    }
+    private transient List<String> staty =  new ArrayList<String>(){{
+        add("wagawgag");
+    }};
 
 }
