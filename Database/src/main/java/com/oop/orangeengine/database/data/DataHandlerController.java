@@ -9,18 +9,19 @@ import java.util.UUID;
 
 public class DataHandlerController {
 
+    private static FSTConfiguration fstConfiguration = FSTConfiguration.createJsonConfiguration();
     private static DataHandlerController INSTANCE = new DataHandlerController();
 
     private Map<Class, IDataHandler> dataHandlerMap = new HashMap<>();
     private final IDataHandler<Object> defaultHandler = new IDataHandler<Object>() {
         @Override
         public Object load(String serialized) {
-            return Engine.getInstance().getFstConfiguration().asObject(serialized.getBytes());
+            return fstConfiguration.asObject(serialized.getBytes());
         }
 
         @Override
         public String serialize(Object object) {
-            return Engine.getInstance().getFstConfiguration().asJsonString(object);
+            return fstConfiguration.asJsonString(object);
         }
     };
 

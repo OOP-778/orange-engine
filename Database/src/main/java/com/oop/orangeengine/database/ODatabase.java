@@ -78,8 +78,6 @@ public abstract class ODatabase {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     resultSet.next();
-                    if (resultSet.isClosed()) return false;
-
                     return resultSet.getObject(1) != null;
                 }
             }
