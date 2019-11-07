@@ -12,14 +12,5 @@ public class Runner {
 
     public static void main(String[] args) {
 
-        ActionListenerController.getInstance().listen(
-                new ActionProperties<ButtonEmptyEvent>(ButtonEmptyEvent.class)
-                .actionId("testing")
-                .buttonAction(event -> {
-                    if ()
-
-                })
-        );
-
     }
 }

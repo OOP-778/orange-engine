@@ -6,6 +6,7 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 public class BoolArg extends CommandArgument<Boolean> {
 
     public BoolArg() {
+
         setIdentity("boolean");
         setDescription("A boolean (true or false)");
         setMapper(input -> {

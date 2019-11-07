@@ -3,9 +3,8 @@ package com.oop.orangeengine.menu;
 import com.oop.orangeengine.main.util.data.OQueue;
 import com.oop.orangeengine.main.util.data.map.OMap;
 import com.oop.orangeengine.main.util.data.pair.OPair;
-import com.oop.orangeengine.menu.packet.SlotUpdate;
+import com.oop.orangeengine.menu.packet.PacketUtils;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -100,12 +99,16 @@ public class InventoryUtil {
             if (itemStack == null) continue;
 
             int finalSlot = slot;
-            viewers.forEach(player -> SlotUpdate.update(player, finalSlot, itemStack, false));
+            viewers.forEach(player -> PacketUtils.updateSlot(player, finalSlot, itemStack, false));
             inventory.setItem(slot, itemStack);
 
         }
 
         return added;
+    }
+
+    public static void updateTitle(Inventory inventory, String title) {
+        inventory.getViewers().forEach(viewier -> PacketUtils.updateTitle((Player) viewier, inventory, title));
     }
 
 }

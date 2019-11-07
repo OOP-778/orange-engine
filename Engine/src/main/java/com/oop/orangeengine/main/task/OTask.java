@@ -9,15 +9,23 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 @Getter
 public class OTask extends Storegable {
 
+    // If spigot
     @Setter
     private BukkitTask bukkitTask;
+
+    // Classic
+    @Setter
+    private ScheduledFuture<?> scheduledFuture;
 
     private Consumer<OTask> consumer;
     private Consumer<OTask> whenFinished;
@@ -26,10 +34,13 @@ public class OTask extends Storegable {
     private boolean repeat = false;
     private boolean sync = true;
     private int runTimes = -1;
+    private boolean cancelled = false;
 
     protected Runnable run() {
 
         return () -> {
+
+            if (cancelled) return;
 
             //Check for run times
             OptionalConsumer<Integer> runned = grab("runned");
@@ -67,11 +78,11 @@ public class OTask extends Storegable {
     }
 
     public int getTaskId() {
-        return bukkitTask.getTaskId();
+        return bukkitTask == null ? -1 : bukkitTask.getTaskId();
     }
 
     public Plugin getOwner() {
-        return bukkitTask.getOwner();
+        return getEngine().getOwning();
     }
 
     public boolean isSync() {
@@ -79,12 +90,17 @@ public class OTask extends Storegable {
     }
 
     public boolean isCancelled() {
-        return Bukkit.getScheduler().isCurrentlyRunning(bukkitTask.getTaskId());
+        return cancelled;
     }
 
     public void cancel() {
-        if (bukkitTask != null)
+        this.cancelled = true;
+        if (bukkitTask != null) {
             bukkitTask.cancel();
+        }
+
+        if (scheduledFuture != null)
+            scheduledFuture.cancel(false);
     }
 
     public OTask runnable(Runnable runnable) {

@@ -4,8 +4,7 @@ import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.button.ClickListener;
 import com.oop.orangeengine.menu.button.impl.FillableButton;
-import com.oop.orangeengine.menu.config.button.ActionTypesController;
-import com.oop.orangeengine.menu.events.ButtonClickEvent;
+import com.oop.orangeengine.menu.config.action.ActionTypesController;
 import com.oop.orangeengine.menu.events.ButtonEmptyEvent;
 import com.oop.orangeengine.menu.events.ButtonFillEvent;
 import com.oop.orangeengine.yaml.ConfigurationSection;
@@ -19,7 +18,10 @@ public class ConfigFillableButton extends ConfigNormalButton {
             ConfigurationSection onFillSection = section.getSection("on fill");
 
             for (String actionType : ActionTypesController.getActionTypes().keySet())
-                onFillSection.ifValuePresent(actionType, String.class, text -> new ClickListener<>(ButtonFillEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                onFillSection.ifValuePresent(actionType, String.class, text -> {
+                    clickListeners().add(new ClickListener<>(ButtonFillEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                    appliedActions().add(text);
+                });
 
         }
 
@@ -27,8 +29,10 @@ public class ConfigFillableButton extends ConfigNormalButton {
             ConfigurationSection onEmptySection = section.getSection("on empty");
 
             for (String actionType : ActionTypesController.getActionTypes().keySet())
-                onEmptySection.ifValuePresent(actionType, String.class, text -> new ClickListener<>(ButtonEmptyEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
-
+                onEmptySection.ifValuePresent(actionType, String.class, text -> {
+                    clickListeners().add(new ClickListener<>(ButtonEmptyEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                    appliedActions().add(text);
+                });
         }
     }
 

@@ -157,6 +157,10 @@ public final class OSimpleReflection {
 
         }
 
+        public Class<?> getClassIfFoundInCache(String className) {
+            return CLASS_MAP.get(className);
+        }
+
         @Override
         public String toString() {
             return path;

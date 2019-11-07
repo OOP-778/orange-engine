@@ -29,6 +29,8 @@ public class ConfigNormalButton extends AConfigButton {
         // Set click handler
         button.clickListeners().addAll(clickListeners());
 
+        button.appliedActions().addAll(appliedActions());
+
         // Set sound
         if (sound() != null)
             button.sound(sound());

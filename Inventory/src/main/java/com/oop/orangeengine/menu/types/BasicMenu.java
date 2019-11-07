@@ -19,14 +19,14 @@ public class BasicMenu extends AMenu {
 
     @Override
     protected void build() {
+
         // Apply designer
         if (designer() != null)
             designer().fill(this);
 
         // Set Wrapped Inventory
         if (wrappedInventory == null) {
-            Inventory inventory = provideNewInv();
-            wrappedInventory = new WrappedInventory(this, inventory);
+            wrappedInventory = new WrappedInventory(this, title());
         }
 
         // Set buttons
@@ -36,10 +36,5 @@ public class BasicMenu extends AMenu {
     @Override
     public WrappedInventory getWrapperFromBukkit(Inventory inventory) {
         return getWrappedInventory();
-    }
-
-    @Override
-    protected Inventory provideNewInv() {
-        return Bukkit.createInventory(this, size(), Helper.color(title()));
     }
 }

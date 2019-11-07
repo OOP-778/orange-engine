@@ -1,17 +1,16 @@
 package com.oop.orangeengine.menu;
 
 import com.oop.orangeengine.main.Helper;
+import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
-import com.oop.orangeengine.menu.packet.SlotUpdate;
+import com.oop.orangeengine.menu.packet.PacketUtils;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.Container;
-import net.minecraft.server.v1_8_R3.PlayerInventory;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -19,23 +18,30 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
-public class WrappedInventory implements Cloneable {
+public class WrappedInventory implements Cloneable, InventoryHolder {
 
     private AMenu owner;
     private Inventory bukkitInventory;
     private AMenuButton[] buttons = null;
+    private String title;
 
-    public WrappedInventory(AMenu owner, Inventory inventory) {
+    public WrappedInventory(AMenu owner, String title) {
         this.owner = owner;
-        this.bukkitInventory = inventory;
-        this.buttons = new AMenuButton[inventory.getSize()];
+        this.bukkitInventory = Bukkit.createInventory(this, owner.size(), Helper.color(title));
+        this.buttons = new AMenuButton[bukkitInventory.getSize()];
+        this.title = title;
 
         // Initialize items so we don't get any nulls
         loadItems();
     }
 
-    private WrappedInventory() {
+    public WrappedInventory setBukkitInventory(Inventory inventory) {
+        this.bukkitInventory = inventory;
+        this.buttons = new AMenuButton[inventory.getSize()];
+        return this;
     }
+
+    private WrappedInventory() {}
 
     private void loadItems() {
         for (int slot = 0; slot < buttons.length; slot++) {
@@ -75,7 +81,7 @@ public class WrappedInventory implements Cloneable {
         bukkitInventory.setItem(button.slot(), button.currentItem());
 
         Set<Player> viewers = getViewers();
-        viewers.forEach(player -> SlotUpdate.update(player, button.slot(), button.currentItem(), true));
+        viewers.forEach(player -> PacketUtils.updateSlot(player, button.slot(), button.currentItem(), true));
     }
 
     public Set<Player> getViewers() {
@@ -98,20 +104,21 @@ public class WrappedInventory implements Cloneable {
 
         button.holder(this);
         buttons[slot] = button;
+        button.slotNoUpdate(slot);
         updateButton(button);
     }
 
     public long emptySlots() {
         ensureNotEmpty();
         return Arrays.stream(buttons)
-                .filter(button -> button.currentItem().getType() == Material.AIR)
+                .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
                 .count();
     }
 
     public List<Integer> listEmptySlots() {
         ensureNotEmpty();
         return Arrays.stream(buttons)
-                .filter(button -> button.currentItem().getType() == Material.AIR || button.placeholder())
+                .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
                 .map(AMenuButton::slot)
                 .collect(Collectors.toList());
     }
@@ -134,7 +141,8 @@ public class WrappedInventory implements Cloneable {
     public WrappedInventory clone() {
         WrappedInventory wrappedInventory = new WrappedInventory();
         wrappedInventory.owner = owner;
-        wrappedInventory.bukkitInventory = owner.provideNewInv();
+        wrappedInventory.bukkitInventory = Bukkit.createInventory(wrappedInventory, owner.size(), title);
+        wrappedInventory.title = title;
         Arrays.stream(buttons)
                 .map(AMenuButton::clone)
                 .forEach(button -> wrappedInventory.setButton(button.slot(), button));
@@ -170,15 +178,56 @@ public class WrappedInventory implements Cloneable {
         bukkitInventory.setItem(button.slot(), button.currentItem());
 
         Set<Player> viewers = getViewers();
-        viewers.forEach(player -> SlotUpdate.update(player, button.slot(), button.currentItem(), true));
+        viewers.forEach(player -> PacketUtils.updateSlot(player, button.slot(), button.currentItem(), true));
     }
 
     public int firstEmpty() {
         ensureNotEmpty();
         return Arrays.stream(buttons)
-                .filter(button -> button.currentItem().getType() == Material.AIR || button.placeholder())
+                .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
                 .map(AMenuButton::slot)
                 .findFirst()
                 .orElse(-1);
     }
+
+    @Override
+    public Inventory getInventory() {
+        return getBukkitInventory();
+    }
+
+    public void moveTo(Inventory inventory) {
+
+        // Check if we have current viewers if so add them to the list
+        Set<Player> currentViewers = new HashSet<>();
+        if (bukkitInventory != null && !bukkitInventory.getViewers().isEmpty())
+            currentViewers.addAll(bukkitInventory.getViewers().stream().map(viewer -> (Player) viewer).collect(Collectors.toSet()));
+
+        // Move current items to new inventory
+        moveItems(inventory);
+
+        this.bukkitInventory = inventory;
+        currentViewers.forEach(this::open);
+    }
+
+    public OptionalConsumer<AMenuButton> findByFilter(Predicate<AMenuButton> buttonPredicate) {
+        return OptionalConsumer.of(Arrays.asList(getButtons()).stream().filter(buttonPredicate).findFirst());
+    }
+
+    private void moveItems(Inventory inventory) {
+        if (buttons != null) {
+            for (AMenuButton button : buttons) {
+                inventory.setItem(button.slot(), button.currentItem());
+            }
+        }
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+        if (bukkitInventory != null && !bukkitInventory.getViewers().isEmpty())
+            InventoryUtil.updateTitle(bukkitInventory, title);
+
+        else
+            moveTo(Bukkit.createInventory(this, owner.size(), title));
+    }
+
 }

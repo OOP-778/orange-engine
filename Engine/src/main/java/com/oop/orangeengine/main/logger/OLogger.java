@@ -56,7 +56,7 @@ public class OLogger {
 
     public void error(Throwable exception) {
 
-        printError("Exception was caught in " + getLoggerName() + ": " + exception.getMessage());
+        printError(exception.getClass().getSimpleName() + " was caught in " + getLoggerName() + ": " + exception.getMessage());
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());
         }

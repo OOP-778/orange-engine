@@ -16,7 +16,7 @@ menu1:
     - "XXXXXXXXX"
     - "AAAAFAAAA"
     - ""
-    - "XXXPXNXXX"
+    - "XXXPXNXXB"
 
   buttons:
 
@@ -41,7 +41,7 @@ menu1:
         material: black_stained_glass_pane
 
       on click:
-        execute action: "test"
+        execute action: "next page"
 
     "P":
       # There's three types of buttons
@@ -66,15 +66,73 @@ menu1:
       on empty:
         execute action: "onEmpty"
 
-    "show player":
-      # There's three types of buttons
-      # filler = Dummy button
-      # normal = An ordinary button
-      # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
-      display name: "&e%player%"
+    "B":
       type: normal
-      template: true
-      material: player_head
+      material: diamond
+      display name: "I OOP"
 
       on click:
-        execute action: "show player kills"
+        open: "child2"
+
+  children:
+    "child2":
+      # There's two types paged & normal
+      type: basic
+
+      # If paged there's two placeholders for title: %currentPage%/%availablePages%
+      title: "&eExample Menu Title 2"
+
+      # Layout is a way to form your GUI this also defines inventory size
+      # If you want AIR the layout id for AIR is A
+      layout:
+        - "XXXXXXXXX"
+        - "AAAAFAAAA"
+        - ""
+        - "BXXPXNXXX"
+
+      buttons:
+
+        # This is the layout ID
+        "X":
+          # There's three types of buttons
+          # filler = Dummy button
+          # normal = An ordinary button
+          # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+          type: filler
+          material: YELLOW_STAINED_GLASS_PANE
+
+        "N":
+          # There's three types of buttons
+          # filler = Dummy button
+          # normal = An ordinary button
+          # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+          type: swappable
+          material: arrow
+          display name: "&e>>"
+          on swap:
+            material: black_stained_glass_pane
+
+          on click:
+            execute action: "next page"
+
+        "P":
+          # There's three types of buttons
+          # filler = Dummy button
+          # normal = An ordinary button
+          # swappable = A button that has a swappable itemStack, it's mostly used for nextPage, previousPage to replace when they're not needed
+          type: swappable
+          material: arrow
+          display name: "&e<<"
+          on swap:
+            material: black_stained_class_pane
+
+          on click:
+            execute action: "previous page"
+
+        "B":
+          type: normal
+          material: diamond
+          display name: "I OOP"
+
+          on click:
+            execute action: "return"

@@ -5,10 +5,10 @@ import com.oop.orangeengine.main.component.IEngineComponent;
 import com.oop.orangeengine.main.events.async.EventData;
 import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.task.ITaskController;
 import com.oop.orangeengine.main.task.StaticTask;
-import com.oop.orangeengine.main.task.TaskController;
+import com.oop.orangeengine.main.task.SpigotTaskController;
 import lombok.Getter;
-import org.bukkit.inventory.Inventory;
 import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class Engine {
     private static Engine instance;
     private EnginePlugin owning;
     private List<AEngineComponent> components = new ArrayList<>();
-    private TaskController taskController;
+    private ITaskController taskController;
     private OLogger logger;
     private final FSTConfiguration fstConfiguration = FSTConfiguration.createJsonConfiguration();
 
@@ -42,8 +42,7 @@ public class Engine {
 
         new StaticTask(this);
 
-        //Initialize task controller
-        taskController = new TaskController(owning);
+        taskController = plugin.provideTaskController();
         logger = new OLogger(owning);
 
         ClassLoader.load();
@@ -76,6 +75,10 @@ public class Engine {
                 findFirst().
                 orElse(null);
 
+    }
+
+    public void onDisable() {
+        instance = null;
     }
 
 }

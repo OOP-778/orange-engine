@@ -19,5 +19,5 @@ shadowJar {
     relocate("com.oop.orangeengine", "com.oop.testingPlugin.engine")
     archiveName = "OrangeEngine-TestingPlugin.jar"
 
-    destinationDirectory = file('../target')
+    destinationDirectory = file('/run/media/brian/BRABARAR/Serrvers/OOP/1.12.2/plugins/')
 }

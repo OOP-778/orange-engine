@@ -1,17 +1,23 @@
 package com.oop.orangeengine.main.task;
 
 import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.util.DisablePriority;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
-public class TaskController implements ITaskController {
+public class SpigotTaskController implements ITaskController {
 
     private EnginePlugin owning;
+    private Set<OTask> tasks = new HashSet<>();
 
-    public TaskController(EnginePlugin owning) {
+    public SpigotTaskController(EnginePlugin owning) {
         this.owning = owning;
+        owning.onDisable(() -> tasks.forEach(OTask::cancel), DisablePriority.LAST);
     }
 
     @Override
@@ -23,9 +29,13 @@ public class TaskController implements ITaskController {
         else
             bukkitTask = async(task);
 
-        task.setBukkitTask(bukkitTask);
-        return task;
+        if (bukkitTask != null) {
+            task.setBukkitTask(bukkitTask);
+            if (task.isRepeat() || task.getDelay() > 1)
+                tasks.add(task);
+        }
 
+        return task;
     }
 
     private BukkitTask async(OTask task) {
@@ -35,7 +45,6 @@ public class TaskController implements ITaskController {
         else if (task.getDelay() != -1)
             return Bukkit.getScheduler().runTaskLaterAsynchronously(owning, task.run(), task.getDelayAsTicks());
 
-        // I ate shiet!
         else if (!isAsyncThread())
             return Bukkit.getScheduler().runTaskAsynchronously(owning, task.run());
 
@@ -59,11 +68,8 @@ public class TaskController implements ITaskController {
         else {
 
             task.run().run();
-            task.run();
             return null;
         }
-
-
     }
 
     private boolean isAsyncThread() {

@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class HoloLine implements Viewable, Updateable {
 
     private String content;
-    boolean requiresUpdate = false;
     private List<UUID> viewers = new ArrayList<>();
     private final WrappedArmorStand wrappedArmorStand;
 
@@ -23,7 +22,6 @@ public class HoloLine implements Viewable, Updateable {
 
     public void setContent(String content) {
         this.content = content;
-        requiresUpdate = true;
     }
 
     @Override

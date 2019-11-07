@@ -127,7 +127,7 @@ public class MessageLine {
                 buffer.append(" ");
 
             else if (clonedLC.getText().contains(" "))
-                checkThrough.addAll(Arrays.stream(clonedLC.getText().split(" ")).collect(toList()));
+                checkThrough.addAll(Arrays.asList(clonedLC.getText().split(" ")));
 
             else {
 
@@ -158,11 +158,14 @@ public class MessageLine {
 
                     }
 
-                    if (colorFinder.color() != "")
+                    if (colorFinder.color().contentEquals(""))
                         lastColorL = colorFinder;
 
-                    buffer.append(spacedBuffer).append(checkThrough.size() == 1 ? checkThrough.get(0).contains(" ") ? "" : "" : " ");
+                    if (checkThrough.indexOf(spacedString) > 0)
+                        buffer.append(" ").append(spacedBuffer);
 
+                    else
+                        buffer.append(spacedBuffer);
                 }
 
             }

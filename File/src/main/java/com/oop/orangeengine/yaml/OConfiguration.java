@@ -235,14 +235,6 @@ public class OConfiguration implements Valuable {
 
     }
 
-    public <T> T getValueAsReq(String path) {
-        return (T) getValue(path);
-    }
-
-    public <T> T getValueAsReq(String path, Class<T> type) {
-        return type.cast(getValue(path));
-    }
-
     public AConfigurationValue setValue(String path, Object object) {
 
         AConfigurationValue value = null;

@@ -5,6 +5,7 @@ import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.button.ClickListener;
+import com.oop.orangeengine.menu.config.action.ActionTypesController;
 import com.oop.orangeengine.menu.config.button.types.ConfigFillableButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigFillerButton;
 import com.oop.orangeengine.menu.config.button.types.ConfigNormalButton;
@@ -17,7 +18,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Accessors(fluent = true, chain = true)
@@ -31,6 +34,7 @@ public abstract class AConfigButton {
     private boolean template = false;
     private boolean placeholder = false;
     private WrappedSound sound;
+    private List<String> appliedActions = new ArrayList<>();
 
     private Set<ClickListener> clickListeners = new HashSet<>();
 
@@ -53,11 +57,10 @@ public abstract class AConfigButton {
         if (section.hasChild("on click")) {
             ConfigurationSection onClickSection = section.getSection("on click");
 
-            Helper.print("Found on click");
-
             for (String actionType : ActionTypesController.getActionTypes().keySet()) {
                 onClickSection.ifValuePresent(actionType, String.class, text -> {
                     clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                    appliedActions.add(text);
                 });
             }
         }
@@ -69,7 +72,10 @@ public abstract class AConfigButton {
                 ConfigurationSection onClickSection = section.getSection(normalized);
 
                 for (String actionType : ActionTypesController.getActionTypes().keySet())
-                    onClickSection.ifValuePresent(actionType, String.class, text -> clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(clickEnum).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text))));
+                    onClickSection.ifValuePresent(actionType, String.class, text -> {
+                        clickListeners.add(new ClickListener<>(ButtonClickEvent.class).clickEnum(clickEnum).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
+                        appliedActions.add(text);
+                    });
 
             }
         }

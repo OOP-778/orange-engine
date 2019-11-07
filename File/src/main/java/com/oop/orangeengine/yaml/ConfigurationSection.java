@@ -1,5 +1,6 @@
 package com.oop.orangeengine.yaml;
 
+import com.oop.orangeengine.file.OFile;
 import com.oop.orangeengine.yaml.util.ConfigurationUtil;
 import com.oop.orangeengine.yaml.util.CustomWriter;
 import com.oop.orangeengine.yaml.util.Descriptionable;
@@ -274,6 +275,10 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
     public <T> T wrap(Class<T> type) {
         return type.cast(wrap());
+    }
+
+    public OFile getFile() {
+        return configuration.getOFile();
     }
 
 }

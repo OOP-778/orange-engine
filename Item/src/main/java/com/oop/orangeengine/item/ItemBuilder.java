@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public abstract class ItemBuilder implements Typeable {
+public abstract class ItemBuilder implements Typeable, Cloneable {
 
     @Getter
     @Setter
@@ -233,4 +233,17 @@ public abstract class ItemBuilder implements Typeable {
     public int getAmount() {
         return getItemStack().getAmount();
     }
+
+    public boolean hasNBTTag(String key) {
+        return new NBTItem(getItemStack()).hasKey(key);
+    }
+
+    public Object getNBTTag(String key) {
+        return new NBTItem(getItemStack()).getObject(key, Object.class);
+    }
+
+    public <T> T getNBTTag(String key, Class<T> type) {
+        return new NBTItem(getItemStack()).getObject(key, type);
+    }
+
 }

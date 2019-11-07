@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu.config.action;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import com.oop.orangeengine.main.util.data.set.OSet;
@@ -20,10 +21,11 @@ public class ActionListenerController {
         // Next Page Handler
         actionPropertiesOSet.add(
                 new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
-                        .actionId("nextPage")
+                        .actionId("next page")
                         .buttonAction(event -> {
                             if (!(event.getMenu() instanceof PagedMenu)) return;
 
+                            System.out.println("RUnning next page");
                             PagedMenu menu = (PagedMenu) event.getMenu();
                             OptionalConsumer<WrappedInventory> nextPage = menu.getNextPage(event.getWrappedInventory());
                             if (nextPage.isPresent())
@@ -35,7 +37,7 @@ public class ActionListenerController {
         // Last Page Handler
         actionPropertiesOSet.add(
                 new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
-                        .actionId("lastPage")
+                        .actionId("last page")
                         .buttonAction(event -> {
                             if (!(event.getMenu() instanceof PagedMenu)) return;
 
@@ -54,6 +56,9 @@ public class ActionListenerController {
                         .buttonAction(event -> {
                             if (event.getMenu().parent() != null)
                                 event.getMenu().parent().getWrappedInventory().open(event.getPlayer());
+
+                            else
+                                event.getPlayer().sendMessage(Helper.color("&cThe parent is not found!"));
                         })
         );
     }

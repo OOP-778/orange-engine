@@ -81,8 +81,6 @@ public class YamlMessage {
 
     }
 
-
-
     private static void saveLine(ConfigurationSection section, LineContent lineContent) {
 
         section.setValue("text", lineContent.getText());
@@ -146,6 +144,10 @@ public class YamlMessage {
 
         return fromSection(section);
 
+    }
+
+    public static OMessage fromValue(String text) {
+        return new OMessage().appendLine(text);
     }
 
     public static OMessage fromSection(ConfigurationSection section) {

@@ -7,4 +7,9 @@ public class OButton extends AMenuButton {
     public OButton(ItemStack currentItem, int slot) {
         super(currentItem, slot);
     }
+
+    public OButton(ItemStack currentItem) {
+        super(currentItem, -1);
+    }
+
 }

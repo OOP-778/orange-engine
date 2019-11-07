@@ -2,7 +2,6 @@ package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
-import com.oop.orangeengine.main.Helper;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -95,7 +94,7 @@ public class OCommand {
     }
 
     public OCommand argument(CommandArgument argument) {
-        argumentMap.put(argument.getIdentifier(), argument);
+        argumentMap.put(argument.getIdentity(), argument);
         argument.onAdd(this);
         return this;
     }

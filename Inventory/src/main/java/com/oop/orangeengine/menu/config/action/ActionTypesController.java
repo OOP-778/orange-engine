@@ -1,4 +1,4 @@
-package com.oop.orangeengine.menu.config.button;
+package com.oop.orangeengine.menu.config.action;
 
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OptionalConsumer;
@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class ActionTypesController {
 
@@ -30,7 +32,7 @@ public class ActionTypesController {
 
         actionTypes.put("execute action", actionId -> {
             OptionalConsumer<ActionProperties> properties = OptionalConsumer.of(ActionListenerController.getInstance().getActionPropertiesOSet().stream()
-                    .filter(action -> action.actionId() != null && action.actionId().equalsIgnoreCase(actionId))
+                    .filter(action -> action.actionId() != null && action.actionId().contentEquals(actionId))
                     .findFirst()
                     .orElse(null));
 
@@ -38,14 +40,12 @@ public class ActionTypesController {
 
                 if (!properties.isPresent()) {
                     event.getPlayer().sendMessage(Helper.color("&cError happened! Contact administration!"));
-                    throw new IllegalStateException("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
+                    getEngine().getLogger().printError("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
 
                 } else {
                     ActionProperties<ButtonEvent> props = properties.get();
-                    if (!props.buttonEventClass().isAssignableFrom(event.getClass()))
-                        return;
-
-                    props.buttonAction().onAction(event);
+                    if (props.buttonEventClass().isAssignableFrom(event.getClass()))
+                        props.buttonAction().onAction(event);
                 }
             };
         });

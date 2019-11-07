@@ -7,6 +7,7 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.button.AMenuButton;
+import com.oop.orangeengine.menu.button.impl.SwappableButton;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
@@ -29,15 +30,18 @@ public class PagedMenu extends AMenu {
         if (designer() != null)
             designer().fill(this);
 
-        WrappedInventory placeholderInventory = new WrappedInventory(this, provideNewInv());
+        WrappedInventory placeholderInventory = new WrappedInventory(this, title());
         for (AMenuButton button : buttons()) {
             if (button.paged()) continue;
             if (button.template()) continue;
 
-            Helper.print("Setting: " + button.getClass() + ", " + button.slot());
-
             placeholderInventory.setButton(button.slot(), button);
         }
+
+        long pagedButtons = buttons().stream()
+                .filter(AMenuButton::paged)
+                .count();
+        int pagesRequired = Math.round(pagedButtons / placeholderInventory.emptySlots());
 
         OPair<Integer, WrappedInventory> currentPage = null;
         for (AMenuButton button : buttons()) {
@@ -75,19 +79,35 @@ public class PagedMenu extends AMenu {
 
             currentPage.getValue().setButton(currentPage.getValue().firstEmpty(), button);
         }
+
+        pages.forEach((page, inv) -> {
+
+            // Change title of the inventory according to the page number
+            inv.changeTitle(inv.getTitle().replace("%currentPage%", page + "").replace("%allPages%", pages.size() + ""));
+
+            // Swap next / last page buttons
+            if(page == 1)
+                inv.findByFilter(button -> button.appliedActions().contains("last page")).ifPresent(button -> {
+                    SwappableButton swappableButton = (SwappableButton) button;
+                    swappableButton.swap();
+                });
+
+            else if (page == pages.size())
+                inv.findByFilter(button -> button.appliedActions().contains("next page")).ifPresent(button -> {
+                    SwappableButton swappableButton = (SwappableButton) button;
+                    swappableButton.swap();
+                });
+
+        });
+        wrappedInventory = pages.get(1);
     }
 
     @Override
     public WrappedInventory getWrapperFromBukkit(Inventory inventory) {
         return pages.values().stream()
-                .filter(wi -> wi.getBukkitInventory() == inventory)
+                .filter(wi -> wi == inventory.getHolder())
                 .findFirst()
                 .orElse(null);
-    }
-
-    @Override
-    protected Inventory provideNewInv() {
-        return Bukkit.createInventory(this, size(), title());
     }
 
     public OptionalConsumer<WrappedInventory> getNextPage(WrappedInventory wrappedInventory) {

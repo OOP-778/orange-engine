@@ -6,6 +6,7 @@ import com.oop.orangeengine.menu.button.ClickEnum;
 import com.oop.orangeengine.menu.config.ConfigMenuTemplate;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.ButtonEvent;
+import com.oop.orangeengine.menu.events.ButtonFillEvent;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -38,6 +39,20 @@ public class ActionProperties<T extends ButtonEvent> {
 
         if (customFilter != null && !customFilter.test(event.getClickedButton()))
             return false;
+
+        if(event.getClass() == ButtonFillEvent.class) {
+            System.out.println(event.getClass());
+            System.out.println(buttonEventClass);
+            System.out.println(buttonEventClass.isAssignableFrom(event.getClass()));
+            System.out.println(event.getClass().isAssignableFrom(buttonEventClass));
+            if (actionId != null) {
+
+                event.getClickedButton().grab("actionId", String.class).ifPresentOrElse((id) -> {
+                    System.out.println("Action id is present: " + id + " " + (actionId.contentEquals(id)));
+                }, () -> System.out.println("action not present"));
+
+            }
+        }
 
         if (!buttonEventClass.isAssignableFrom(event.getClass()))
             return false;

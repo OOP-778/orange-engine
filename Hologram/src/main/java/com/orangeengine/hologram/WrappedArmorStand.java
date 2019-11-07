@@ -27,11 +27,12 @@ public class WrappedArmorStand {
     public HoloLine owner;
 
     public WrappedArmorStand(HoloLine owner, Location location) {
+        this.owner = owner;
         this.entityArmorStand = createArmorStand(location);
         this.location = new OPair<>(location, false);
         this.id = invoke(GET_ID, entityArmorStand);
 
-        //Set defaults
+        // Set defaults
         invoke(SET_GRAVITY_METHOD, entityArmorStand, false);
         invoke(SET_MARKER_METHOD, entityArmorStand, true);
         invoke(SET_SMALL_METHOD, entityArmorStand, true);

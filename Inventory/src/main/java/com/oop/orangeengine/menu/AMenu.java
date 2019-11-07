@@ -36,7 +36,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     private int size;
 
     @Getter
-    private String title;
+    private String title = "Unnamed Menu %currentPage%";
 
     @Getter
     @Setter
@@ -118,6 +118,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
 
     public void addChild(AMenu menu) {
         children.add(menu);
+        menu.parent(this);
     }
 
     public boolean isSlotEmpty(int slot) {
@@ -167,7 +168,5 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     protected abstract void build();
 
     public abstract WrappedInventory getWrapperFromBukkit(Inventory inventory);
-
-    protected abstract Inventory provideNewInv();
 
 }

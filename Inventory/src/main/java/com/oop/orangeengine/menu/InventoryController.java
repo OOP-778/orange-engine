@@ -39,17 +39,12 @@ public class InventoryController extends AEngineComponent {
     public InventoryController() {
         SyncEvents.listen(InventoryClickEvent.class, EventPriority.LOWEST, event -> {
 
-            Helper.print("Log 0");
             if (event.isCancelled()) return;
-            Helper.print("Log 1");
             if (event.getSlot() < 0) return;
-            Helper.print("Log 1");
             if (event.getWhoClicked().getOpenInventory().getTopInventory() == null) return;
-            Helper.print("Log 1");
-            if (!(event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof AMenu)) return;
+            if (!(event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory)) return;
 
-            Helper.print("Log 2");
-            if (event.getWhoClicked().getOpenInventory().getTopInventory() != null && event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof AMenu) {
+            if (event.getWhoClicked().getOpenInventory().getTopInventory() != null && event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory) {
                 if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
 
                     event.setResult(Event.Result.DENY);
@@ -74,11 +69,11 @@ public class InventoryController extends AEngineComponent {
                     event.setCancelled(true);
             }
 
-            if (!(event.getClickedInventory().getHolder() instanceof AMenu)) return;
+            if (!(event.getClickedInventory().getHolder() instanceof WrappedInventory)) return;
 
             event.setCancelled(true);
-            AMenu menu = (AMenu) event.getClickedInventory().getHolder();
-            WrappedInventory wrappedInventory = menu.getWrapperFromBukkit(event.getClickedInventory());
+            WrappedInventory wrappedInventory = (WrappedInventory) event.getClickedInventory().getHolder();
+            AMenu menu = wrappedInventory.getOwner();
 
             AMenuButton button = wrappedInventory.getButtonAt(event.getSlot());
             if (button.currentItem().getType() == Material.AIR && !(button instanceof FillableButton)) return;
@@ -130,7 +125,6 @@ public class InventoryController extends AEngineComponent {
                     .filter(props -> props.accepts(buttonClickEvent))
                     .forEach(props -> props.buttonAction().onAction(buttonClickEvent));
 
-            System.out.println(button.clickListeners().size() + " Listeners");
             button.clickListeners().stream().filter(listener -> listener.accepts(buttonClickEvent)).forEach(listener -> listener.consumer().accept(buttonClickEvent));
 
             if (button.sound() != null)
@@ -138,18 +132,20 @@ public class InventoryController extends AEngineComponent {
         });
 
         SyncEvents.listen(InventoryCloseEvent.class, EventPriority.LOWEST, event -> {
-            if (!(event.getInventory().getHolder() instanceof AMenu)) return;
+            if (!(event.getInventory().getHolder() instanceof WrappedInventory)) return;
 
-            AMenu menu = (AMenu) event.getInventory().getHolder();
+            WrappedInventory wrappedInventory = (WrappedInventory) event.getInventory().getHolder();
+            AMenu menu = wrappedInventory.getOwner();
             if (menu.closeEventHandler() != null)
                 menu.closeEventHandler().accept(new MenuCloseEvent(menu, event));
 
         });
 
         SyncEvents.listen(InventoryOpenEvent.class, EventPriority.LOWEST, event -> {
-            if (!(event.getInventory().getHolder() instanceof AMenu)) return;
+            if (!(event.getInventory().getHolder() instanceof WrappedInventory)) return;
 
-            AMenu menu = (AMenu) event.getInventory().getHolder();
+            WrappedInventory wrappedInventory = (WrappedInventory) event.getInventory().getHolder();
+            AMenu menu = wrappedInventory.getOwner();
             if (menu.openEventHandler() != null)
                 menu.openEventHandler().accept(new MenuOpenEvent(menu, event));
 

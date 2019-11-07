@@ -1,21 +1,23 @@
 package com.oop.orangeengine.main.plugin;
 
+import com.oop.orangeengine.main.task.ITaskController;
+import com.oop.orangeengine.main.util.DisablePriority;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.logger.OLogger;
-import com.oop.orangeengine.main.task.TaskController;
+import com.oop.orangeengine.main.task.SpigotTaskController;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public abstract class EnginePlugin extends JavaPlugin {
 
-    private List<Runnable> runOnDisable = new LinkedList<>();
+    private Map<DisablePriority, Runnable> onDisableRun = new HashMap<>();
     private Engine engine;
     private OLogger oLogger;
-    private TaskController taskController;
 
     @Override
     public void onEnable() {
@@ -23,7 +25,6 @@ public abstract class EnginePlugin extends JavaPlugin {
         //Init Defaults
         engine = new Engine(this);
         oLogger = engine.getLogger();
-        taskController = engine.getTaskController();
 
         //Init data folder
         if(!getDataFolder().exists())
@@ -37,14 +38,31 @@ public abstract class EnginePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         disable();
-        runOnDisable.forEach(Runnable::run);
+
+        // Disable tasks
+        onDisableRun.entrySet().stream()
+                .sorted(Comparator.comparing(t -> t.getKey().getOrder()))
+                .forEach(ds -> {
+                    System.out.println("Disable order: " + ds.getKey().getOrder());
+                    ds.getValue().run();
+                });
+
     }
 
     public void onDisable(Runnable runnable) {
-        this.runOnDisable.add(runnable);
+        this.onDisableRun.put(DisablePriority.MIDDLE, runnable);
+    }
+
+    public void onDisable(Runnable runnable, DisablePriority priority) {
+        this.onDisableRun.put(priority, runnable);
+    }
+
+    public ITaskController getTaskController() {
+        return getEngine().getTaskController();
     }
 
     public abstract void enable();
     public void disable() {}
 
+    public abstract ITaskController provideTaskController();
 }

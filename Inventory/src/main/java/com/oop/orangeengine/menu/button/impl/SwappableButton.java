@@ -20,7 +20,13 @@ public class SwappableButton extends AMenuButton {
         super(item, slot);
     }
 
+    public SwappableButton(ItemStack item) {
+        super(item, -1);
+    }
+
     public void swap() {
+        if (toSwap == null) return;
+
         ItemStack swapWith = currentItem().clone();
         ButtonItemSwapEvent swapEvent = new ButtonItemSwapEvent(toSwap, swapWith);
         Bukkit.getPluginManager().callEvent(swapEvent);

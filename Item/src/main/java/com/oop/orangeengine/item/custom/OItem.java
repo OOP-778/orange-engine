@@ -8,7 +8,6 @@ import com.oop.orangeengine.yaml.mapper.section.ConfigurationSerializable;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class OItem extends ItemBuilder implements ConfigurationSerializable<OItem> {
+public class OItem extends ItemBuilder implements ConfigurationSerializable<OItem>, Cloneable {
 
     public OItem() {
         super(Material.AIR, 1);
@@ -60,16 +59,16 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
 
         //Load glow
         section.ifValuePresent("glow", boolean.class, bool -> {
-            if(bool)
+            if (bool)
                 makeGlow();
         });
 
         //Load Enchants
         section.ifValuePresent("enchants", List.class, list -> asListString(list, stringList -> {
-            for(String enchant : stringList) {
+            for (String enchant : stringList) {
 
                 String[] split = enchant.split(":");
-                if(split.length <= 1) continue;
+                if (split.length <= 1) continue;
 
                 addEnchant(Enchantment.getByName(split[0].toUpperCase()), Integer.parseInt(split[1]));
 
@@ -110,7 +109,6 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
                             .collect(Collectors.toList())
             );
 
-
     }
 
     @Override
@@ -122,4 +120,13 @@ public class OItem extends ItemBuilder implements ConfigurationSerializable<OIte
         consumer.accept(list);
     }
 
+    @Override
+    public OItem clone() {
+        try {
+            return (OItem) super.clone();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 }

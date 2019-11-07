@@ -2,7 +2,6 @@ package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
-import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
@@ -20,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CommandController {
 
@@ -183,8 +181,9 @@ public class CommandController {
         else {
 
             String[] argsCopy = args.clone();
-            for (CommandArgument arg : command.getArgumentMap().values()) {
+            List<CommandArgument> commandArguments = new ArrayList<>(command.getArgumentMap().values());
 
+            for (CommandArgument arg : commandArguments) {
                 if (argsCopy.length == 0) {
 
                     if (!arg.isRequired()) continue;
@@ -205,10 +204,22 @@ public class CommandController {
 
                     } else {
 
-                        arguments.put(arg.getIdentifier(), value.getFirst());
+                        arguments.put(arg.getIdentity(), value.getFirst());
                         argsCopy = cutArray(argsCopy, 1);
 
                     }
+                }
+
+                if (arg.isGrabAllNextArgs()){
+                    String current = (String) arguments.get(arg.getIdentity());
+                    for (String nextArg : argsCopy) {
+                        current += " " + nextArg;
+                    }
+
+                    arguments.remove(arg.getIdentity());
+                    arguments.put(arg.getIdentity(), current);
+
+                    break;
                 }
 
             }
@@ -216,8 +227,6 @@ public class CommandController {
             execCommand(new WrappedCommand(sender, arguments), command);
 
         }
-
-
     }
 
     private void handleProperUsage(OCommand command, CommandSender sender) {
@@ -314,7 +323,6 @@ public class CommandController {
                 message.appendLine(line);
 
             }
-            message.appendLine(" ");
             if (sender instanceof Player)
                 message.send(((Player) sender));
 
@@ -361,12 +369,10 @@ public class CommandController {
         //Format = <required> [optional]
         if (args.stream().anyMatch(CommandArgument::isRequired)) {
 
-
-            line.append(colorScheme.getMainColor()).append(" ");
             args.stream().filter(CommandArgument::isRequired).forEach(arg -> {
 
-                line.append("<");
-                LineContent content = new LineContent("&f" + arg.getIdentifier()).
+                line.append(" <");
+                LineContent content = new LineContent("&f" + arg.getIdentity()).
                         hoverText(colorScheme.getMainColor() + arg.getDescription());
                 line.append(content);
                 line.append(colorScheme.getMainColor() + ">");
@@ -382,7 +388,7 @@ public class CommandController {
             args.stream().filter(a -> !a.isRequired()).forEach(arg -> {
 
                 line.append("[");
-                LineContent content = new LineContent("&f" + arg.getIdentifier()).
+                LineContent content = new LineContent("&f" + arg.getIdentity()).
                         hoverText(colorScheme.getSecondColor() + arg.getDescription());
                 line.append(content);
                 line.append(colorScheme.getSecondColor() + "]");
