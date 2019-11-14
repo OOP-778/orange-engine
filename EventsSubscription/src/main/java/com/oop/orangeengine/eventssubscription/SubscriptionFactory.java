@@ -34,9 +34,16 @@ public class SubscriptionFactory extends AEngineComponent {
         SubscribedEvent<T> subscribedEvent = new SubscribedEvent<>(props);
         SubEvent event = SubEvent.listen(type, props.priority(), subscribedEvent::tryHandling, Engine.getInstance().getOwning());
 
-        subscribedEvent.setSubEvent(event);
-        subscribedEvent.setListener(listener);
+        subscribedEvent.subEvent(event);
+        subscribedEvent.listener(listener);
         subscribedEvent.executeTask();
+
+        return subscribedEvent;
+    }
+
+    public <T extends Event> SubscribedEvent<T> subscribeTo(SubscribedEvent<T> subscribedEvent) {
+        SubEvent event = SubEvent.listen(subscribedEvent.type(), subscribedEvent.props().priority(), subscribedEvent::tryHandling, Engine.getInstance().getOwning());
+        subscribedEvent.subEvent(event);
 
         return subscribedEvent;
     }

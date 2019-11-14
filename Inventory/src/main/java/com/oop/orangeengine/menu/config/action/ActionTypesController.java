@@ -30,24 +30,21 @@ public class ActionTypesController {
                     });
         });
 
-        actionTypes.put("execute action", actionId -> {
+        actionTypes.put("execute action", actionId -> event -> {
             OptionalConsumer<ActionProperties> properties = OptionalConsumer.of(ActionListenerController.getInstance().getActionPropertiesOSet().stream()
                     .filter(action -> action.actionId() != null && action.actionId().contentEquals(actionId))
                     .findFirst()
                     .orElse(null));
 
-            return event -> {
+            if (!properties.isPresent()) {
+                event.getPlayer().sendMessage(Helper.color("&cError happened! Contact administration!"));
+                getEngine().getLogger().printError("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
 
-                if (!properties.isPresent()) {
-                    event.getPlayer().sendMessage(Helper.color("&cError happened! Contact administration!"));
-                    getEngine().getLogger().printError("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
-
-                } else {
-                    ActionProperties<ButtonEvent> props = properties.get();
-                    if (props.buttonEventClass().isAssignableFrom(event.getClass()))
-                        props.buttonAction().onAction(event);
-                }
-            };
+            } else {
+                ActionProperties<ButtonEvent> props = properties.get();
+                if (props.buttonEventClass().isAssignableFrom(event.getClass()))
+                    props.buttonAction().onAction(event);
+            }
         });
     }
 

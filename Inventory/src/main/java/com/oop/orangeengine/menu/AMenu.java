@@ -169,4 +169,12 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
 
     public abstract WrappedInventory getWrapperFromBukkit(Inventory inventory);
 
+    public List<AMenu> getAllChildren() {
+        List<AMenu> allChildren = new ArrayList<>();
+        children.forEach(children -> {
+            allChildren.add(children);
+            allChildren.addAll(children.getAllChildren());
+        });
+        return allChildren;
+    }
 }

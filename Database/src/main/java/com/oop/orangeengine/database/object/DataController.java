@@ -4,12 +4,14 @@ import com.google.common.collect.HashBiMap;
 import com.oop.orangeengine.database.ODatabase;
 import com.oop.orangeengine.database.annotations.DatabaseTable;
 import com.oop.orangeengine.database.annotations.DatabaseValue;
+import com.oop.orangeengine.main.task.StaticTask;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.DataModificationHandler;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import lombok.Getter;
 
+import javax.xml.stream.events.StartDocument;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -74,11 +76,20 @@ public abstract class DataController {
         classToTable.put(table.tableName(), klass);
     }
 
+    public void save(DatabaseObject object, boolean async) {
+        if (async)
+            StaticTask.getInstance().async(() -> save(object));
+
+        else
+            StaticTask.getInstance().sync(() -> save(object));
+    }
+
     public void save(DatabaseObject object) {
         save(new HashSet<DatabaseObject>() {{
             add(object);
         }});
     }
+
 
     public void saveAll() {
         save(data);

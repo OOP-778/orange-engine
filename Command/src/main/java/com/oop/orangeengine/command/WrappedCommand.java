@@ -3,6 +3,7 @@ package com.oop.orangeengine.command;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,9 @@ public class WrappedCommand {
         this.arguments = arguments;
     }
 
+    public Player getSenderAsPlayer() {
+        return (Player) sender;
+    }
 
     public OptionalConsumer<Object> getArg(String arg) {
         return OptionalConsumer.of(Optional.ofNullable(arguments.get(arg)));

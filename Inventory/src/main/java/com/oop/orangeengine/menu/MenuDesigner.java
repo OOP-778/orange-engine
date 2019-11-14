@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu;
 
+import com.google.common.collect.Sets;
 import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
@@ -7,10 +8,11 @@ import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
 
-public class MenuDesigner {
+public class MenuDesigner implements Cloneable {
     private char[][] layout;
     private Map<Character, AMenuButton> buttonMap = new HashMap<>();
 
@@ -65,5 +67,27 @@ public class MenuDesigner {
                 realSlot++;
             }
         }
+    }
+
+    public Set<AMenuButton> getButtons() {
+        return Sets.newHashSet(buttonMap.values());
+    }
+
+    @Override
+    public MenuDesigner clone() {
+        MenuDesigner menuDesigner = null;
+        try {
+            menuDesigner = (MenuDesigner) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        assert menuDesigner != null;
+
+        menuDesigner.buttonMap = new HashMap<>();
+        MenuDesigner finalMenuDesigner = menuDesigner;
+
+        buttonMap.forEach((key, button) -> finalMenuDesigner.buttonMap.put(key, button.clone()));
+
+        return menuDesigner;
     }
 }

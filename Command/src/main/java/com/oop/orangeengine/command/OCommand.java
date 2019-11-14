@@ -21,7 +21,7 @@ public class OCommand {
     private String label;
 
     //The description of the command
-    private String description = "";
+    private String description = "None";
 
     //If command will be shown when list of commands are shown / on tab complete
     private boolean secret = false;

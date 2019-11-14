@@ -225,7 +225,6 @@ public class CommandController {
             }
 
             execCommand(new WrappedCommand(sender, arguments), command);
-
         }
     }
 
@@ -237,9 +236,9 @@ public class CommandController {
             MessageLine line = new MessageLine();
             String allParents = command.getLabelWithParents();
 
-            line.append(colorScheme.getMainColor() + "Usage: /" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
+            line.append(colorScheme.getMainColor() + "Usage: /");
 
-            LineContent labelContent = new LineContent(colorScheme.getMainColor() + command.getLabel());
+            LineContent labelContent = new LineContent(reverseLabel(allParents.substring(0, allParents.length() - 1)));
             if (!command.getDescription().equalsIgnoreCase("none"))
                 labelContent.hoverText(colorScheme.getMainColor() + command.getDescription());
             line.append(labelContent);
@@ -287,12 +286,12 @@ public class CommandController {
 
                 String allParents = command.getLabelWithParents();
                 LineContent labelContent = new LineContent(colorScheme.getMainColor() + "/" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
-                if (!command.getDescription().equalsIgnoreCase(""))
+                if (!command.getDescription().equalsIgnoreCase("None"))
                     labelContent.hoverText(colorScheme.getMainColor() + command.getDescription());
                 line.append(labelContent);
 
                 buildArgs(command.getArgumentMap().values(), line);
-                if (!command.getDescription().equalsIgnoreCase(""))
+                if (!command.getDescription().equalsIgnoreCase("None"))
                     line.append(colorScheme.getMainColor() + " - " + command.getDescription());
 
                 message.appendLine(line);
@@ -312,12 +311,12 @@ public class CommandController {
                 line.append(colorScheme.getMainColor() + "/" + reverseLabel(command.getLabelWithParents()));
 
                 LineContent labelContent = new LineContent(colorScheme.getMainColor() + subCommand.getLabel());
-                if (!subCommand.getDescription().equalsIgnoreCase(""))
+                if (!subCommand.getDescription().equalsIgnoreCase("None"))
                     labelContent.hoverText(colorScheme.getMainColor() + subCommand.getDescription());
                 line.append(labelContent);
 
                 buildArgs(subCommand.getArgumentMap().values(), line);
-                if (!subCommand.getDescription().equalsIgnoreCase(""))
+                if (!subCommand.getDescription().equalsIgnoreCase("None"))
                     line.append(colorScheme.getMainColor() + " - " + subCommand.getDescription());
 
                 message.appendLine(line);

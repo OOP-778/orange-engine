@@ -2,6 +2,7 @@ package com.oop.orangeengine.menu.button;
 
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.main.storage.Storegable;
+import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.map.OMap;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.menu.WrappedInventory;
@@ -17,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -134,6 +136,7 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
 
         aMenuButton.holder = null;
         aMenuButton.currentItem = currentItem.clone();
+
         return aMenuButton;
     }
 
@@ -157,6 +160,15 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
     public AMenuButton addClickHandler(ClickListener listener) {
         clickListeners.add(listener);
         return this;
+    }
+
+    public AMenuButton saveCurrentItem(String id) {
+        putIfPresentReplace(id, currentItem.clone());
+        return this;
+    }
+
+    public OptionalConsumer<ItemStack> getSavedCopy(String id) {
+        return grab(id);
     }
 
     public static SwappableButton newNextPageButton(ItemStack item) {

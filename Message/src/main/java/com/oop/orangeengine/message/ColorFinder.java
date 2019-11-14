@@ -21,7 +21,6 @@ public class ColorFinder {
         String decoration = "";
 
         for (Character c : charArray) {
-
             if (string(c).equalsIgnoreCase("&")) {
 
                 int index = ArrayUtils.indexOf(charArray, c);
@@ -33,6 +32,7 @@ public class ColorFinder {
 
                     if (chatColor.isColor())
                         color = "&" + secondChar;
+
                     else
                         decoration = "&" + secondChar;
 

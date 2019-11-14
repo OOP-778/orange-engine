@@ -21,7 +21,7 @@ public class ConfigNormalButton extends AConfigButton {
 
     @Override
     public AMenuButton privConstructButton() {
-        return new OButton(item().getItemStack(), -1);
+        return new OButton(item().getItemStack().clone(), -1);
     }
 
     protected void toButton(AMenuButton button) {

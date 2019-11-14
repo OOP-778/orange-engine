@@ -1,20 +1,30 @@
 package com.oop.orangeengine.eventssubscription.subscription;
 
+import com.oop.orangeengine.eventssubscription.SubscriptionFactory;
 import com.oop.orangeengine.eventssubscription.SubscriptionProperties;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.task.OTask;
 import com.oop.orangeengine.main.task.StaticTask;
+import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.bukkit.event.Event;
 
 import java.util.function.Consumer;
 
+@Accessors(chain = true, fluent = true)
+@Getter
 public class SubscribedEvent<T extends Event> extends Storegable {
 
     private OTask task;
     public SubscribedEvent(SubscriptionProperties<T> props) {
         this.props = props;
+    }
+
+    private Class<T> type;
+    public SubscribedEvent(Class<T> type){
+        this.type = type;
     }
 
     @Setter
@@ -23,6 +33,7 @@ public class SubscribedEvent<T extends Event> extends Storegable {
     @Setter
     private Consumer<T> listener;
 
+    @Setter
     private SubscriptionProperties<T> props;
     private int timesRan = 0;
 
@@ -65,6 +76,10 @@ public class SubscribedEvent<T extends Event> extends Storegable {
             Engine.getInstance().getLogger().error(ex);
         }
 
+    }
+
+    public void subscribe() {
+        SubscriptionFactory.getInstance().subscribeTo(this);
     }
 
 }

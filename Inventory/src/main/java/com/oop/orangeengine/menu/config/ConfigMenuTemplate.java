@@ -1,5 +1,6 @@
 package com.oop.orangeengine.menu.config;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.MenuDesigner;
 import com.oop.orangeengine.menu.button.AMenuButton;
@@ -33,7 +34,7 @@ public class ConfigMenuTemplate {
         this.menuIdentifier = configuration.getKey();
 
         // Set menu type
-        assert configuration.hasValue("type");
+        Helper.assertTrue(configuration.hasValue("type"), "Failed to find menu type in " + configuration.getKey());
         menuType = MenuType.valueOf(configuration.getValueAsReq("type").toString().toUpperCase());
 
         // Set title if found
@@ -86,9 +87,9 @@ public class ConfigMenuTemplate {
 
     private AMenu getMenu() {
         if (menuType == MenuType.BASIC)
-            return new BasicMenu(menuIdentifier, designer.getSize()).designer(designer);
+            return new BasicMenu(menuIdentifier, designer.getSize()).designer(designer.clone());
 
         else
-            return new PagedMenu(menuIdentifier, designer.getSize()).designer(designer);
+            return new PagedMenu(menuIdentifier, designer.getSize()).designer(designer.clone());
     }
 }

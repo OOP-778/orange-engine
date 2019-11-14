@@ -6,13 +6,15 @@ import java.io.File;
 
 public class Runner {
     public static void main(String[] args) {
-        File dab = new File("dab");
-        if (!dab.exists())
-            dab.mkdirs();
 
-        System.out.println(dab.getPath());
-        ODatabase database = new SqlLiteDatabase(dab, "data");
-        Controller controller = new Controller(database);
+        String testing = "awhawhawh awhawhawh awhawhwaa";
+        String[] split = testing.split(" ");
+
+        StringBuffer buffer = new StringBuffer();
+        for (String spaced : split)
+            buffer.append(spaced).append(" ");
+
+        System.out.println(buffer);
     }
 
     public static class Controller extends DataController {

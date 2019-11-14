@@ -1,11 +1,16 @@
 package com.oop.orangeengine.database.data;
 
+import com.oop.orangeengine.item.ItemStackUtil;
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.util.OSimpleReflection;
+import org.bukkit.inventory.ItemStack;
 import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class DataHandlerController {
 
@@ -48,6 +53,26 @@ public class DataHandlerController {
                 return object.toString();
             }
         });
+
+        try {
+            dataHandlerMap.put(ItemStack.class, new IDataHandler() {
+                @Override
+                public Object load(String serialized) {
+                    return ItemStackUtil.itemStackFromJson(serialized);
+                }
+
+                @Override
+                public String serialize(Object object) {
+                    try {
+                        return ItemStackUtil.itemStackToJson((ItemStack) object);
+                    } catch (Exception e) {
+                        getEngine().getLogger().error(e);
+                    }
+                    return null;
+                }
+            });
+
+        } catch (Exception ignored) {}
     }
 
     public static DataHandlerController getInstance() {

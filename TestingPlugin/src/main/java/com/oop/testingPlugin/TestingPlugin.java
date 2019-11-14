@@ -2,6 +2,7 @@ package com.oop.testingPlugin;
 
 import com.oop.orangeengine.command.CommandController;
 import com.oop.orangeengine.command.OCommand;
+import com.oop.orangeengine.command.arg.arguments.StringArg;
 import com.oop.orangeengine.file.OFile;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.main.Helper;
@@ -22,7 +23,9 @@ import com.oop.orangeengine.menu.config.action.ActionTypesController;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.ButtonFillEvent;
 import com.oop.orangeengine.menu.types.PagedMenu;
+import com.oop.orangeengine.message.line.MessageLine;
 import com.oop.orangeengine.yaml.OConfiguration;
+import org.apache.logging.log4j.message.Message;
 import org.bukkit.entity.Player;
 
 import javax.swing.*;
@@ -77,14 +80,17 @@ public class TestingPlugin extends EnginePlugin {
 
         CommandController cmdController = new CommandController(this);
         cmdController.register(
-                new OCommand().
-                        label("testingMenu")
-                        .ableToExecute(Player.class)
-                        .onCommand(cmd -> {
-                            menu.getWrappedInventory().open((Player) cmd.getSender());
-                        })
-        );
+                new OCommand()
+                .label("testingCommand")
+                .onCommand(command -> {
+                    MessageLine line = new MessageLine();
+                    line.append("&e");
+                    line.append("Awgawgawgawgawgawg ");
 
+                    line.append("&bwgagw&ewahwah&aabwaba");
+                    line.send(command.getSenderAsPlayer());
+                })
+        );
     }
 
     @Override

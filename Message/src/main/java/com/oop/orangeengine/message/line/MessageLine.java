@@ -3,6 +3,9 @@ package com.oop.orangeengine.message.line;
 import com.google.common.primitives.Chars;
 import com.oop.orangeengine.message.Centered;
 import com.oop.orangeengine.message.ColorFinder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -12,11 +15,17 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
+@Getter
+@Setter
+@Accessors(chain = true, fluent = true)
 public class MessageLine {
 
     private LinkedList<LineContent> contentList = new LinkedList<>();
-    private boolean centered = false;
+    private boolean center = false;
     private boolean autoSpaces = false;
+    private boolean cache = false;
+
+    private TextComponent cached;
 
     public MessageLine insert(LineContent lineContent, LineContent at, InsertMethod method) {
 
@@ -57,9 +66,14 @@ public class MessageLine {
 
     public void send(Player player, Map<String, String> placeholders) {
 
-        String appendEnd = "", appendStart = "";
+        if (placeholders.isEmpty() && cached != null) {
+            contentList.forEach(cl -> cl.triggerSend(player));
+            player.spigot().sendMessage(cached);
+            return;
+        }
 
-        if (centered) {
+        String appendEnd = "", appendStart = "";
+        if (center) {
 
             //Okay so we need to gather setSpaces
             StringBuilder builder = new StringBuilder();
@@ -123,23 +137,33 @@ public class MessageLine {
             if (lastColorL != null)
                 buffer.append(lastColorL.color()).append(lastColorL.decoration());
 
-            if (clonedLC.getText().trim().length() == 0)
+            if (clonedLC.getText().trim().length() == 0) {
                 buffer.append(" ");
+                continue;
 
-            else if (clonedLC.getText().contains(" "))
+            } else if (clonedLC.getText().contains(" "))
                 checkThrough.addAll(Arrays.asList(clonedLC.getText().split(" ")));
 
             else {
-
                 lastColorL = ColorFinder.find(clonedLC.getText());
                 buffer.append(clonedLC.getText());
 
             }
 
+            if (checkThrough.size() == 1) {
+                if (clonedLC.getText().startsWith(" "))
+                    buffer.append(" ").append(checkThrough.get(0));
+
+                else if (clonedLC.getText().endsWith(" "))
+                    buffer.append(checkThrough.get(0)).append(" ");
+
+                clonedLC.text(buffer.toString());
+                base.addExtra(clonedLC.create());
+                continue;
+            }
+
             for (String spacedString : checkThrough) {
-
                 if (lastColorL == null) {
-
                     lastColorL = ColorFinder.find(spacedString);
                     buffer.append(spacedString).append(" ");
 
@@ -149,7 +173,6 @@ public class MessageLine {
                     StringBuilder spacedBuffer = new StringBuilder(lastColorL.color() + lastColorL.decoration());
 
                     for (char character : spacedString.toCharArray()) {
-
                         if (!spacedBuffer.toString().contains(lastColorL.color() + lastColorL.decoration()))
                             spacedBuffer.append(lastColorL.color()).append(lastColorL.decoration()).append(character);
 
@@ -158,7 +181,7 @@ public class MessageLine {
 
                     }
 
-                    if (colorFinder.color().contentEquals(""))
+                    if (!colorFinder.color().contentEquals(""))
                         lastColorL = colorFinder;
 
                     if (checkThrough.indexOf(spacedString) > 0)
@@ -179,28 +202,17 @@ public class MessageLine {
 
         }
 
-
         base.addExtra(new TextComponent(appendEnd));
+        this.cached = base;
 
         //Finish off by sending
         contentList.forEach(cl -> cl.triggerSend(player));
         player.spigot().sendMessage(base);
 
+        if (cache)
+            cached = base;
     }
 
-    public MessageLine center(boolean center) {
-        this.centered = center;
-        return this;
-    }
-
-    public MessageLine autoSpaces(boolean autoSpaces) {
-        this.autoSpaces = autoSpaces;
-        return this;
-    }
-
-    public List<LineContent> contentList() {
-        return contentList;
-    }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
