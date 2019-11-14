@@ -35,7 +35,7 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         return this;
     }
 
-    Map<String, AConfigurationValue> getValues() {
+    public Map<String, AConfigurationValue> getValues() {
         return values;
     }
 

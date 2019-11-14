@@ -11,7 +11,6 @@ import java.util.*;
 public class YamlMessage {
 
     public static void saveToConfig(OMessage message, OConfiguration configuration, String path) {
-
         if (message.getLineList().size() <= 1) {
 
             //We got one line
@@ -39,7 +38,6 @@ public class YamlMessage {
                     index++;
 
                 }
-
             }
 
         } else {

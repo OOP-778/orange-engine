@@ -16,9 +16,15 @@ public class ClassicTaskController implements ITaskController {
     private EnginePlugin plugin;
 
     public ClassicTaskController(EnginePlugin plugin) {
+        this.plugin = plugin;
         plugin.onDisable(() -> {
-            asyncTasks.forEach(OTask::cancel);
-            executor.shutdownNow();
+            asyncTasks.clear();
+            try {
+                executor.shutdown();
+                executor.awaitTermination(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         }, DisablePriority.LAST);
         ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(1, runnable -> new Thread(runnable, "OrangeEngine-Executor-" + ThreadLocalRandom.current().nextInt(100)));
