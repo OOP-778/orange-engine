@@ -19,5 +19,9 @@ shadowJar {
     relocate("com.oop.orangeengine", "com.oop.testingPlugin.engine")
     archiveName = "OrangeEngine-TestingPlugin.jar"
 
-    destinationDirectory = file('/run/media/brian/BRABARAR/Serrvers/OOP/1.12.2/plugins/')
+    if (!project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword'))
+        destinationDirectory = file('/run/media/brian/BRABARAR/Serrvers/OOP/1.12.2/plugins/')
+
+    else
+        destinationDirectory = file('/target')
 }

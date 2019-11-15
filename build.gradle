@@ -69,7 +69,6 @@ allprojects {
     publish.shouldRunAfter shadowJar
 
     shadowJar {
-
         relocate("org.nustaq", "com.oop.orangeengine.libs.nustaq")
 
         archiveName = "OrangeEngine-${project.name}.jar"
