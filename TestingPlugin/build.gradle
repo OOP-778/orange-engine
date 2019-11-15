@@ -23,5 +23,5 @@ shadowJar {
         destinationDirectory = file('/run/media/brian/BRABARAR/Serrvers/OOP/1.12.2/plugins/')
 
     else
-        destinationDirectory = file('/target')
+        destinationDirectory = file('../target')
 }
