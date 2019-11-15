@@ -49,7 +49,6 @@ public class YamlMessage {
 
             int currentLine = 1;
             for (MessageLine line : message.getLineList()) {
-
                 ConfigurationSection lineSection = linesSection.createNewSection(currentLine + "");
 
                 if (line.contentList().size() == 1) {
@@ -73,7 +72,6 @@ public class YamlMessage {
                     }
                 }
                 currentLine++;
-
             }
         }
 

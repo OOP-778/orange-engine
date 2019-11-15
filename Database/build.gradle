@@ -13,6 +13,6 @@ repositories {
 
 dependencies {
     compile 'mysql:mysql-connector-java:8.0.17'
-    compile 'org.xerial:sqlite-jdbc:3.28.0'
+    compileOnly 'org.xerial:sqlite-jdbc:3.28.0'
     compileOnly project(":Item")
 }

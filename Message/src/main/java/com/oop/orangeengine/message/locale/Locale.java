@@ -26,7 +26,7 @@ public class Locale {
         section = configuration.createNewSection(locale);
 
         // Load from values
-        section.getValues().forEach((key, value) -> localeMap.put(key.toUpperCase(), YamlMessage.fromValue(value.getValueAsReq())));
+        section.getValues().forEach((key, value) -> localeMap.put(key, YamlMessage.fromValue(value.getValueAsReq())));
 
         // Load from sections
         section.getSections().forEach((key, localeSection) -> localeMap.put(localeSection.getKey(), YamlMessage.fromSection(localeSection)));
@@ -41,14 +41,14 @@ public class Locale {
     }
 
     public OMessage getMessage(String id, Supplier<OMessage> ifNotFound) {
+        id = id.toLowerCase().replace("_", " ");
         OMessage message = localeMap.get(id);
         if (message == null) {
             message = ifNotFound.get();
-            YamlMessage.saveToConfig(message, configuration, section.getKey() + "." + id.toLowerCase().replace("_", " "));
+            YamlMessage.saveToConfig(message, configuration, section.getKey() + "." + id);
             configuration.save();
         }
 
         return message;
     }
-
 }
