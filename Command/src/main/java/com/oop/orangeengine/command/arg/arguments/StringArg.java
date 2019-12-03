@@ -8,7 +8,7 @@ public class StringArg extends CommandArgument<String> {
     public StringArg() {
         setDescription("A text");
         setIdentity("text");
-        setMapper(text -> new OPair<>(text, null));
+        setMapper(text -> new OPair<String, String>(text, null));
     }
 
 }
