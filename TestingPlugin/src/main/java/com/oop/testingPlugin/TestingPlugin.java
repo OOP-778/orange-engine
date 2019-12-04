@@ -1,96 +1,45 @@
 package com.oop.testingPlugin;
 
-import com.oop.orangeengine.command.CommandController;
-import com.oop.orangeengine.command.OCommand;
-import com.oop.orangeengine.command.arg.arguments.StringArg;
-import com.oop.orangeengine.file.OFile;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.oop.orangeengine.item.custom.OItem;
-import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.ClassicTaskController;
 import com.oop.orangeengine.main.task.ITaskController;
-import com.oop.orangeengine.material.OMaterial;
-import com.oop.orangeengine.menu.AMenu;
-import com.oop.orangeengine.menu.MenuDesigner;
-import com.oop.orangeengine.menu.WrappedInventory;
-import com.oop.orangeengine.menu.button.ClickListener;
-import com.oop.orangeengine.menu.button.impl.OButton;
-import com.oop.orangeengine.menu.button.impl.SwappableButton;
-import com.oop.orangeengine.menu.config.ConfigMenuTemplate;
-import com.oop.orangeengine.menu.config.action.ActionListenerController;
-import com.oop.orangeengine.menu.config.action.ActionProperties;
-import com.oop.orangeengine.menu.config.action.ActionTypesController;
-import com.oop.orangeengine.menu.events.ButtonClickEvent;
-import com.oop.orangeengine.menu.events.ButtonFillEvent;
-import com.oop.orangeengine.menu.types.PagedMenu;
-import com.oop.orangeengine.message.line.MessageLine;
-import com.oop.orangeengine.yaml.OConfiguration;
-import org.apache.logging.log4j.message.Message;
-import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.jar.JarFile;
-import java.util.zip.ZipFile;
+import java.time.Duration;
+import java.time.Instant;
 
 public class TestingPlugin extends EnginePlugin {
 
     @Override
     public void enable() {
-        OFile file = new OFile(getDataFolder(), "exampleMenu.yml").createIfNotExists(true);
-        OConfiguration configuration = new OConfiguration(file);
+        Gson gson = new GsonBuilder()
+                .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
+                .serializeNulls()
+                .create();
 
-        PagedMenu menu = new PagedMenu("something", 3);
-        MenuDesigner designer = new MenuDesigner(new ArrayList<String>(){{
-            add("YYYYYYYYY");
-            add("XXXXXXXXX");
-            add("YYYLYNYYY");
-        }});
 
-        SwappableButton nextPage = new SwappableButton(
-                new OItem(OMaterial.ARROW)
-                        .setDisplayName("&a&lNext page")
-                        .getItemStack(), -1
-        );
-        nextPage.addClickHandler(new ClickListener<ButtonClickEvent>(ButtonClickEvent.class).consumer(ActionTypesController.getActionTypes().get("execute action").apply("next page")));
-        nextPage.appliedActions().add("next page");
-        nextPage.toSwap(OMaterial.YELLOW_STAINED_GLASS_PANE.parseItem());
+        DabClass dabClass = new DabClass(new OItem(Material.ANVIL).getItemStack());
 
-        SwappableButton lastPage = new SwappableButton(
-                new OItem(OMaterial.ARROW)
-                        .setDisplayName("&bLast page")
-                        .getItemStack(), -1
-        );
-        lastPage.addClickHandler(new ClickListener<ButtonClickEvent>(ButtonClickEvent.class).consumer(ActionTypesController.getActionTypes().get("execute action").apply("last page")));
-        lastPage.appliedActions().add("last page");
-        lastPage.toSwap(OMaterial.YELLOW_STAINED_GLASS_PANE.parseItem());
+        Instant now = Instant.now();
+        print("Starting GSON");
 
-        designer.setButton('N', nextPage);
-        designer.setButton('L', lastPage);
+        String serializedGson = gson.toJson(dabClass);
+        print("Serializing Took: " + Duration.between(now, Instant.now()).toMillis());
+        print(serializedGson);
 
-        designer.setButton('Y', new OButton(
-                new OItem(OMaterial.AIR)
-                .getItemStack()
-                , -1
-        ).actAsFilled(true));
-        menu.designer(designer);
+        now = Instant.now();
+        gson.fromJson(serializedGson, DabClass.class);
+        print("Deserializing Took: " + Duration.between(now, Instant.now()).toMillis());
 
-        for (int i = 0; i < 100; i++)
-            menu.addButton(new OButton(new OItem(OMaterial.ANDESITE).makeUnstackable().getItemStack(), -1).paged(true));
+    }
 
-        CommandController cmdController = new CommandController(this);
-        cmdController.register(
-                new OCommand()
-                .label("testingCommand")
-                .onCommand(command -> {
-                    MessageLine line = new MessageLine();
-                    line.append("&e");
-                    line.append("Awgawgawgawgawgawg ");
-
-                    line.append("&bwgagw&ewahwah&aabwaba");
-                    line.send(command.getSenderAsPlayer());
-                })
-        );
+    void print(Object ob) {
+        Bukkit.getConsoleSender().sendMessage(ob.toString());
     }
 
     @Override

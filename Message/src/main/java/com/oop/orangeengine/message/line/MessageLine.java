@@ -238,7 +238,7 @@ public class MessageLine {
 
         for (int index = length - 1; index > -1; --index) {
             char section = input.charAt(index);
-            if ((section == '&' || section == '§') && index < length - 1) {
+            if ((section == '&' || section == '\u00a7') && index < length -1) {
 
                 char c = input.charAt(index + 1);
                 ChatColor color = ChatColor.getByChar(c);

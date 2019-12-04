@@ -1,32 +1,24 @@
-import com.oop.orangeengine.database.ODatabase;
-import com.oop.orangeengine.database.object.DataController;
-import com.oop.orangeengine.database.types.SqlLiteDatabase;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 
 public class Runner {
     public static void main(String[] args) {
+        System.out.println("== GSON ==");
+        Gson gson = new GsonBuilder().serializeNulls().create();
 
-        String testing = "awhawhawh awhawhawh awhawhwaa";
-        String[] split = testing.split(" ");
+        Instant now = Instant.now();
+        String serializedGson = gson.toJson(new A());
+        System.out.println(serializedGson);
 
-        StringBuffer buffer = new StringBuffer();
-        for (String spaced : split)
-            buffer.append(spaced).append(" ");
+        System.out.println("Serialization Took: " + Duration.between(now, Instant.now()).toMillis());
+        now = Instant.now();
 
-        System.out.println(buffer);
-    }
+        gson.fromJson(serializedGson, A.class);
+        System.out.println("Deserialization Took: " + Duration.between(now, Instant.now()).toMillis());
 
-    public static class Controller extends DataController {
-
-        public Controller(ODatabase database) {
-            super(database);
-
-            registerClass(A.class);
-
-            load();
-            setAutoSave(true);
-        }
     }
 
 }

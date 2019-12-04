@@ -92,7 +92,7 @@ public abstract class DatabaseObject {
                     if (dataHandler == null)
                         throw new IllegalStateException("Failed to load database value (table: " + table.tableName() + ", column: " + cachedColumn.getSecond().columnName() + ", rowID: " + rowId + ") cause IDataHandler is not found for type " + field.getType());
 
-                    Object loadedValue = dataHandler.load(object.toString());
+                    Object loadedValue = dataHandler.load(object.toString(), field.getType());
                     field.set(this, loadedValue);
                     hashCodes.put(cachedColumn.getSecond().columnName(), loadedValue.hashCode());
 
@@ -158,9 +158,7 @@ public abstract class DatabaseObject {
             getAllParents(holder).forEach(klass -> DatabaseObject.initCachedColumns(klass, false));
 
         if (holderValue == null) {
-
             holderValue = new ArrayList<>();
-            cachedColumns.put(holder, Collections.synchronizedList(holderValue));
 
             for (Field field : holder.getDeclaredFields()) {
                 if (Modifier.isTransient(field.getModifiers())) continue;
@@ -172,13 +170,12 @@ public abstract class DatabaseObject {
                 holderValue.add(new OPair<>(field, databaseValue));
 
             }
+            cachedColumns.put(holder, Collections.synchronizedList(holderValue));
 
         }
 
         if (parentValue == null && holder.getSuperclass() != null && holder.getSuperclass() != DatabaseObject.class) {
-
             parentValue = new ArrayList<>();
-            cachedColumns.put(holder.getSuperclass(), Collections.synchronizedList(parentValue));
 
             for (Field field : holder.getSuperclass().getDeclaredFields()) {
                 if (Modifier.isTransient(field.getModifiers())) continue;
@@ -189,6 +186,7 @@ public abstract class DatabaseObject {
                 parentValue.add(new OPair<>(field, databaseValue));
 
             }
+            cachedColumns.put(holder.getSuperclass(), Collections.synchronizedList(parentValue));
         }
 
     }

@@ -1,10 +1,8 @@
 package com.oop.orangeengine.database.data;
 
+import com.google.gson.Gson;
 import com.oop.orangeengine.item.ItemStackUtil;
-import com.oop.orangeengine.main.Engine;
-import com.oop.orangeengine.main.util.OSimpleReflection;
 import org.bukkit.inventory.ItemStack;
-import org.nustaq.serialization.FSTConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,26 +12,27 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class DataHandlerController {
 
-    private static FSTConfiguration fstConfiguration = FSTConfiguration.createJsonConfiguration();
+    private static Gson gson;
     private static DataHandlerController INSTANCE = new DataHandlerController();
 
     private Map<Class, IDataHandler> dataHandlerMap = new HashMap<>();
     private final IDataHandler<Object> defaultHandler = new IDataHandler<Object>() {
         @Override
-        public Object load(String serialized) {
-            return fstConfiguration.asObject(serialized.getBytes());
+        public Object load(String serialized, Class type) {
+            return gson.fromJson(serialized, type);
         }
 
         @Override
         public String serialize(Object object) {
-            return fstConfiguration.asJsonString(object);
+            return gson.toJson(object);
         }
     };
 
     private DataHandlerController() {
+        gson = getEngine().getGson();
         dataHandlerMap.put(UUID.class, new IDataHandler<UUID>() {
             @Override
-            public UUID load(String serialized) {
+            public UUID load(String serialized, Class type) {
                 return UUID.fromString(serialized);
             }
 
@@ -44,7 +43,7 @@ public class DataHandlerController {
         });
         dataHandlerMap.put(Boolean.class, new IDataHandler() {
             @Override
-            public Object load(String serialized) {
+            public Object load(String serialized, Class type) {
                 return Boolean.parseBoolean(serialized);
             }
 
@@ -57,7 +56,7 @@ public class DataHandlerController {
         try {
             dataHandlerMap.put(ItemStack.class, new IDataHandler() {
                 @Override
-                public Object load(String serialized) {
+                public Object load(String serialized, Class type) {
                     return ItemStackUtil.itemStackFromJson(serialized);
                 }
 
@@ -72,7 +71,8 @@ public class DataHandlerController {
                 }
             });
 
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public static DataHandlerController getInstance() {
@@ -85,7 +85,7 @@ public class DataHandlerController {
                 .findFirst()
                 .orElse(null);
 
-        if(correctKey == null)
+        if (correctKey == null)
             return (IDataHandler<T>) defaultHandler;
 
         IDataHandler<T> handler = dataHandlerMap.get(correctKey);

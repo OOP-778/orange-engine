@@ -7,11 +7,8 @@ version 'v1'
 
 sourceCompatibility = 1.8
 
-repositories {
-}
+repositories {}
 
 dependencies {
-    compile "org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT"
-    compile project(":Database")
-    compile project(":Engine")
+    compile 'com.google.code.gson:gson:2.8.6'
 }
