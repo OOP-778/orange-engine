@@ -1,4 +1,4 @@
-package com.orangeengine.hologram;
+package com.oop.orangeengine.hologram;
 
 import com.oop.orangeengine.main.util.Updateable;
 import lombok.Getter;
@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 public class HoloLine implements Viewable, Updateable {

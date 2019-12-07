@@ -70,30 +70,35 @@ public interface AsyncEvents extends Listener, EventExecutor {
     ) {
 
         final AsyncEvents events = ($, event) -> {
-            if (asyncEvent.getClassType().isInstance(event)) {
+            if (asyncEvent.classType().isInstance(event)) {
+                if (asyncEvent.cancelIf() != null && asyncEvent.cancelIf().test(asyncEvent.classType().cast(event)))
+                    return;
 
                 EventData data = new EventData();
-                if (EventData.getDataTypes().containsKey(asyncEvent.getClassType()))
-                    EventData.getDataType(asyncEvent.getClassType()).accept(asyncEvent.getClassType().cast(event), data);
+                if (EventData.getDataTypes().containsKey(asyncEvent.classType()))
+                    EventData.getDataType(asyncEvent.classType()).accept(asyncEvent.classType().cast(event), data);
 
-                if (asyncEvent.getPreAsync() != null)
-                    asyncEvent.getPreAsync().accept(asyncEvent.getClassType().cast(event), data);
+                if (asyncEvent.preAsync() != null)
+                    asyncEvent.preAsync().accept(asyncEvent.classType().cast(event), data);
 
                 async(() -> {
-                    if (asyncEvent.getAsync() != null)
-                        asyncEvent.getAsync().accept(asyncEvent.getClassType().cast(event), data);
+                    if (asyncEvent.cancelIf() != null && asyncEvent.cancelIf().test(asyncEvent.classType().cast(event)))
+                        return;
+
+                    if (asyncEvent.async() != null)
+                        asyncEvent.async().accept(asyncEvent.classType().cast(event), data);
                 });
 
             }
         };
 
-        if (asyncEvent.getEventPriority() != null)
-            Bukkit.getPluginManager().registerEvent(asyncEvent.getClassType(), events, asyncEvent.getEventPriority(), events, Engine.getInstance().getOwning());
+        if (asyncEvent.priority() != null)
+            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning());
+
         else
-            Bukkit.getPluginManager().registerEvent(asyncEvent.getClassType(), events, asyncEvent.getEventPriority(), events, Engine.getInstance().getOwning());
+            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning());
 
         registeredEvents.add(events);
-
         return events;
     }
 

@@ -1,4 +1,4 @@
-package com.orangeengine.hologram;
+package com.oop.orangeengine.hologram;
 
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OSimpleReflection;
@@ -11,7 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static com.orangeengine.hologram.WrappedArmorStand.ReflectionConstant.*;
+import static com.oop.orangeengine.hologram.WrappedArmorStand.ReflectionConstant.*;
 
 public class WrappedArmorStand {
 

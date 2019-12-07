@@ -1,9 +1,10 @@
-package com.orangeengine.hologram;
+package com.oop.orangeengine.hologram.types;
 
+import com.oop.orangeengine.hologram.HoloLine;
+import com.oop.orangeengine.hologram.Viewable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.Updateable;
 
-import javax.swing.text.View;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
