@@ -12,8 +12,8 @@ public class ConfigSwappableButton extends ConfigNormalButton {
     public ConfigSwappableButton(ConfigurationSection section) {
         super(section);
 
-        if (section.hasValue("on swap"))
-            swapItem = new OItem().load(section);
+        if (section.hasChild("on swap"))
+            swapItem = new OItem().load(section.getSection("on swap"));
     }
 
     @Override

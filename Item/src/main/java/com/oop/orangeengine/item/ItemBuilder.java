@@ -132,9 +132,8 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
 
     public ItemBuilder setDisplayName(String displayName) {
         ItemMeta meta = getItemMeta();
-        System.out.println(meta);
-        System.out.println(itemStack.getType());
-        meta.setDisplayName(Helper.color(displayName));
+        if (meta != null)
+            meta.setDisplayName(Helper.color(displayName));
 
         setItemMeta(meta);
         return this;
@@ -142,11 +141,12 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
 
     public ItemBuilder setLore(List<String> lore) {
         ItemMeta meta = getItemMeta();
-        meta.setLore(
-                lore.stream()
-                        .map(Helper::color)
-                        .collect(Collectors.toList())
-        );
+        if (meta != null)
+            meta.setLore(
+                    lore.stream()
+                            .map(Helper::color)
+                            .collect(Collectors.toList())
+            );
 
         setItemMeta(meta);
         return this;
@@ -192,6 +192,9 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
     }
 
     public String getDisplayName() {
+        if (getItemMeta() == null)
+            return "";
+
         return getItemMeta().hasDisplayName() ? getItemMeta().getDisplayName() : "";
     }
 

@@ -6,6 +6,8 @@ import com.oop.orangeengine.menu.config.action.ActionListenerController;
 import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.ButtonEvent;
+import com.oop.orangeengine.menu.events.MenuSwitchEvent;
+import org.bukkit.Bukkit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,9 +22,13 @@ public class ActionTypesController {
 
     static {
         actionTypes.put("open", menuName -> event -> {
-
             event.getMenu().getChild(menuName, true).ifPresentOrElse(
                     menu -> {
+                        MenuSwitchEvent menuSwitchEvent = new MenuSwitchEvent(event.getMenu(), menu, event.getPlayer());
+                        Bukkit.getPluginManager().callEvent(menuSwitchEvent);
+                        if (menuSwitchEvent.isCancelled())
+                            return;
+
                         menu.getWrappedInventory().open(event.getPlayer());
                     },
                     () -> {
@@ -37,7 +43,7 @@ public class ActionTypesController {
                     .orElse(null));
 
             if (!properties.isPresent()) {
-                event.getPlayer().sendMessage(Helper.color("&cError happened! Contact administration!"));
+                event.getPlayer().sendMessage(Helper.color("&cError happened! Contact Administration!"));
                 getEngine().getLogger().printError("Failed to find action listener for menu " + event.getMenu().identifier() + " id " + actionId);
 
             } else {

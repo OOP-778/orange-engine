@@ -3,6 +3,7 @@ package com.oop.orangeengine.main.logger;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 
 @Getter
@@ -12,6 +13,9 @@ public class OLogger {
     private String normal_prefix = "&e[OLogger]: &r";
     private String debug_prefix = "&e[OLogger DEBUG]: &r";
     private String loggerName;
+
+    @Setter
+    private boolean debugMode = false;
 
     public OLogger(EnginePlugin plugin) {
         name(plugin);
@@ -51,7 +55,7 @@ public class OLogger {
     }
 
     public void printDebug(Object object) {
-        send(debug_prefix + object.toString());
+        Helper.print(debug_prefix + object);
     }
 
     public void error(Throwable exception) {

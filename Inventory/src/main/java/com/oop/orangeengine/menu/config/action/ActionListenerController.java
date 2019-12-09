@@ -37,7 +37,7 @@ public class ActionListenerController {
         // Last Page Handler
         actionPropertiesOSet.add(
                 new ActionProperties<ButtonClickEvent>(ButtonClickEvent.class)
-                        .actionId("last page")
+                        .actionId("previous page")
                         .buttonAction(event -> {
                             if (!(event.getMenu() instanceof PagedMenu)) return;
 

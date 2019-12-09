@@ -35,6 +35,10 @@ public class ConfigNormalButton extends AConfigButton {
         if (sound() != null)
             button.sound(sound());
 
-        button.template(template());
+        button.actAsFilled(actAsFilled());
+        if (template()) {
+            button.template(template());
+            button.storeIfNotPresent("template", section().getKey());
+        }
     }
 }

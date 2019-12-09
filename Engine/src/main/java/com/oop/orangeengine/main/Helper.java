@@ -11,6 +11,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class Helper {
 
@@ -20,6 +23,11 @@ public class Helper {
 
     public static void print(Object object) {
         Bukkit.getConsoleSender().sendMessage(color(object.toString()));
+    }
+
+    public static void debug(Object object) {
+        if (getEngine().getLogger().isDebugMode())
+            getEngine().getLogger().printDebug(object);
     }
 
     public static <T> T[] toArray(T... args) {
@@ -62,6 +70,16 @@ public class Helper {
         }
 
         return true;
+    }
+
+    public static String capitalizeAll(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        return Arrays.stream(str.split("\\s+"))
+                .map(t -> t.substring(0, 1).toUpperCase() + t.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
 }

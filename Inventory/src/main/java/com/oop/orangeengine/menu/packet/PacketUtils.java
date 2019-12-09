@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.version.OVersion;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +14,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
 import static com.oop.orangeengine.main.Helper.assertTrue;
 
 public class PacketUtils {
@@ -75,8 +77,14 @@ public class PacketUtils {
     }
 
     public static void updateTitle(Player player, Inventory inventory, String title) {
-        assertTrue(title.toCharArray().length < 15, "Failed to update title for " + player.getName() + " because title is too long! Max characters can be 15!");
         title = Helper.color(title);
+
+        if (inventory.getTitle().contentEquals(title)) return;
+
+        getEngine().getLogger().printDebug("Changing title for inventory " + inventory.getHolder());
+        getEngine().getLogger().printDebug("Old title: " + inventory.getTitle() + ", lenght: " + inventory.getTitle().length());
+        getEngine().getLogger().printDebug("New title: " + title + ", lenght: " + title.length());
+        assertTrue(title.toCharArray().length < 32, "Failed to update title for " + player.getName() + " because title is too long! Max characters can be 32!");
 
         try {
             final Object chatMessageTitle = CHAT_MESSAGE_CONST.newInstance(title, new Object[0]);
@@ -92,7 +100,7 @@ public class PacketUtils {
             } else
                 packet = PACKET_OPEN_WINDOW_CONST.newInstance(windowId, "minecraft:chest", chatMessageTitle, inventory.getSize());
 
-            sendPacket(packet, player);
+            sendPacket(player, packet);
             PLAYER_UPDATE_INVENTORY_METHOD.invoke(entityPlayer, activeContainer);
         } catch (Exception ex) {
             ex.printStackTrace();

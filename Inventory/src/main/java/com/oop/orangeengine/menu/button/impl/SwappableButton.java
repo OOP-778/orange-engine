@@ -39,7 +39,7 @@ public class SwappableButton extends AMenuButton {
     }
 
     public boolean isSwapped() {
-        return orgHashCode != -1 || toSwap.hashCode() != currentItem().hashCode();
+        return orgHashCode != -1 && toSwap.hashCode() != currentItem().hashCode();
     }
 
 }

@@ -16,9 +16,7 @@ public class EventData extends Storegable {
     }
 
     public static <T extends Event> BiConsumer<T, EventData> getDataType(Class<T> type) {
-
         return (BiConsumer<T, EventData>) getDataTypes().get(type);
-
     }
 
     public static Map<Class<? extends Event>, BiConsumer<? extends Event, EventData>> getDataTypes() {

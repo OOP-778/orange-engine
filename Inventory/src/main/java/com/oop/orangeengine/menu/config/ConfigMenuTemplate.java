@@ -1,20 +1,19 @@
 package com.oop.orangeengine.menu.config;
 
+import com.google.common.collect.Maps;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.MenuDesigner;
-import com.oop.orangeengine.menu.button.AMenuButton;
 import com.oop.orangeengine.menu.config.action.ActionListenerController;
-import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.config.button.AConfigButton;
 import com.oop.orangeengine.menu.types.BasicMenu;
 import com.oop.orangeengine.menu.types.PagedMenu;
 import com.oop.orangeengine.yaml.ConfigurationSection;
-import com.oop.orangeengine.yaml.OConfiguration;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.oop.orangeengine.main.Helper.assertTrue;
 
@@ -28,7 +27,7 @@ public class ConfigMenuTemplate {
     private MenuDesigner designer;
 
     private List<AConfigButton> buttons = new ArrayList<>();
-    private List<ConfigMenuTemplate> children = new ArrayList<>();
+    private Map<String, ConfigMenuTemplate> children = Maps.newHashMap();
 
     public ConfigMenuTemplate(ConfigurationSection configuration) {
         this.menuIdentifier = configuration.getKey();
@@ -61,11 +60,11 @@ public class ConfigMenuTemplate {
 
         // Init children menus
         if (configuration.hasChild("children"))
-            configuration.getSection("children").getSections().values().forEach(child -> children.add(new ConfigMenuTemplate(child)));
+            configuration.getSection("children").getSections().values().forEach(child -> children.put(child.getKey(), new ConfigMenuTemplate(child)));
 
     }
 
-    public AMenu build() {
+    public AMenu build(boolean withChildren) {
         AMenu menu = getMenu();
 
         // Set title
@@ -80,9 +79,14 @@ public class ConfigMenuTemplate {
         buttons.forEach(button -> menu.addButton(button.toButton()));
 
         // Build children
-        children.forEach(configMenu -> menu.addChild(configMenu.build()));
+        if (withChildren)
+            children.values().forEach(configMenu -> menu.addChild(configMenu.build(withChildren)));
 
         return menu;
+    }
+
+    public AMenu build() {
+        return build(true);
     }
 
     private AMenu getMenu() {
@@ -92,4 +96,10 @@ public class ConfigMenuTemplate {
         else
             return new PagedMenu(menuIdentifier, designer.getSize()).designer(designer.clone());
     }
+
+    public void getAllChildren(List<ConfigMenuTemplate> list) {
+        list.add(this);
+        getChildren().values().forEach(menu -> menu.getAllChildren(list));
+    }
+
 }

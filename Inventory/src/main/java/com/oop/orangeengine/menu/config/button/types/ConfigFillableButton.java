@@ -22,7 +22,6 @@ public class ConfigFillableButton extends ConfigNormalButton {
                     clickListeners().add(new ClickListener<>(ButtonFillEvent.class).clickEnum(ClickEnum.GLOBAL).consumer(ActionTypesController.getActionTypes().get(actionType).apply(text)));
                     appliedActions().add(text);
                 });
-
         }
 
         if (section.hasChild("on empty")) {

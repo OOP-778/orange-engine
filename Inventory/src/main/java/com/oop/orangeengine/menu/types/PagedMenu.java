@@ -38,14 +38,11 @@ public class PagedMenu extends AMenu {
             placeholderInventory.setButton(button.slot(), button);
         }
 
-        long pagedButtons = buttons().stream()
-                .filter(AMenuButton::paged)
-                .count();
-        int pagesRequired = Math.round(pagedButtons / placeholderInventory.emptySlots());
-
         OPair<Integer, WrappedInventory> currentPage = null;
         for (AMenuButton button : buttons()) {
             if (!button.paged()) continue;
+
+            Helper.debug("Adding " + button.currentItem() + " into paged menu!");
 
             // Check if it's first time
             if (pages.isEmpty()) {
@@ -65,6 +62,7 @@ public class PagedMenu extends AMenu {
                 }
             }
 
+            Helper.debug("Current page first empty = " + currentPage.getValue().firstEmpty());
             // Check if the currentPage has any empty slots
             if (currentPage.getValue().firstEmpty() == -1) {
                 WrappedInventory nextPage = pages.get(currentPage.getKey() + 1);
@@ -77,6 +75,7 @@ public class PagedMenu extends AMenu {
                 }
             }
 
+            Helper.debug("Added " + button.currentItem() + " into paged menu!");
             currentPage.getValue().setButton(currentPage.getValue().firstEmpty(), button);
         }
 
@@ -85,20 +84,23 @@ public class PagedMenu extends AMenu {
             // Change title of the inventory according to the page number
             inv.changeTitle(inv.getTitle().replace("%currentPage%", page + "").replace("%allPages%", pages.size() + ""));
 
+            SwappableButton previousPageButton =   inv.findByFilter(button -> button.appliedActions().contains("previous page")).get(SwappableButton.class);
+            SwappableButton nextPageButton = inv.findByFilter(button -> button.appliedActions().contains("next page")).get(SwappableButton.class);
+
+            if (previousPageButton != null && previousPageButton.isSwapped())
+                previousPageButton.swap();
+
+            if (nextPageButton != null && nextPageButton.isSwapped())
+                nextPageButton.swap();
+
             // Swap next / last page buttons
-            if(page == 1)
-                inv.findByFilter(button -> button.appliedActions().contains("last page")).ifPresent(button -> {
-                    SwappableButton swappableButton = (SwappableButton) button;
-                    swappableButton.swap();
-                });
+            if(page == 1 && previousPageButton != null)
+                previousPageButton.swap();
 
-            else if (page == pages.size())
-                inv.findByFilter(button -> button.appliedActions().contains("next page")).ifPresent(button -> {
-                    SwappableButton swappableButton = (SwappableButton) button;
-                    swappableButton.swap();
-                });
-
+            if (page == pages.size() && nextPageButton != null)
+                nextPageButton.swap();
         });
+
         wrappedInventory = pages.get(1);
     }
 

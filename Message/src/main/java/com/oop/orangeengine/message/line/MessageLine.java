@@ -165,7 +165,11 @@ public class MessageLine {
             for (String spacedString : checkThrough) {
                 if (lastColorL == null) {
                     lastColorL = ColorFinder.find(spacedString);
-                    buffer.append(spacedString).append(" ");
+                    if (checkThrough.indexOf(spacedString) > 0)
+                        buffer.append(" ").append(spacedString);
+
+                    else
+                        buffer.append(spacedString);
 
                 } else {
 
@@ -193,8 +197,11 @@ public class MessageLine {
 
             }
 
+            String[] forLambda = new String[]{buffer.toString()};
+            placeholders.forEach((key, plac) -> forLambda[0] = forLambda[0].replaceAll(key, plac));
+
             //Set the Text
-            clonedLC.text(buffer.toString());
+            clonedLC.text(forLambda[0]);
             base.addExtra(clonedLC.create());
 
             if (autoSpaces)

@@ -22,13 +22,13 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
 
     private AMenu owner;
     private Inventory bukkitInventory;
-    private AMenuButton[] buttons = null;
+    private AMenuButton[] arrayButtons = null;
     private String title;
 
     public WrappedInventory(AMenu owner, String title) {
         this.owner = owner;
         this.bukkitInventory = Bukkit.createInventory(this, owner.size(), Helper.color(title));
-        this.buttons = new AMenuButton[bukkitInventory.getSize()];
+        this.arrayButtons = new AMenuButton[bukkitInventory.getSize()];
         this.title = title;
 
         // Initialize items so we don't get any nulls
@@ -37,41 +37,41 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
 
     public WrappedInventory setBukkitInventory(Inventory inventory) {
         this.bukkitInventory = inventory;
-        this.buttons = new AMenuButton[inventory.getSize()];
+        this.arrayButtons = new AMenuButton[inventory.getSize()];
         return this;
     }
 
     private WrappedInventory() {}
 
     private void loadItems() {
-        for (int slot = 0; slot < buttons.length; slot++) {
+        for (int slot = 0; slot < arrayButtons.length; slot++) {
 
             ItemStack itemStack = bukkitInventory.getItem(slot);
             if (itemStack == null || itemStack.getType() == Material.AIR)
-                buttons[slot] = BukkitItem.newAir(slot);
+                arrayButtons[slot] = BukkitItem.newAir(slot);
 
             else
-                buttons[slot] = new BukkitItem(itemStack, slot);
+                arrayButtons[slot] = new BukkitItem(itemStack, slot);
 
         }
         ensureButtonsHaveHolder();
     }
 
-    public Set<AMenuButton> getButtons(boolean filterOutItems) {
+    public Set<AMenuButton> getArrayButtons(boolean filterOutItems) {
         ensureNotEmpty();
-        return Arrays.stream(buttons)
+        return Arrays.stream(arrayButtons)
                 .filter(button -> filterOutItems && !(button instanceof BukkitItem))
                 .collect(Collectors.toSet());
     }
 
     public AMenuButton getButtonAt(int slot) {
         ensureNotEmpty();
-        return buttons[slot];
+        return arrayButtons[slot];
     }
 
     public Set<AMenuButton> getBukkitItems() {
         ensureNotEmpty();
-        return Arrays.stream(buttons)
+        return Arrays.stream(arrayButtons)
                 .filter(button -> button instanceof BukkitItem)
                 .collect(Collectors.toSet());
     }
@@ -91,33 +91,34 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
     }
 
     private void ensureNotEmpty() {
-        if (buttons == null) {
-            buttons = new AMenuButton[bukkitInventory.getSize()];
+        if (arrayButtons == null) {
+            arrayButtons = new AMenuButton[bukkitInventory.getSize()];
             loadItems();
         }
     }
 
     public void setButton(int slot, AMenuButton button) {
+        Helper.debug("Setting " + button.currentItem() + " into s lot " + slot);
         ensureNotEmpty();
         if (button == null)
             button = BukkitItem.newAir(slot);
 
         button.holder(this);
-        buttons[slot] = button;
+        arrayButtons[slot] = button;
         button.slotNoUpdate(slot);
         updateButton(button);
     }
 
     public long emptySlots() {
         ensureNotEmpty();
-        return Arrays.stream(buttons)
+        return Arrays.stream(arrayButtons)
                 .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
                 .count();
     }
 
     public List<Integer> listEmptySlots() {
         ensureNotEmpty();
-        return Arrays.stream(buttons)
+        return Arrays.stream(arrayButtons)
                 .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
                 .map(AMenuButton::slot)
                 .collect(Collectors.toList());
@@ -143,14 +144,14 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
         wrappedInventory.owner = owner;
         wrappedInventory.bukkitInventory = Bukkit.createInventory(wrappedInventory, owner.size(), title);
         wrappedInventory.title = title;
-        Arrays.stream(buttons)
+        Arrays.stream(arrayButtons)
                 .map(AMenuButton::clone)
                 .forEach(button -> wrappedInventory.setButton(button.slot(), button));
         return wrappedInventory;
     }
 
     public void ensureButtonsHaveHolder() {
-        for (AMenuButton button : buttons)
+        for (AMenuButton button : arrayButtons)
             button.holder(this);
     }
 
@@ -158,10 +159,10 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
         List<Integer> updatedSlots = new ArrayList<>();
 
         // Update virtually
-        for (int i = 0; i < buttons.length; i++) {
-            AMenuButton button = buttons[i];
+        for (int i = 0; i < arrayButtons.length; i++) {
+            AMenuButton button = arrayButtons[i];
             if (filter.test(button)) {
-                buttons[i] = BukkitItem.newAir(button.slot());
+                arrayButtons[i] = BukkitItem.newAir(button.slot());
                 updatedSlots.add(i);
             }
         }
@@ -172,7 +173,7 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
     }
 
     public void updateAtSlot(int slot) {
-        AMenuButton button = buttons[slot];
+        AMenuButton button = arrayButtons[slot];
 
         if (button.slot() == -1 || button.currentItem() == null) return;
         bukkitInventory.setItem(button.slot(), button.currentItem());
@@ -183,8 +184,19 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
 
     public int firstEmpty() {
         ensureNotEmpty();
-        return Arrays.stream(buttons)
-                .filter(button -> (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR) || button.placeholder() || !button.actAsFilled())
+        return Arrays.stream(arrayButtons)
+                .filter(button -> {
+                    if (button.actAsFilled())
+                        return false;
+
+                    if (button instanceof BukkitItem && button.currentItem().getType() == Material.AIR)
+                        return true;
+
+                    if (button.placeholder())
+                        return true;
+
+                    return false;
+                })
                 .map(AMenuButton::slot)
                 .findFirst()
                 .orElse(-1);
@@ -210,12 +222,12 @@ public class WrappedInventory implements Cloneable, InventoryHolder {
     }
 
     public OptionalConsumer<AMenuButton> findByFilter(Predicate<AMenuButton> buttonPredicate) {
-        return OptionalConsumer.of(Arrays.asList(getButtons()).stream().filter(buttonPredicate).findFirst());
+        return OptionalConsumer.of(Arrays.asList(this.getArrayButtons()).stream().filter(buttonPredicate).findFirst());
     }
 
     private void moveItems(Inventory inventory) {
-        if (buttons != null) {
-            for (AMenuButton button : buttons) {
+        if (arrayButtons != null) {
+            for (AMenuButton button : arrayButtons) {
                 inventory.setItem(button.slot(), button.currentItem());
             }
         }

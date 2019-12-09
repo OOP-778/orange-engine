@@ -36,7 +36,7 @@ public class Locale {
         localeInstance = new Locale(locale);
     }
 
-    public static Locale getLocaleInstance() {
+    public static Locale getLocale() {
         return localeInstance;
     }
 

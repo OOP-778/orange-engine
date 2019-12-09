@@ -1,6 +1,7 @@
 package com.oop.orangeengine.menu;
 
 import com.oop.orangeengine.main.Engine;
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.list.OList;
@@ -15,14 +16,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Accessors(fluent = true, chain = true)
-public abstract class AMenu extends Storegable implements InventoryHolder {
+public abstract class AMenu extends Storegable implements InventoryHolder, ButtonHolder {
 
     final private int maxSize = 54;
     @Getter
@@ -50,10 +54,6 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     @Setter
     private Consumer<MenuCloseEvent> closeEventHandler;
 
-    @Getter
-    @Setter
-    private Consumer<AMenu> updater;
-
     private Set<AMenu> children = new HashSet<>();
 
     @Getter
@@ -65,6 +65,10 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     @Getter
     @Setter
     private MenuDesigner designer;
+
+    @Setter
+    @Getter
+    private Consumer<InventoryClickEvent> bottomInvClickHandler;
 
     public AMenu(String identifier, int size, AMenu parent) {
         this.identifier = identifier;
@@ -89,8 +93,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     }
 
     public void title(String title) {
-        this.title = title;
-        //TODO Add title update packet
+        this.title = Helper.color(title);
     }
 
     public boolean hasChild(String identifier) {
@@ -135,8 +138,7 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
     }
 
     public void update() {
-        if (updater != null)
-            updater.accept(this);
+        build();
     }
 
     public WrappedInventory getWrappedInventory(boolean rebuild) {
@@ -176,5 +178,19 @@ public abstract class AMenu extends Storegable implements InventoryHolder {
             allChildren.addAll(children.getAllChildren());
         });
         return allChildren;
+    }
+
+    @Override
+    public List<AMenuButton> getButtons() {
+        return buttons;
+    }
+
+    @Override
+    public void removeButtonIfMatched(Predicate<AMenuButton> filter) {
+        Set<AMenuButton> collect = getButtons().stream()
+                .filter(filter)
+                .collect(Collectors.toSet());
+        collect.forEach(AMenuButton::remove);
+        getButtons().removeAll(collect);
     }
 }

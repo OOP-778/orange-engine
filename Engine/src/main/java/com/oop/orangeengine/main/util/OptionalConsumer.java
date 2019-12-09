@@ -39,8 +39,12 @@ public class OptionalConsumer<T> implements Consumer<Optional<T>> {
         return this;
     }
 
-    public  T get() {
-        return (T) optional.get();
+    public T get() {
+        return optional.orElse(null);
+    }
+
+    public <T> T get(Class<T> type) {
+        return (T) optional.orElse(null);
     }
 
     @Override

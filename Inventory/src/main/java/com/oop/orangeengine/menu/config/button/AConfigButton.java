@@ -17,6 +17,7 @@ import com.oop.orangeengine.yaml.ConfigurationSection;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,19 +29,22 @@ import java.util.Set;
 @Setter
 public abstract class AConfigButton {
 
+    private ConfigurationSection section;
     private ButtonType type;
     private String layoutId;
     private OItem item;
     private boolean template = false;
     private boolean placeholder = false;
     private WrappedSound sound;
+    private boolean actAsFilled;
     private List<String> appliedActions = new ArrayList<>();
 
     private Set<ClickListener> clickListeners = new HashSet<>();
-
     private AMenuButton constructedButton;
 
     public AConfigButton(ConfigurationSection section) {
+        this.section = section;
+
         // Set layout Id
         if (section.getKey().length() == 1)
             layoutId = section.getKey();
@@ -52,6 +56,9 @@ public abstract class AConfigButton {
 
         // Load item
         item = new OItem().load(section);
+        if (item.getMaterial() == Material.AIR)
+            actAsFilled = true;
+
 
         // Init button clicking
         if (section.hasChild("on click")) {
@@ -82,6 +89,8 @@ public abstract class AConfigButton {
 
         if (section.hasValue("sound"))
             WrappedSound.of(OSound.match(section.getValueAsReq("sound")), 0f, 50f);
+
+        section.ifValuePresent("template", boolean.class, bool -> template = bool);
     }
 
     public static AConfigButton fromConfig(ConfigurationSection section) {

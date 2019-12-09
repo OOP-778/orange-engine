@@ -6,6 +6,7 @@ import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.map.OMap;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.menu.WrappedInventory;
+import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.button.impl.SwappableButton;
 import com.oop.orangeengine.menu.config.action.ActionTypesController;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
@@ -87,6 +88,11 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
 
         clickListeners.add(clickListener);
         return this;
+    }
+
+    public void remove() {
+        if (holder != null)
+            holder.setButton(slot, BukkitItem.newAir(slot));
     }
 
     public AMenuButton currentItem(ItemStack itemStack, boolean update) {

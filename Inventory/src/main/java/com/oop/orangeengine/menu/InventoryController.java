@@ -19,12 +19,10 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.ItemStack;
 
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +40,11 @@ public class InventoryController extends AEngineComponent {
             if (event.isCancelled()) return;
             if (event.getSlot() < 0) return;
             if (event.getWhoClicked().getOpenInventory().getTopInventory() == null) return;
-            if (!(event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory)) return;
+            if (!(event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory))
+                return;
 
-            if (event.getWhoClicked().getOpenInventory().getTopInventory() != null && event.getWhoClicked().getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory) {
+            System.out.println(event.getAction().name());
+            if (event.getClickedInventory() == event.getWhoClicked().getOpenInventory().getBottomInventory()) {
                 if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
 
                     event.setResult(Event.Result.DENY);
@@ -69,18 +69,25 @@ public class InventoryController extends AEngineComponent {
                     event.setCancelled(true);
             }
 
+            WrappedInventory wrappedInventory = (WrappedInventory) event.getWhoClicked().getOpenInventory().getTopInventory().getHolder();
+            AMenu menu = wrappedInventory.getOwner();
+
+            if (!(event.getClickedInventory().getHolder() instanceof WrappedInventory) && menu.bottomInvClickHandler() != null)
+                menu.bottomInvClickHandler().accept(event);
+
             if (!(event.getClickedInventory().getHolder() instanceof WrappedInventory)) return;
 
             event.setCancelled(true);
-            WrappedInventory wrappedInventory = (WrappedInventory) event.getClickedInventory().getHolder();
-            AMenu menu = wrappedInventory.getOwner();
-
             AMenuButton button = wrappedInventory.getButtonAt(event.getSlot());
+            if (button.actAsFilled()) {
+                event.setCancelled(true);
+                return;
+            }
+
             if (button.currentItem().getType() == Material.AIR && !(button instanceof FillableButton)) return;
             ItemStack beforeChange = button.currentItem().clone();
 
             if (button.pickable()) {
-
                 ItemStack currentAtSlot = event.getCurrentItem().clone();
                 ItemStack cursor = event.getCursor().clone();
                 int slot = event.getSlot();
@@ -102,14 +109,13 @@ public class InventoryController extends AEngineComponent {
                     currentItemClone.setAmount(1);
 
                     event.getWhoClicked().setItemOnCursor(currentItemClone.clone());
-
                     currentItemClone.setAmount(cursor.getAmount() - 1);
                     event.getClickedInventory().setItem(slot, currentItemClone);
                 }
             }
             button.updateButtonFromHolder();
 
-            // Call for config events
+            // Call events
             ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange, ClickEnum.match(event));
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
 
@@ -151,8 +157,15 @@ public class InventoryController extends AEngineComponent {
 
         });
 
+        SyncEvents.listen(InventoryDragEvent.class, EventPriority.LOWEST, event -> {
+            if (!(event.getInventory().getHolder() instanceof WrappedInventory)) return;
+            if (event.isCancelled()) return;
+
+            event.setCancelled(true);
+        });
+
         getEngine().getOwning().onDisable(() -> Helper.getOnlinePlayers().stream()
-                .filter(player -> player.getOpenInventory().getTopInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof AMenu)
+                .filter(player -> player.getOpenInventory().getTopInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof WrappedInventory)
                 .forEach(HumanEntity::closeInventory));
     }
 
@@ -215,13 +228,11 @@ public class InventoryController extends AEngineComponent {
                 return removed;
 
             } else {
-
                 int canBeRemoved = stack.getAmount() - stack.getAmount();
                 itemStack.setAmount(itemStack.getAmount() - canBeRemoved);
 
                 stack.setAmount(stack.getAmount() - canBeRemoved);
                 removed += canBeRemoved;
-
             }
         }
         return removed;
