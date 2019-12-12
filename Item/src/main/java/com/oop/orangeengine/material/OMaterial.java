@@ -26,6 +26,7 @@ package com.oop.orangeengine.material;
  */
 
 import com.oop.orangeengine.item.custom.OItem;
+import com.oop.orangeengine.main.Helper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -854,7 +855,7 @@ public enum OMaterial {
     WHITE_SHULKER_BOX(0, "WHITE_SHULKER_BOX"),
     WHITE_STAINED_GLASS(0, "STAINED_GLASS"),
     WHITE_STAINED_GLASS_PANE(0, "STAINED_GLASS_PANE"),
-    WHITE_TERRACOTTA(0, "TERRACOTTA"),
+    WHITE_TERRACOTTA(0, "TERRACOTTA", "STAINED_CLAY"),
     WHITE_TULIP(6, "RED_ROSE"),
     WHITE_WALL_BANNER(0, "WALL_BANNER"),
     WHITE_WOOL(0, "WOOL"),
@@ -1062,6 +1063,9 @@ public enum OMaterial {
     public static OMaterial matchMaterial(@Nonnull String name, byte data) {
         Validate.notEmpty(name, "Material name cannot be null or empty");
         name = format(name);
+
+        Helper.debug("Material name: " + name);
+        Helper.debug("Data: " + data);
 
         if ((contains(name) && data <= 0) && (isNewVersion() || !isDuplicated(name)))
             return valueOf(name);

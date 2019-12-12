@@ -25,15 +25,17 @@ public abstract class DatabaseObject {
     @Getter
     private int rowId = -1;
 
-    @Setter
-    private Runnable whenLoaded;
+    private List<Runnable> whenLoaded = new ArrayList<>();
+
+    private DataController dataController;
 
     public DatabaseObject() {
         this.holder = this.getClass();
         initCachedColumns(holder);
     }
 
-    public void load(ODatabase database, int rowId) {
+    public void load(DataController dataController, int rowId) {
+        ODatabase database = dataController.getDatabase();
         try {
 
             /*
@@ -98,8 +100,7 @@ public abstract class DatabaseObject {
 
                 }
             }
-            if(whenLoaded != null)
-                whenLoaded.run();
+            whenLoaded.forEach(Runnable::run);
 
         } catch (Exception ex) {
            ex.printStackTrace();
@@ -270,5 +271,18 @@ public abstract class DatabaseObject {
 
     void setRowId(int rowCount) {
         this.rowId = rowCount;
+    }
+
+    public void save(boolean async) {
+        if (dataController != null)
+            dataController.save(this, async);
+    }
+
+    public void save() {
+        save(false);
+    }
+
+    public void setWhenLoaded(Runnable runnable) {
+        this.whenLoaded.add(runnable);
     }
 }

@@ -18,9 +18,7 @@ import lombok.experimental.Accessors;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 @EqualsAndHashCode
@@ -143,6 +141,14 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
         aMenuButton.holder = null;
         aMenuButton.currentItem = currentItem.clone();
 
+        // Copy data
+        aMenuButton.newMap();;
+        forEach(aMenuButton.getData()::put);
+
+        // Remove template
+        aMenuButton.remove("template");
+        aMenuButton.template(false);
+
         return aMenuButton;
     }
 
@@ -169,7 +175,7 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
     }
 
     public AMenuButton saveCurrentItem(String id) {
-        putIfPresentReplace(id, currentItem.clone());
+        storeIfPresentReplace(id, currentItem.clone());
         return this;
     }
 

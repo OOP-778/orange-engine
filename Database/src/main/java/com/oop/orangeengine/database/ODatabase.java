@@ -17,9 +17,9 @@ public abstract class ODatabase {
 
     private AsyncQueue queue = new AsyncQueue(this);
 
-    protected abstract Connection provideConnection() throws SQLException;
+    protected abstract Connection provideConnection() throws SQLException, ClassNotFoundException;
 
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException, ClassNotFoundException {
         return provideConnection();
     }
 
@@ -31,7 +31,7 @@ public abstract class ODatabase {
                     columns.add(resultSet.getString("COLUMN_NAME"));
             }
 
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -47,7 +47,7 @@ public abstract class ODatabase {
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -63,7 +63,7 @@ public abstract class ODatabase {
                         rowsIds.add(resultSet.getInt(1));
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return rowsIds;
@@ -81,7 +81,7 @@ public abstract class ODatabase {
                     return resultSet.getObject(1) != null;
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new SQLException("Failed to check if object has value (table=" + table + ", column=" + column + ", id=" + id + ") cause of " + e.getMessage()).printStackTrace();
         }
         return false;
@@ -100,7 +100,7 @@ public abstract class ODatabase {
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.execute();
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
@@ -111,7 +111,7 @@ public abstract class ODatabase {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.execute();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -124,7 +124,7 @@ public abstract class ODatabase {
                     return databaseValue.columnType().getObject(resultSet);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new SQLException("Failed to gather column value (table=" + table + ", column=" + databaseValue.columnName() + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
         }
         return null;
@@ -149,7 +149,7 @@ public abstract class ODatabase {
 
                 close(rs);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -182,7 +182,7 @@ public abstract class ODatabase {
                     for (OPair<String, OColumn> column : columns)
                         statement.executeUpdate("ALTER TABLE " + tableName + " ADD " + column.getFirst() + " " + column.getSecond().getSql());
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -263,7 +263,7 @@ public abstract class ODatabase {
                 while (resultSet.next())
                     tables.add(resultSet.getString(3));
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return tables;

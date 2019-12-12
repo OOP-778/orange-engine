@@ -26,6 +26,8 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 public abstract class DataController {
 
     private HashBiMap<String, Class<? extends DatabaseObject>> classToTable = HashBiMap.create();
+
+    @Getter
     private ODatabase database;
 
     private boolean autoSave;
@@ -57,7 +59,7 @@ public abstract class DataController {
 
                     declaredConstructor.setAccessible(true);
                     DatabaseObject value = declaredConstructor.newInstance();
-                    value.load(database, rowId);
+                    value.load(this, rowId);
                     data.add(value);
 
                 } catch (Exception ex) {
@@ -138,7 +140,7 @@ public abstract class DataController {
 
             connection.commit();
 
-        } catch (SQLException | IllegalAccessException ex) {
+        } catch (SQLException | IllegalAccessException | ClassNotFoundException ex) {
             ex.printStackTrace();
         }
     }

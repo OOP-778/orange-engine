@@ -70,6 +70,7 @@ allprojects {
 
     shadowJar {
         relocate("org.nustaq", "com.oop.orangeengine.libs.nustaq")
+        relocate("de.tr7zw.oop", "com.oop.orangeengine.libs.nbt")
 
         archiveName = "OrangeEngine-${project.name}.jar"
         destinationDirectory = file('../target')

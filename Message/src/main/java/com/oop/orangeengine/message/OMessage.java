@@ -4,11 +4,14 @@ import com.oop.orangeengine.message.line.MessageLine;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
-public class OMessage {
+public class OMessage implements Cloneable {
 
     private LinkedList<MessageLine> lineList = new LinkedList<>();
     private boolean center = false;
@@ -42,13 +45,22 @@ public class OMessage {
 
     }
 
+    public List<String> getRaw() {
+        return lineList.stream()
+                .map(MessageLine::getRaw)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public OMessage clone() {
-        try {
-            return ((OMessage) super.clone());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
+        OMessage message = new OMessage();
+        message.lineList = new LinkedList<>();
+
+        lineList.stream()
+                .map(MessageLine::clone)
+                .forEach(line -> message.lineList.add(line));
+
+        message.center = center;
+        return message;
     }
 }

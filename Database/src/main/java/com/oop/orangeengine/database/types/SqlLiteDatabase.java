@@ -21,7 +21,8 @@ public class SqlLiteDatabase extends ODatabase {
     }
 
     @Override
-    protected Connection provideConnection() throws SQLException {
+    protected Connection provideConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("org.sqlite.JDBC");
         return DriverManager.getConnection(path);
     }
 }

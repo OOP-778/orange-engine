@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
 @Getter
 @Setter
 @Accessors(chain = true, fluent = true)
-public class MessageLine {
+public class MessageLine implements Cloneable {
 
     private LinkedList<LineContent> contentList = new LinkedList<>();
     private boolean center = false;
@@ -220,16 +220,22 @@ public class MessageLine {
             cached = base;
     }
 
-
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public MessageLine clone() {
 
-        MessageLine messageLine = ((MessageLine) super.clone());
-        messageLine.contentList = new LinkedList<>();
-        messageLine.contentList.addAll(contentList.stream().map(LineContent::clone).collect(toList()));
+        MessageLine messageLine = null;
+        try {
+            messageLine = ((MessageLine) super.clone());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (messageLine != null) {
+            messageLine.contentList = new LinkedList<>();
+            messageLine.contentList.addAll(contentList.stream().map(LineContent::clone).collect(toList()));
+        }
 
         return messageLine;
-
     }
 
     public enum InsertMethod {
@@ -256,8 +262,15 @@ public class MessageLine {
                     break;
             }
         }
-
         return result.toString();
     }
 
+    public String getRaw() {
+        String[] rawText = new String[]{""};
+        String space = autoSpaces() ? " " : "";
+
+        contentList.forEach(lineContent -> rawText[0] = space + lineContent.getText());
+
+        return rawText[0];
+    }
 }
