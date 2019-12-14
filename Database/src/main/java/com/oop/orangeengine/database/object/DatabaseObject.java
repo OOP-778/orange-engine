@@ -28,7 +28,7 @@ public abstract class DatabaseObject {
 
     private List<Runnable> whenLoaded = new LinkedList<>();
 
-    private DataController dataController;
+    protected DataController dataController;
 
     public DatabaseObject() {
         this.holder = this.getClass();

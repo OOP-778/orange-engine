@@ -10,6 +10,7 @@ import com.oop.orangeengine.main.util.data.DataModificationHandler;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.data.set.OConcurrentSet;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.xml.stream.events.StartDocument;
 import java.lang.reflect.Constructor;
@@ -30,10 +31,35 @@ public abstract class DataController {
     @Getter
     private ODatabase database;
 
+    @Setter
     private boolean autoSave;
 
     public DataController(ODatabase database) {
         this.database = database;
+
+        final DataController instance = this;
+        data.setHandler(new DataModificationHandler<DatabaseObject>() {
+            @Override
+            public void onAdd(DatabaseObject object) {
+                if (autoSave)
+                    save(object);
+
+                object.dataController = instance;
+            }
+
+            @Override
+            public void onRemove(DatabaseObject object) {
+                if (autoSave)
+                    if (object.getRowId() != -1) {
+                        DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
+                        assert table != null;
+
+                        database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
+                    }
+
+
+            }
+        });
     }
 
     @Getter
@@ -291,27 +317,6 @@ public abstract class DataController {
                 .filter(object -> asKlass.isAssignableFrom(object.getClass()))
                 .map(object -> (T) object)
                 .collect(Collectors.toSet());
-    }
-
-    public void setAutoSave(boolean autoSave) {
-        this.autoSave = autoSave;
-        if (autoSave)
-            data.setHandler(new DataModificationHandler<DatabaseObject>() {
-                @Override
-                public void onAdd(DatabaseObject object) {
-                    save(object);
-                }
-
-                @Override
-                public void onRemove(DatabaseObject object) {
-                    if (object.getRowId() != -1) {
-                        DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
-                        assert table != null;
-
-                        database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
-                    }
-                }
-            });
     }
 
     public <T extends DatabaseObject> void removeIf(Class<T> type, Predicate<T> predicate) {
