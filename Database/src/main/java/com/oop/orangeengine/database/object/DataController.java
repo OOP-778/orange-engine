@@ -32,7 +32,7 @@ public abstract class DataController {
     private ODatabase database;
 
     @Setter
-    private boolean autoSave;
+    private boolean autoSave = false;
 
     public DataController(ODatabase database) {
         this.database = database;
@@ -86,8 +86,8 @@ public abstract class DataController {
                     declaredConstructor.setAccessible(true);
                     DatabaseObject value = declaredConstructor.newInstance();
                     value.load(this, rowId);
-                    data.add(value);
 
+                    data.addNoHandler(value);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

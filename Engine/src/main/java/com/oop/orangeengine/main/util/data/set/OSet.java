@@ -26,4 +26,7 @@ public class OSet<T> extends HashSet<T> {
     }
 
 
+    public void addNoHandler(T value) {
+        super.add(value);
+    }
 }
