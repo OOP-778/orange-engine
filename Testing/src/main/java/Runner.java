@@ -1,24 +1,22 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.time.Duration;
-import java.time.Instant;
+import java.util.Objects;
 
 public class Runner {
     public static void main(String[] args) {
-        System.out.println("== GSON ==");
-        Gson gson = new GsonBuilder().serializeNulls().create();
 
-        Instant now = Instant.now();
-        String serializedGson = gson.toJson(new A());
-        System.out.println(serializedGson);
+        Thread.currentThread().setUncaughtExceptionHandler(new Handler());
+        print();
 
-        System.out.println("Serialization Took: " + Duration.between(now, Instant.now()).toMillis());
-        now = Instant.now();
+    }
 
-        gson.fromJson(serializedGson, A.class);
-        System.out.println("Deserialization Took: " + Duration.between(now, Instant.now()).toMillis());
+    static void print() {
+        String s = null;
+        Objects.requireNonNull(s);
+    }
 
+    static class Handler implements Thread.UncaughtExceptionHandler {
+        public void uncaughtException(Thread t, Throwable e) {
+            System.out.println("Unhandled exception");
+        }
     }
 
 }

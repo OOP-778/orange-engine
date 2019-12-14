@@ -22,10 +22,11 @@ public abstract class DatabaseObject {
     private static Map<Class, List<OPair<Field, DatabaseValue>>> cachedColumns = new ConcurrentHashMap<>();
     protected Map<String, Integer> hashCodes = new ConcurrentHashMap<>();
     private Class holder;
+
     @Getter
     private int rowId = -1;
 
-    private List<Runnable> whenLoaded = new ArrayList<>();
+    private List<Runnable> whenLoaded = new LinkedList<>();
 
     private DataController dataController;
 
@@ -45,6 +46,7 @@ public abstract class DatabaseObject {
             */
 
             this.rowId = rowId;
+            this.dataController = dataController;
 
             DatabaseTable table = findTable(holder);
             if (table == null)

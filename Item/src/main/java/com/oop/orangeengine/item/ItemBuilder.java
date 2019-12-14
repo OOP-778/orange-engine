@@ -36,7 +36,6 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
             if (item.getItemMeta().hasDisplayName())
                 setDisplayName(item.getItemMeta().getDisplayName());
         }
-
     }
 
     public ItemBuilder(OMaterial material) {
