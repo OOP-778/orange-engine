@@ -23,8 +23,10 @@ public class BukkitAdapter {
         builder.registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter());
     }
 
+    public BukkitAdapter() {}
+
     // ItemStack adapter
-    private static class ItemStackAdapter implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
+    public static class ItemStackAdapter implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
 
         @Override
         public ItemStack deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {

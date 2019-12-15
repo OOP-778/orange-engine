@@ -6,6 +6,7 @@ import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.component.IEngineComponent;
 import com.oop.orangeengine.main.events.async.EventData;
 import com.oop.orangeengine.main.gson.BukkitAdapter;
+import com.oop.orangeengine.main.gson.UpdateableAdapterFactory;
 import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.ITaskController;
@@ -31,7 +32,9 @@ public class Engine {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.serializeNulls();
+
         new BukkitAdapter(gsonBuilder);
+        new UpdateableAdapterFactory(gsonBuilder);
         gson = gsonBuilder.create();
 
         //Initialize plugin disable actions

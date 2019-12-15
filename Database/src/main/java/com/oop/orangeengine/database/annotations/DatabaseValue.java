@@ -15,4 +15,5 @@ public @interface DatabaseValue {
 
     OColumn columnType() default OColumn.TEXT;
 
+
 }

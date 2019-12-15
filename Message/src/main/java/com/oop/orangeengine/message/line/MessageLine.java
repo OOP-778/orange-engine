@@ -93,16 +93,16 @@ public class MessageLine implements Cloneable {
             int startSpaces = 0, endSpaces = 0;
 
             for (Character charz : characterList) {
-
                 if (!charz.toString().equalsIgnoreCase(" ")) {
                     startSpaces = spaceCount;
                     break;
+
                 } else
                     spaceCount++;
-
             }
 
             Collections.reverse(characterList);
+
             spaceCount = 0;
             for (Character charz : characterList) {
                 if (!charz.toString().equalsIgnoreCase(" ")) {

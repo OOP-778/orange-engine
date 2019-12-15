@@ -17,7 +17,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class DatabaseObject {
+public abstract class DatabaseObject implements DatabaseUpdatable {
 
     private static Map<Class, List<OPair<Field, DatabaseValue>>> cachedColumns = new ConcurrentHashMap<>();
     protected Map<String, Integer> hashCodes = new ConcurrentHashMap<>();
@@ -33,6 +33,9 @@ public abstract class DatabaseObject {
     public DatabaseObject() {
         this.holder = this.getClass();
         initCachedColumns(holder);
+        loadFields();
+
+        setWhenLoaded(this::updateFields);
     }
 
     public void load(DataController dataController, int rowId) {

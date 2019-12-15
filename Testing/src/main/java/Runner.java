@@ -1,22 +1,19 @@
-import java.util.Objects;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import t.a.ExampleObject;
 
 public class Runner {
+
+    final static Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(new UpdateableAdapterFactory())
+            .create();
+
     public static void main(String[] args) {
+        String serialized = gson.toJson(new ExampleObject());
+        System.out.println(serialized);
 
-        Thread.currentThread().setUncaughtExceptionHandler(new Handler());
-        print();
+        ExampleObject exampleObject = gson.fromJson(serialized, ExampleObject.class);
+        System.out.println(exampleObject);
 
     }
-
-    static void print() {
-        String s = null;
-        Objects.requireNonNull(s);
-    }
-
-    static class Handler implements Thread.UncaughtExceptionHandler {
-        public void uncaughtException(Thread t, Throwable e) {
-            System.out.println("Unhandled exception");
-        }
-    }
-
 }

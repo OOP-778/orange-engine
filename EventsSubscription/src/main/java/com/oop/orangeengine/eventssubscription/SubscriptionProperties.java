@@ -18,7 +18,7 @@ public class SubscriptionProperties<T extends Event> {
 
     private long timeOut = -1;
     private int timesToRun = 1;
-    private Consumer<SubscribedEvent<T>> onTimeOut;
+    private Consumer<SubscribedEvent<T>> onTimeOut = (event) -> {};
     private EventPriority priority = EventPriority.NORMAL;
     private boolean async = false;
     private Predicate<T> filter;

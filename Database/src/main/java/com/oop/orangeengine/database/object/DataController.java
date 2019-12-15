@@ -56,8 +56,6 @@ public abstract class DataController {
 
                         database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
                     }
-
-
             }
         });
     }
