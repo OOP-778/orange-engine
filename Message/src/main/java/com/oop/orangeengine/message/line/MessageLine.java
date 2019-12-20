@@ -28,7 +28,6 @@ public class MessageLine implements Cloneable {
     private TextComponent cached;
 
     public MessageLine insert(LineContent lineContent, LineContent at, InsertMethod method) {
-
         int indexOfAt = contentList.indexOf(at);
         if (indexOfAt == -1) throw new IllegalStateException("List doesn't contain location of message getValue!");
 
@@ -36,9 +35,9 @@ public class MessageLine implements Cloneable {
             case BEFORE:
                 contentList.add(indexOfAt - 1, lineContent);
                 return this;
+
             case AFTER:
                 contentList.add(indexOfAt + 1, lineContent);
-
         }
 
         return this;
@@ -65,7 +64,6 @@ public class MessageLine implements Cloneable {
     }
 
     public void send(Player player, Map<String, String> placeholders) {
-
         if (placeholders.isEmpty() && cached != null) {
             contentList.forEach(cl -> cl.triggerSend(player));
             player.spigot().sendMessage(cached);
@@ -108,7 +106,9 @@ public class MessageLine implements Cloneable {
                 if (!charz.toString().equalsIgnoreCase(" ")) {
                     endSpaces = spaceCount;
                     break;
-                } else spaceCount++;
+
+                } else
+                    spaceCount++;
             }
 
             //Append start setSpaces
@@ -124,7 +124,7 @@ public class MessageLine implements Cloneable {
             appendEnd = endBuilder.toString();
         }
 
-        //Merge components
+        // Merge components
         TextComponent base = new TextComponent(appendStart);
         ColorFinder lastColorL = null;
 
@@ -172,7 +172,6 @@ public class MessageLine implements Cloneable {
                         buffer.append(spacedString);
 
                 } else {
-
                     ColorFinder colorFinder = ColorFinder.find(spacedString);
                     StringBuilder spacedBuffer = new StringBuilder(lastColorL.color() + lastColorL.decoration());
 
@@ -212,7 +211,7 @@ public class MessageLine implements Cloneable {
         base.addExtra(new TextComponent(appendEnd));
         this.cached = base;
 
-        //Finish off by sending
+        // Finish off by sending
         contentList.forEach(cl -> cl.triggerSend(player));
         player.spigot().sendMessage(base);
 
@@ -222,7 +221,6 @@ public class MessageLine implements Cloneable {
 
     @Override
     public MessageLine clone() {
-
         MessageLine messageLine = null;
         try {
             messageLine = ((MessageLine) super.clone());

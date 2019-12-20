@@ -5,12 +5,15 @@ import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.menu.AMenu;
 import com.oop.orangeengine.menu.MenuDesigner;
 import com.oop.orangeengine.menu.config.action.ActionListenerController;
+import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.config.button.AConfigButton;
+import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.types.BasicMenu;
 import com.oop.orangeengine.menu.types.PagedMenu;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import lombok.Getter;
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,14 +57,14 @@ public class ConfigMenuTemplate {
                 if (!configButton.placeholder()) {
                     designer.setButton(configButton.layoutId().toCharArray()[0], configButton.toButton());
 
-                } else buttons.add(configButton);
+                } else
+                    buttons.add(configButton);
             }
         }
 
         // Init children menus
         if (configuration.hasChild("children"))
             configuration.getSection("children").getSections().values().forEach(child -> children.put(child.getKey(), new ConfigMenuTemplate(child)));
-
     }
 
     public AMenu build(boolean withChildren) {
@@ -100,6 +103,10 @@ public class ConfigMenuTemplate {
     public void getAllChildren(List<ConfigMenuTemplate> list) {
         list.add(this);
         getChildren().values().forEach(menu -> menu.getAllChildren(list));
+    }
+
+    public <T extends ButtonClickEvent> void listen(ActionProperties<T> props) {
+        ActionListenerController.getInstance().listen(props.menuId(getMenuIdentifier()));
     }
 
 }
