@@ -19,10 +19,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.bukkit.Material;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Accessors(fluent = true, chain = true)
 @Getter
@@ -94,7 +91,10 @@ public abstract class AConfigButton {
     }
 
     public static AConfigButton fromConfig(ConfigurationSection section) {
-        ButtonType type = ButtonType.matchType(section.getValueAsReq("type").toString());
+        String stringType = section.getValueAsReq("type");
+        Objects.requireNonNull(stringType, "Button type not found inside " + section.getPath());
+
+        ButtonType type = ButtonType.matchType(stringType);
         if (type == ButtonType.NORMAL)
             return new ConfigNormalButton(section);
 
