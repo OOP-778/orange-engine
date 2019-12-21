@@ -13,7 +13,7 @@ group 'com.oop.orangeengine'
 def props = new Properties()
 file("version.properties").withInputStream { props.load(it) }
 if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
-    version = props['VERSION'].toInteger() + 1
+    version = props['VERSION'].toDouble() + 0.1
     props['VERSION'] = version.toString()
     props.store(props.newWriter(), null)
 }
