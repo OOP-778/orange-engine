@@ -40,5 +40,9 @@ public class ConfigNormalButton extends AConfigButton {
             button.template(template());
             button.storeIfNotPresent("template", section().getKey());
         }
+
+        button.placeholder(placeholder());
+
+        data().forEach(button::store);
     }
 }

@@ -11,7 +11,6 @@ public class MapperController {
         return instance;
     }
 
-
     private Map<Class, IMapper> mapperMap = new LinkedHashMap<>();
 
     private MapperController() {

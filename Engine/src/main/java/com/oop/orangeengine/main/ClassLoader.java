@@ -3,7 +3,10 @@ package com.oop.orangeengine.main;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.JarUtil;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -41,15 +44,9 @@ public class ClassLoader {
                 Class klass = Class.forName(className);
                 for (Constructor constructor : klass.getConstructors())
                     if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
-                        try {
-                            constructor.newInstance();
-                        } catch (InstantiationException | InvocationTargetException | IllegalAccessException ex) {
-                        }
+                        constructor.newInstance();
                     }
-            } catch (Throwable ex) {
-                if (!ex.getClass().getSimpleName().contains("Found"))
-                    ex.printStackTrace();
-            }
+            } catch (Throwable ex) {}
         }
     }
 

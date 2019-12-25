@@ -10,7 +10,6 @@ import com.oop.orangeengine.database.provider.FieldProviderController;
 import com.oop.orangeengine.database.provider.IDBFieldProvider;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -58,27 +57,12 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
             List<OPair<Field, DatabaseValue>> cachedColumns = new ArrayList<>(getFields(holder));
             for (OPair<Field, DatabaseValue> cachedColumn : cachedColumns) {
                 Object fieldValue = cachedColumn.getFirst().get(this);
-                if (!database.tableHasValue(table.tableName(), cachedColumn.getSecond().columnName(), rowId) && fieldValue == null) {
-
-                    ClassFieldProvider classFieldProvider = FieldProviderController.getInstance().findProvider(holder);
-                    if (classFieldProvider == null)
-                        throw new IllegalStateException("Failed to load database object field column " + cachedColumn.getSecond().columnName() + " cause Class Provider wasn't found!");
-
-                    IDBFieldProvider fieldProvider = classFieldProvider.findProvider(cachedColumn.getSecond().columnName());
-                    if (fieldProvider == null)
-                        throw new IllegalStateException("Failed to load database object field column " + cachedColumn.getSecond().columnName() + " cause Field Provider wasn't found!");
-
-                    Object value = fieldProvider.provide(this);
-                    cachedColumn.getFirst().set(this, value);
-                    hashCodes.put(cachedColumn.getSecond().columnName(), value.hashCode());
-                    continue;
-                }
-
                 Object object = database.gatherColumnValue(table.tableName(), cachedColumn.getSecond(), "id", rowId + "");
+
                 if (object == null && fieldValue == null)
                     throw new IllegalStateException("Failed to load database value from table: " + table.tableName() + ", column: " + cachedColumn.getSecond().columnName() + ", rowID: " + rowId);
 
-                if(fieldValue != null && object == null)
+                if (fieldValue != null && object == null)
                     continue;
 
                 Field field = cachedColumn.getFirst();
@@ -102,13 +86,12 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
                     Object loadedValue = dataHandler.load(object.toString(), field.getType());
                     field.set(this, loadedValue);
                     hashCodes.put(cachedColumn.getSecond().columnName(), loadedValue.hashCode());
-
                 }
             }
             whenLoaded.forEach(Runnable::run);
 
         } catch (Exception ex) {
-           ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 

@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Accessors(fluent = true, chain = true)
-public abstract class AMenu extends Storegable implements InventoryHolder, ButtonHolder {
+public abstract class AMenu extends Storegable implements InventoryHolder, ButtonHolder, Cloneable {
 
     final private int maxSize = 54;
     @Getter
@@ -192,5 +192,16 @@ public abstract class AMenu extends Storegable implements InventoryHolder, Butto
                 .collect(Collectors.toSet());
         collect.forEach(AMenuButton::remove);
         getButtons().removeAll(collect);
+    }
+
+    @Override
+    protected AMenu clone() {
+        AMenu cloned = null;
+        try {
+            cloned = (AMenu) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return cloned;
     }
 }

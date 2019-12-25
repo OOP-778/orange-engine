@@ -15,39 +15,44 @@ import java.util.List;
 @Getter
 public abstract class ODatabase {
 
-    private AsyncQueue queue = new AsyncQueue(this);
-
     protected abstract Connection provideConnection() throws SQLException, ClassNotFoundException;
 
-    public Connection getConnection() throws SQLException, ClassNotFoundException {
-        return provideConnection();
+    public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                connection = provideConnection();
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return connection;
     }
+
+    private Connection connection;
 
     public List<String> getColumns(String table) {
         List<String> columns = new ArrayList<>();
-        try (Connection connection = getConnection()) {
-            try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table, null)) {
+
+        try {
+            try (ResultSet resultSet = getConnection().getMetaData().getColumns(null, null, table, null)) {
                 while (resultSet.next())
                     columns.add(resultSet.getString("COLUMN_NAME"));
             }
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception ex){
+            ex.printStackTrace();
         }
 
         return columns;
     }
 
     public int getRowCount(String table) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT COUNT(*) from " + table)) {
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    resultSet.next();
-                    return resultSet.getInt(1);
-                }
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT COUNT(*) from " + table)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getInt(1);
             }
-
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -56,16 +61,16 @@ public abstract class ODatabase {
 
     public List<Integer> getRowIds(String table) {
         List<Integer> rowsIds = new ArrayList<>();
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM " + table)) {
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next())
-                        rowsIds.add(resultSet.getInt(1));
-                }
+
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT id FROM " + table)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next())
+                    rowsIds.add(resultSet.getInt(1));
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return rowsIds;
     }
 
@@ -74,14 +79,12 @@ public abstract class ODatabase {
     }
 
     public boolean tableHasValue(String table, String column, int id) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    resultSet.next();
-                    return resultSet.getObject(1) != null;
-                }
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getObject(1) != null;
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             new SQLException("Failed to check if object has value (table=" + table + ", column=" + column + ", id=" + id + ") cause of " + e.getMessage()).printStackTrace();
         }
         return false;
@@ -95,36 +98,25 @@ public abstract class ODatabase {
     }
 
     public void execute(String sql) {
-        queue.add(() -> {
-            try (Connection connection = getConnection()) {
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.execute();
-                }
-            } catch (SQLException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        });
-    }
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql)) {
+            preparedStatement.execute();
 
-    public void executeNow(String sql) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.execute();
-            }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    public void executeNow(String sql) {
+        execute(sql);
+    }
+
     public Object gatherColumnValue(String table, DatabaseValue databaseValue, String identifierColumn, String identifierValue) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + databaseValue.columnName() + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    resultSet.next();
-                    return databaseValue.columnType().getObject(resultSet);
-                }
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + databaseValue.columnName() + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                resultSet.next();
+                return databaseValue.columnType().getObject(resultSet);
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException  e) {
             new SQLException("Failed to gather column value (table=" + table + ", column=" + databaseValue.columnName() + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
         }
         return null;
@@ -139,17 +131,15 @@ public abstract class ODatabase {
     }
 
     public int insertAndGetId(String sql) {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.execute();
+        try (PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.execute();
 
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next())
-                    return rs.getInt(1);
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next())
+                return rs.getInt(1);
 
-                close(rs);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
+            close(rs);
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -177,12 +167,10 @@ public abstract class ODatabase {
         }
 
         public void edit() {
-            try (Connection connection = database.getConnection()) {
-                try (Statement statement = connection.createStatement()) {
-                    for (OPair<String, OColumn> column : columns)
-                        statement.executeUpdate("ALTER TABLE " + tableName + " ADD " + column.getFirst() + " " + column.getSecond().getSql());
-                }
-            } catch (SQLException | ClassNotFoundException e) {
+            try (Statement statement = database.getConnection().createStatement()) {
+                for (OPair<String, OColumn> column : columns)
+                    statement.executeUpdate("ALTER TABLE " + tableName + " ADD " + column.getFirst() + " " + column.getSecond().getSql());
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -258,12 +246,10 @@ public abstract class ODatabase {
 
     public List<String> getTables() {
         List<String> tables = new ArrayList<>();
-        try (final Connection connection = getConnection()) {
-            try (ResultSet resultSet = connection.getMetaData().getTables(null, null, null, null)) {
-                while (resultSet.next())
-                    tables.add(resultSet.getString(3));
-            }
-        } catch (SQLException | ClassNotFoundException e) {
+        try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, null, null)) {
+            while (resultSet.next())
+                tables.add(resultSet.getString(3));
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return tables;

@@ -2,8 +2,10 @@ package com.oop.orangeengine.database.object;
 
 import com.google.common.collect.HashBiMap;
 import com.oop.orangeengine.database.ODatabase;
+import com.oop.orangeengine.database.Took;
 import com.oop.orangeengine.database.annotations.DatabaseTable;
 import com.oop.orangeengine.database.annotations.DatabaseValue;
+import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.task.StaticTask;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.DataModificationHandler;
@@ -34,14 +36,19 @@ public abstract class DataController {
     @Setter
     private boolean autoSave = false;
 
+    private OLogger logger;
+
     public DataController(ODatabase database) {
         this.database = database;
+
+        this.logger = getEngine().getLogger();
+        logger.setDebugMode(true);
 
         final DataController instance = this;
         data.setHandler(new DataModificationHandler<DatabaseObject>() {
             @Override
             public void onAdd(DatabaseObject object) {
-                if (autoSave)
+                if (object.getRowId() == -1 && autoSave)
                     save(object);
 
                 object.dataController = instance;
@@ -49,13 +56,12 @@ public abstract class DataController {
 
             @Override
             public void onRemove(DatabaseObject object) {
-                if (autoSave)
-                    if (object.getRowId() != -1) {
-                        DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
-                        assert table != null;
+                if (object.getRowId() != -1) {
+                    DatabaseTable table = object.getClass().getDeclaredAnnotation(DatabaseTable.class);
+                    assert table != null;
 
-                        database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
-                    }
+                    database.execute("DELETE FROM " + table.tableName() + " WHERE id = " + object.getRowId());
+                }
             }
         });
     }
@@ -85,7 +91,7 @@ public abstract class DataController {
                     DatabaseObject value = declaredConstructor.newInstance();
                     value.load(this, rowId);
 
-                    data.addNoHandler(value);
+                    data.add(value);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -116,21 +122,20 @@ public abstract class DataController {
         }});
     }
 
-
     public void saveAll() {
         save(data);
     }
 
-    public void save(Collection<DatabaseObject> objects) {
+    public void save(Collection<? extends DatabaseObject> objects) {
 
         /*
         1. Because this controller can store any DatabaseObject we have to split objects into own maps of class & update table structure
         2. Save objects
         */
 
-        try (Connection connection = database.getConnection()) {
+        Connection connection = database.getConnection();
+        try {
             Map<Class, List<DatabaseObject>> splittedObjects = new HashMap<>();
-            connection.setAutoCommit(false);
 
             for (DatabaseObject object : objects) {
 
@@ -162,9 +167,7 @@ public abstract class DataController {
                 }
             }
 
-            connection.commit();
-
-        } catch (SQLException | IllegalAccessException | ClassNotFoundException ex) {
+        } catch (SQLException | IllegalAccessException ex) {
             ex.printStackTrace();
         }
     }
@@ -203,21 +206,38 @@ public abstract class DataController {
 
         stringBuilder.append(")");
 
+        logger.printDebug(stringBuilder.toString());
+        logger.printDebug("Inserting started");
+        Took took = Took.now();
         try (PreparedStatement statement = connection.prepareStatement(stringBuilder.toString(), Statement.RETURN_GENERATED_KEYS)) {
             IntStream.range(1, fields.size() + 1).forEach(slot -> {
                 try {
+                    Took took1 = Took.now();
                     statement.setObject(slot, object.wrapFieldObject(fields.get(slot - 1).getFirst()));
+                    took1.end();
+
+                    logger.printDebug("Field insertion (" + fields.get(slot-1).getSecond().columnName() + ") took " + took1.took() + "ms");
                 } catch (SQLException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
             });
 
+            Took took3 = Took.now();
             statement.execute();
-            try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if (resultSet.next())
-                    object.setRowId(resultSet.getInt(1));
-            }
+            took3.end();
+            logger.printDebug("Inserting done! Took " + took3.took() + "ms");
+
+            Took took2 = Took.now();
+            // Set row id
+            List<Integer> rowIds = database.getRowIds(table.tableName());
+            object.setRowId(rowIds.get(rowIds.size() - 1));
+
+            took2.end();
+            logger.printDebug("Getting row id took " + took2.took() + "ms");
         }
+
+        took.end();
+        logger.printDebug("Fully Object Insertion Took " + took.took() + "ms");
     }
 
     private void updateObject(DatabaseObject object, Connection connection) throws SQLException, IllegalAccessException {

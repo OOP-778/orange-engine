@@ -55,16 +55,15 @@ public class ConfigurationUtil {
 
         ConfigurationSection leadSection = null;
         ConfigurationSection currentSection = null;
-
         List<String> description = new ArrayList<>();
 
         while (iterator.hasNext()) {
-
             UnreadString line = iterator.next();
             if (line == null) continue;
+
             if (line.value().contains(":") && !line.value().contains("#")) {
 
-                String[] split = line.value().split(":");
+                String[] split = splitAtFirst(line.value(), ':');
                 if (split.length == 1) {
 
                     //Now we have to check if the line below is a list or not
@@ -309,4 +308,32 @@ public class ConfigurationUtil {
             bw.newLine();
 
     }
+
+
+    public static String[] splitAtFirst(String string, char character) {
+        StringBuffer[] stringBuffers = new StringBuffer[]{new StringBuffer(), new StringBuffer()};
+        boolean isFirst = true;
+
+        for (char character2 : string.toCharArray()) {
+            if (isFirst && character == character2) {
+                isFirst = false;
+                continue;
+            }
+
+            stringBuffers[isFirst ? 0 : 1].append(character2);
+        }
+
+        int firstLenght = stringBuffers[0].toString().trim().length();
+        int secondLenght = stringBuffers[1].toString().trim().length();
+
+        if (firstLenght > 0 && secondLenght > 0)
+            return new String[]{stringBuffers[0].toString(), stringBuffers[1].toString()};
+
+        else if (firstLenght > 0)
+            return new String[]{stringBuffers[0].toString()};
+
+        else
+            return new String[]{stringBuffers[1].toString()};
+    }
+
 }

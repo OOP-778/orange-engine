@@ -39,6 +39,8 @@ public abstract class AConfigButton {
     private Set<ClickListener> clickListeners = new HashSet<>();
     private AMenuButton constructedButton;
 
+    private Map<String, Object> data = new HashMap<>();
+
     public AConfigButton(ConfigurationSection section) {
         this.section = section;
 
@@ -51,11 +53,12 @@ public abstract class AConfigButton {
             layoutId = section.getKey();
         }
 
+        section.ifValuePresent("placeholder", boolean.class, bool -> placeholder = bool);
+
         // Load item
         item = new OItem().load(section);
         if (item.getMaterial() == Material.AIR)
             actAsFilled = true;
-
 
         // Init button clicking
         if (section.hasChild("on click")) {
@@ -88,6 +91,10 @@ public abstract class AConfigButton {
             WrappedSound.of(OSound.match(section.getValueAsReq("sound")), 0f, 50f);
 
         section.ifValuePresent("template", boolean.class, bool -> template = bool);
+
+        if (section.hasChild("data")) {
+            data.putAll(section.getSection("data").getValuesConverted());
+        }
     }
 
     public static AConfigButton fromConfig(ConfigurationSection section) {

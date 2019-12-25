@@ -16,6 +16,7 @@ import com.oop.orangeengine.yaml.value.AConfigurationValue;
 import com.oop.orangeengine.yaml.value.ConfigurationList;
 import com.oop.orangeengine.yaml.value.ConfigurationValue;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -101,7 +102,7 @@ public class OConfiguration implements Valuable {
 
                 else if (line.value().contains(":")) {
 
-                    String[] split = line.value().split(":");
+                    String[] split = ConfigurationUtil.splitAtFirst(line.value(), ':');
                     if (split.length == 1) {
 
                         UnreadString[] valuesArray = looper.getObjectsCopy(UnreadString.class);
@@ -109,7 +110,6 @@ public class OConfiguration implements Valuable {
                         boolean valid = isValidIndex(valuesArray, elementIndex + 1);
 
                         if (valid && ConfigurationUtil.isList(valuesArray, elementIndex + 1)) {
-
                             if (ConfigurationUtil.findSpaces(split[0]) >= 2) {
                                 description.clear();
                                 continue;
@@ -145,6 +145,7 @@ public class OConfiguration implements Valuable {
 
                         AConfigurationValue value;
 
+                        System.out.println("Is value: " + split[0] + ", " + split[1]);
                         //Check for list
                         if (split[1].trim().startsWith("[]"))
                             value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
@@ -157,7 +158,6 @@ public class OConfiguration implements Valuable {
                         value.setSpaces(0);
 
                         values.put(value.getKey(), value);
-
                     }
                 }
 

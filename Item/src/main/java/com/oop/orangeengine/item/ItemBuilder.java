@@ -248,4 +248,9 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         return new NBTItem(getItemStack()).getObject(key, type);
     }
 
+    public ItemBuilder mergeLore(List<String> secondLore) {
+        secondLore.forEach(getLore()::add);
+        return this;
+    }
+
 }

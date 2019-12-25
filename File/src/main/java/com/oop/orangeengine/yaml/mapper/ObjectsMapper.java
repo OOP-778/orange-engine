@@ -60,6 +60,7 @@ public class ObjectsMapper {
 
     public static Object mapObject(String string) {
 
+
         final Object[] object = {null};
         stringToObjectMappers.forEach(func -> {
 
@@ -114,8 +115,6 @@ public class ObjectsMapper {
         } catch (Exception ex) {
             return false;
         }
-
-
     }
 
     private static boolean isBoolean(String string) {
