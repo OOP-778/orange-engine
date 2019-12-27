@@ -22,6 +22,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
 import static com.oop.orangeengine.yaml.util.ConfigurationUtil.isValidIndex;
 import static com.oop.orangeengine.yaml.util.ConfigurationUtil.parse;
 import static java.util.stream.Collectors.toList;
@@ -145,7 +146,6 @@ public class OConfiguration implements Valuable {
 
                         AConfigurationValue value;
 
-                        System.out.println("Is value: " + split[0] + ", " + split[1]);
                         //Check for list
                         if (split[1].trim().startsWith("[]"))
                             value = new ConfigurationList(parsedKey.getFirst(), new ArrayList<>());
@@ -502,22 +502,18 @@ public class OConfiguration implements Valuable {
                 .orElse(null);
     }
 
-    public int update(String fileName, Class source) {
-        File folder = getOFile().getFolder();
-        JarUtil.copyFileFromJar(fileName, folder, JarUtil.CopyOption.REPLACE_IF_EXIST, "new" + fileName, source);
+    public ConfigurationUpdater updater() {
+        return updater(oFile);
+    }
+
+    public ConfigurationUpdater updater(OFile oFile) {
+        File folder = oFile.getFolder();
+        String fileName = oFile.getFileName();
+
+        JarUtil.copyFileFromJar(fileName, folder, JarUtil.CopyOption.REPLACE_IF_EXIST, "new" + fileName, getEngine().getOwning().getClass());
         OFile newConfigFile = new OFile(folder, "new" + fileName);
 
         OConfiguration newConfig = new OConfiguration(newConfigFile);
-        ConfigurationUpdater updater = new ConfigurationUpdater(newConfig, this);
-        int updated = updater.update();
-
-        try {
-            FileUtils.touch(newConfigFile.getFile());
-            newConfigFile.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return updated;
+        return new ConfigurationUpdater(newConfig, this);
     }
-
 }

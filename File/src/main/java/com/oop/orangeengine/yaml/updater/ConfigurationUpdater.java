@@ -2,18 +2,20 @@ package com.oop.orangeengine.yaml.updater;
 
 import com.oop.orangeengine.yaml.OConfiguration;
 import com.oop.orangeengine.yaml.value.AConfigurationValue;
+import org.apache.commons.io.FileUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 public class ConfigurationUpdater {
 
     private OConfiguration updatedConfig;
     private OConfiguration oldConfig;
     private UpdateType method = UpdateType.BLACKLISTED;
-    private List<String> listedKeys = new ArrayList<>();
-    private List<String> listedValues = new ArrayList<>();
+    private List<Predicate<String>> listedPaths = new ArrayList<>();
 
     public ConfigurationUpdater(OConfiguration updatedConfig, OConfiguration oldConfig) {
         this.updatedConfig = updatedConfig;
@@ -25,41 +27,34 @@ public class ConfigurationUpdater {
         return this;
     }
 
-    public ConfigurationUpdater listKey(String key) {
-        this.listedKeys.add(key);
+    public ConfigurationUpdater addPathFilter(Predicate<String> pathFilter) {
+        this.listedPaths.add(pathFilter);
         return this;
     }
 
-    public ConfigurationUpdater listValue(String value) {
-        this.listedValues.add(value);
+    public ConfigurationUpdater listPath(String path) {
+        this.listedPaths.add(path2 -> path2.contains(path));
         return this;
     }
 
     public int update() {
-
         AtomicInteger updatedValues = new AtomicInteger();
         List<AConfigurationValue> toUpdate = new ArrayList<>();
 
         updatedConfig.getAllValues().forEach((k, v) -> {
             if (!oldConfig.getAllValues().containsKey(k)) {
 
-                //First check for which mode is on
+                // First check for which mode is on
                 if (method == UpdateType.BLACKLISTED) {
-
-                    if (listedValues.stream().anyMatch(key -> v.getKey().contains(key))) return;
-                    if (listedKeys.stream().anyMatch(key -> v.path().contains(key))) return;
-
+                    if (listedPaths.stream().anyMatch(filter -> filter.test(v.path()))) return;
                     toUpdate.add(v);
 
-                } else {
-
-                    if (listedValues.stream().noneMatch(key -> v.getKey().contains(key))) return;
-                    if (listedKeys.stream().noneMatch(key -> v.path().contains(key))) return;
-
+                } else if (method == UpdateType.WHITELIST) {
+                    if (listedPaths.stream().noneMatch(filter -> filter.test(v.path()))) return;
                     toUpdate.add(v);
 
-                }
-
+                } else
+                    toUpdate.add(v);
             }
         });
 
@@ -73,7 +68,10 @@ public class ConfigurationUpdater {
 
         });
 
-        oldConfig.save();
+        if (updatedValues.get() > 0)
+            oldConfig.save();
+
+        deleteOld();
         return updatedValues.get();
 
     }
@@ -81,8 +79,14 @@ public class ConfigurationUpdater {
     public enum UpdateType {
 
         BLACKLISTED,
-        WHITELIST
+        WHITELIST,
+        NONE
 
+    }
+
+    public void deleteOld() {
+        updatedConfig.getOFile().getFile().setLastModified(System.currentTimeMillis());
+        updatedConfig.getOFile().delete();
     }
 
 }
