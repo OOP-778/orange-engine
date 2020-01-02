@@ -28,7 +28,6 @@ public enum OColumn {
         if (obj instanceof String) return VARCHAR;
 
         return TEXT;
-
     }
 
     public static OColumn fromClass(Class klass) {

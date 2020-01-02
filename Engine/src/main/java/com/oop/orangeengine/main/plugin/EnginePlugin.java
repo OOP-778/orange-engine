@@ -19,6 +19,8 @@ public abstract class EnginePlugin extends JavaPlugin {
     private Engine engine;
     private OLogger oLogger;
 
+    private PluginComponentController pluginComponentController = new PluginComponentController();
+
     @Override
     public void onEnable() {
 
@@ -32,7 +34,6 @@ public abstract class EnginePlugin extends JavaPlugin {
 
         //Enable plugin
         enable();
-
     }
 
     @Override
@@ -42,10 +43,7 @@ public abstract class EnginePlugin extends JavaPlugin {
         // Disable tasks
         onDisableRun.entrySet().stream()
                 .sorted(Comparator.comparing(t -> t.getKey().getOrder()))
-                .forEach(ds -> {
-                    System.out.println("Disable order: " + ds.getKey().getOrder());
-                    ds.getValue().run();
-                });
+                .forEach(ds -> ds.getValue().run());
 
     }
 
@@ -65,4 +63,8 @@ public abstract class EnginePlugin extends JavaPlugin {
     public void disable() {}
 
     public abstract ITaskController provideTaskController();
+
+    public <T extends OComponent> T findComponent(Class<T> clazz) {
+        return (T) pluginComponentController.getComponents().stream().filter(comp -> comp.getClass() == clazz).findFirst().orElse(null);
+    }
 }
