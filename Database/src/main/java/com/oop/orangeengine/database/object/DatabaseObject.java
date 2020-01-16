@@ -23,6 +23,9 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
     private Class holder;
 
     @Getter
+    private ObjectState objectState = ObjectState.LOADING;
+
+    @Getter
     private int rowId = -1;
 
     private List<Runnable> whenLoaded = new LinkedList<>();
@@ -35,6 +38,7 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
         loadFields();
 
         setWhenLoaded(this::updateFields);
+        setWhenLoaded(() -> objectState = ObjectState.LOADED);
     }
 
     public void load(DataController dataController, int rowId) {
@@ -272,5 +276,12 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
 
     public void setWhenLoaded(Runnable runnable) {
         this.whenLoaded.add(runnable);
+    }
+
+    public static enum ObjectState {
+        LOADED,
+        UNLOADED,
+        LOADING,
+        SAVING
     }
 }

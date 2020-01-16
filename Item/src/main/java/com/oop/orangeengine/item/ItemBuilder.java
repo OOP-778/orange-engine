@@ -1,11 +1,16 @@
 package com.oop.orangeengine.item;
 
+import com.oop.orangeengine.item.custom.OItem;
+import com.oop.orangeengine.item.custom.OPotion;
+import com.oop.orangeengine.item.custom.OSkull;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
-import com.oop.orangeengine.yaml.Typeable;
+import com.oop.orangeengine.yaml.ConfigurationSection;
+import com.oop.orangeengine.yaml.OConfiguration;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,17 +21,19 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class ItemBuilder implements Typeable, Cloneable {
+public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     @Getter
     @Setter
     private ItemStack itemStack;
 
-    public ItemBuilder(ItemStack item) {
+    public ItemBuilder(@NonNull ItemStack item) {
         this.itemStack = item;
 
         if (item.getItemMeta() != null) {
@@ -38,11 +45,11 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         }
     }
 
-    public ItemBuilder(OMaterial material) {
+    public ItemBuilder(@NonNull OMaterial material) {
         this(material.parseItem());
     }
 
-    public ItemBuilder(Material mat, int amount) {
+    public ItemBuilder(@NonNull Material mat, int amount) {
         this(new ItemStack(mat, amount));
     }
 
@@ -60,51 +67,51 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         return type.cast(getItemMeta());
     }
 
-    public ItemBuilder setItemMeta(ItemMeta meta) {
+    public T itemMeta(ItemMeta meta) {
         itemStack.setItemMeta(meta);
-        return this;
+        return _returnThis();
     }
 
-    public ItemBuilder removeLoreLine(int index) {
+    public T removeLoreLine(int index) {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
-        if (lore.size() == 0 || (lore.size() - 1 < index)) return this;
+        if (lore.size() == 0 || (lore.size() - 1 < index)) return _returnThis();
 
         lore.remove(index);
         meta.setLore(lore);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder replaceInLore(String key, String value) {
+    public T replaceInLore(String key, String value) {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
-        if (lore.isEmpty()) return this;
+        if (lore.isEmpty()) return _returnThis();
 
         lore.replaceAll(string -> string.replace(key, value));
         meta.setLore(lore);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder makeUnstackable() {
+    public T makeUnstackable() {
         addNBTTag("_randomness_" + ThreadLocalRandom.current().nextInt(999999), "_randomness_" + ThreadLocalRandom.current().nextInt(999999));
-        return this;
+        return _returnThis();
     }
 
-    public ItemBuilder addNBTTag(String key, Object value) {
+    public T addNBTTag(String key, Object value) {
         NBTItem nbt = new NBTItem(itemStack);
         nbt.setObject(key, value);
 
         itemStack = nbt.getItem();
-        return this;
+        return _returnThis();
     }
 
-    public ItemBuilder setLoreLine(int index, String text) {
+    public T setLoreLine(int index, String text) {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
@@ -114,31 +121,31 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         lore.set(index, Helper.color(text));
         meta.setLore(lore);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder appendLore(String text) {
+    public T appendLore(String text) {
         ItemMeta meta = getItemMeta();
         List<String> lore = getLore();
 
         lore.add(Helper.color(text));
         meta.setLore(lore);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder setDisplayName(String displayName) {
+    public T setDisplayName(String displayName) {
         ItemMeta meta = getItemMeta();
         if (meta != null)
             meta.setDisplayName(Helper.color(displayName));
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder setLore(List<String> lore) {
+    public T setLore(List<String> lore) {
         ItemMeta meta = getItemMeta();
         if (meta != null)
             meta.setLore(
@@ -147,47 +154,47 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
                             .collect(Collectors.toList())
             );
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder addItemFlag(ItemFlag... flags) {
+    public T addItemFlag(ItemFlag... flags) {
         ItemMeta meta = getItemMeta();
         meta.addItemFlags(flags);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder removeItemFlag(ItemFlag... flags) {
+    public T removeItemFlag(ItemFlag... flags) {
         ItemMeta meta = getItemMeta();
         meta.removeItemFlags(flags);
 
-        setItemMeta(meta);
-        return this;
+        itemMeta(meta);
+        return _returnThis();
     }
 
-    public ItemBuilder addEnchant(Enchantment enchant, int level) {
+    public T addEnchant(Enchantment enchant, int level) {
         itemStack.addUnsafeEnchantment(enchant, level);
-        return this;
+        return _returnThis();
     }
 
-    public ItemBuilder setDurability(int durability) {
+    public T setDurability(int durability) {
         return setDurability((byte) durability);
     }
 
-    public ItemBuilder setDurability(byte durability) {
+    public T setDurability(byte durability) {
         itemStack.setDurability(durability);
-        return this;
+        return _returnThis();
     }
 
-    public ItemBuilder makeGlow() {
+    public T makeGlow() {
         return addNBTTag("ench", "OrangeEngine");
     }
 
-    public ItemBuilder replaceDisplayName(String key, String value) {
+    public T replaceDisplayName(String key, String value) {
         setDisplayName(getDisplayName().replace(key, value));
-        return this;
+        return _returnThis();
     }
 
     public String getDisplayName() {
@@ -213,9 +220,9 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         return nbt.hasKey("ench");
     }
 
-    public ItemBuilder setMaterial(Material material) {
+    public T setMaterial(Material material) {
         itemStack.setType(material);
-        return this;
+        return _returnThis();
     }
 
     public Material getMaterial() {
@@ -223,13 +230,13 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
     }
 
     @Deprecated
-    public ItemBuilder addLore(String text) {
+    public T addLore(String text) {
         return appendLore(text);
     }
 
-    public ItemBuilder setAmount(int amount) {
+    public T setAmount(int amount) {
         getItemStack().setAmount(amount);
-        return this;
+        return _returnThis();
     }
 
     public int getAmount() {
@@ -248,9 +255,97 @@ public abstract class ItemBuilder implements Typeable, Cloneable {
         return new NBTItem(getItemStack()).getObject(key, type);
     }
 
-    public ItemBuilder mergeLore(List<String> secondLore) {
+    public T mergeLore(List<String> secondLore) {
         secondLore.forEach(getLore()::add);
-        return this;
+        return _returnThis();
+    }
+
+    public T load(ConfigurationSection section) {
+        OMaterial material = OMaterial.matchMaterial(section.getValueAsReq("material", String.class));
+        Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
+
+        setItemStack(material.parseItem());
+        if (getItemStack().getItemMeta() == null)
+            getItemStack().setItemMeta(Bukkit.getItemFactory().getItemMeta(material.parseMaterial()));
+
+        //Load Display name
+        section.ifValuePresent("display name", String.class, this::setDisplayName);
+
+        //Load lore
+        section.ifValuePresent("lore", List.class, this::setLore);
+
+        // Load amount
+        section.ifValuePresent("amount", Integer.class, this::setAmount);
+
+        //Load glow
+        section.ifValuePresent("glow", boolean.class, bool -> {
+            if (bool)
+                makeGlow();
+        });
+
+        //Load Enchants
+        section.ifValuePresent("enchants", List.class, list -> asListString(list, stringList -> {
+            for (String enchant : stringList) {
+
+                String[] split = enchant.split(":");
+                if (split.length <= 1) continue;
+
+                addEnchant(Enchantment.getByName(split[0].toUpperCase()), Integer.parseInt(split[1]));
+
+            }
+        }));
+
+        return _returnThis();
+    }
+
+    public void save(ConfigurationSection section, OItem object) {
+
+        // Set material
+        section.setValue("material", object.getMaterial().name());
+
+        // Set display name
+        if (object.getDisplayName().length() > 0)
+            section.setValue("display name", object.getDisplayName());
+
+        // Set if glow
+        if (object.isGlow())
+            section.setValue("glow", true);
+
+        if (object.getAmount() > 1)
+            section.setValue("amount", object.getAmount());
+
+        // Set lore
+        if (!object.getLore().isEmpty())
+            section.setValue("lore", object.getLore());
+
+        // Set Enchants
+        Set<OPair<Enchantment, Integer>> enchants = object.getEnchants();
+        if (!enchants.isEmpty())
+            section.setValue(
+                    "enchants",
+                    enchants.stream()
+                            .map(enchant -> enchant.getFirst().getName() + ":" + enchant.getSecond())
+                            .collect(Collectors.toList())
+            );
+    }
+
+    private void asListString(List list, Consumer<List<String>> consumer) {
+        consumer.accept(list);
+    }
+    
+    protected abstract T _returnThis();
+
+    public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigurationSection section) {
+        OMaterial material = OMaterial.matchMaterial(section.getValueAsReq("material", String.class));
+        Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
+
+        if (material.name().contains("HEAD"))
+            return (ItemBuilder<T>) new OSkull().load(section);
+
+        else if (material.name().contains("POTION"))
+            return (ItemBuilder<T>) new OPotion(material);
+
+        return (ItemBuilder<T>) new OItem().load(section);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.oop.orangeengine.main.plugin;
 
 import com.oop.orangeengine.main.Engine;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
 
 public interface OComponent<O extends EnginePlugin> {
 
@@ -15,7 +14,8 @@ public interface OComponent<O extends EnginePlugin> {
 
     boolean load();
 
-    default void disable() {}
+    default void disable() {
+    }
 
     default boolean reload() {
         disable();
