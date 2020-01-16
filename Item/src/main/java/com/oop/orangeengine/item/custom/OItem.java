@@ -34,16 +34,6 @@ public class OItem extends ItemBuilder<OItem> implements Cloneable {
     }
 
     @Override
-    public OItem clone() {
-        try {
-            return (OItem) super.clone();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
     protected OItem _returnThis() {
         return this;
     }

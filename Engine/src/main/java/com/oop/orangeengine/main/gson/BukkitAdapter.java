@@ -58,9 +58,7 @@ public class BukkitAdapter {
 
             if (itemStack.hasItemMeta()) {
                 JsonObject metaJson = new JsonObject();
-
                 ItemMeta meta = itemStack.getItemMeta();
-
 
                 if (meta.hasDisplayName()) {
                     metaJson.addProperty("displayname", meta.getDisplayName());

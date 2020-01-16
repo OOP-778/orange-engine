@@ -8,7 +8,6 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.yaml.ConfigurationSection;
-import com.oop.orangeengine.yaml.OConfiguration;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -260,6 +260,11 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         return _returnThis();
     }
 
+    public T mergeLore(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta() || !itemStack.getItemMeta().hasLore()) return _returnThis();
+        return mergeLore(itemStack.getItemMeta().getLore());
+    }
+
     public T load(ConfigurationSection section) {
         OMaterial material = OMaterial.matchMaterial(section.getValueAsReq("material", String.class));
         Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
@@ -332,7 +337,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     private void asListString(List list, Consumer<List<String>> consumer) {
         consumer.accept(list);
     }
-    
+
     protected abstract T _returnThis();
 
     public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigurationSection section) {
@@ -348,4 +353,12 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         return (ItemBuilder<T>) new OItem().load(section);
     }
 
+    public T clone() {
+        try {
+            return (T) getClass().getConstructor(ItemStack.class).newInstance(itemStack.clone());
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
