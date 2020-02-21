@@ -1,5 +1,6 @@
 package com.oop.orangeengine.database.object;
 
+import com.google.common.collect.Sets;
 import com.oop.orangeengine.database.ODatabase;
 import com.oop.orangeengine.database.annotations.DatabaseTable;
 import com.oop.orangeengine.database.annotations.DatabaseValue;
@@ -9,6 +10,7 @@ import com.oop.orangeengine.database.provider.ClassFieldProvider;
 import com.oop.orangeengine.database.provider.FieldProviderController;
 import com.oop.orangeengine.database.provider.IDBFieldProvider;
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
@@ -18,8 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DatabaseObject implements DatabaseUpdatable {
 
+
     private static Map<Class, List<OPair<Field, DatabaseValue>>> cachedColumns = new ConcurrentHashMap<>();
-    protected Map<String, Integer> hashCodes = new ConcurrentHashMap<>();
+
+    @Getter
+    private Map<String, Integer> hashCodes = new ConcurrentHashMap<>();
     private Class holder;
 
     @Getter
@@ -203,11 +208,9 @@ public abstract class DatabaseObject implements DatabaseUpdatable {
 
             return dataHandler.serialize(value);
         }
-
     }
 
     private boolean isRaw(Object object) {
-
         Class klass = object.getClass();
         return klass == int.class ||
                 klass == Integer.class ||

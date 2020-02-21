@@ -17,6 +17,8 @@ import java.util.function.Predicate;
 public class SubscriptionProperties<T extends Event> {
 
     private long timeOut = -1;
+    private Predicate<T> runTill;
+
     private int timesToRun = 1;
     private Consumer<SubscribedEvent<T>> onTimeOut = (event) -> {};
     private EventPriority priority = EventPriority.NORMAL;

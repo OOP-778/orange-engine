@@ -2,12 +2,13 @@ package com.oop.orangeengine.yaml.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class Descriptionable {
 
-    private List<String> description = new ArrayList<>();
+    private List<String> description = new LinkedList<>();
 
     public Descriptionable addDescription(String string) {
         description.add(string);
@@ -16,7 +17,6 @@ public abstract class Descriptionable {
 
     public Descriptionable description(List<String> description) {
         this.description = new ArrayList<>(description);
-        description.clear();
         return this;
     }
 
@@ -25,7 +25,6 @@ public abstract class Descriptionable {
     }
 
     public void writeDescription(CustomWriter bw, int spaces) throws IOException {
-
         if (!description.isEmpty()) {
 
             bw.newLine();
@@ -48,8 +47,6 @@ public abstract class Descriptionable {
                 for (String d : description)
                     bw.write(ConfigurationUtil.stringWithSpaces(spaces) + "# " + d);
             }
-
         }
-
     }
 }

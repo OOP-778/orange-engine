@@ -254,7 +254,7 @@ public abstract class DataController {
 
         fields.removeIf(field -> {
 
-            Integer lastHashCode = object.hashCodes.get(field.getSecond().columnName());
+            Integer lastHashCode = object.getHashCodes().get(field.getSecond().columnName());
             Object value = null;
             try {
                 value = field.getFirst().get(object);
@@ -265,15 +265,15 @@ public abstract class DataController {
 
             int currentHashCode = value.hashCode();
             if (lastHashCode != null) {
-                object.hashCodes.remove(field.getSecond().columnName());
-                object.hashCodes.put(field.getSecond().columnName(), currentHashCode);
+                object.getHashCodes().remove(field.getSecond().columnName());
+                object.getHashCodes().put(field.getSecond().columnName(), currentHashCode);
 
                 if (currentHashCode == lastHashCode) {
                     return true;
                 }
 
             }
-            object.hashCodes.put(field.getSecond().columnName(), currentHashCode);
+            object.getHashCodes().put(field.getSecond().columnName(), currentHashCode);
             return false;
 
         });

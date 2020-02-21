@@ -1,16 +1,20 @@
 package com.oop.orangeengine.message.line;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Chars;
 import com.oop.orangeengine.message.Centered;
 import com.oop.orangeengine.message.ColorFinder;
+import com.oop.orangeengine.message.WordsQueue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -27,6 +31,18 @@ public class MessageLine implements Cloneable {
 
     private TextComponent cached;
 
+    public MessageLine() {}
+
+    public MessageLine(String content) {
+        contentList.add(new LineContent(content));
+    }
+
+    public MessageLine(LineContent content) {
+        contentList.add(content);
+    }
+
+
+
     public MessageLine insert(LineContent lineContent, LineContent at, InsertMethod method) {
         int indexOfAt = contentList.indexOf(at);
         if (indexOfAt == -1) throw new IllegalStateException("List doesn't contain location of message getValue!");
@@ -41,7 +57,14 @@ public class MessageLine implements Cloneable {
         }
 
         return this;
+    }
 
+    public MessageLine replace(LineContent replace, LineContent to) {
+        int i = contentList.indexOf(replace);
+        Preconditions.checkArgument(i != -1);
+
+        contentList.set(i, to);
+        return this;
     }
 
     public MessageLine insert(LineContent lineContent, int at) {
@@ -56,6 +79,16 @@ public class MessageLine implements Cloneable {
 
     public MessageLine append(String content) {
         contentList.add(new LineContent(content));
+        return this;
+    }
+
+    public MessageLine replace(String key, Object value) {
+        contentList.forEach(content -> content.replace(key, value));
+        return this;
+    }
+
+    public MessageLine replace(Map<String, Object> placeholders) {
+        contentList.forEach(content -> content.replace(placeholders));
         return this;
     }
 
@@ -76,12 +109,10 @@ public class MessageLine implements Cloneable {
             //Okay so we need to gather setSpaces
             StringBuilder builder = new StringBuilder();
             contentList.forEach(c -> {
-
                 String content = c.getText();
                 for (String key : placeholders.keySet())
                     content = content.replace(key, placeholders.get(key));
                 builder.append(content);
-
             });
 
             String centeredMessage = Centered.getCenteredMessage(builder.toString());
@@ -126,86 +157,24 @@ public class MessageLine implements Cloneable {
 
         // Merge components
         TextComponent base = new TextComponent(appendStart);
-        ColorFinder lastColorL = null;
+        WordsQueue lastQueue = null;
 
         for (LineContent lineContent : contentList) {
-
             LineContent clonedLC = lineContent.clone();
-            List<String> checkThrough = new ArrayList<>();
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
 
-            if (lastColorL != null)
-                buffer.append(lastColorL.color()).append(lastColorL.decoration());
+            lastQueue = WordsQueue.of(lineContent.getText(), lastQueue == null ? new WordsQueue.WordDecoration(null, null) : lastQueue.getEndDecoration());
+            lastQueue.getWords().forEach(word -> builder.append(word.getString()));
 
-            if (clonedLC.getText().trim().length() == 0) {
-                buffer.append(" ");
-                continue;
+            String[] forLambda = new String[]{builder.toString()};
+            placeholders.forEach((key, plac) -> forLambda[0] = forLambda[0].replace(key, plac));
 
-            } else if (clonedLC.getText().contains(" "))
-                checkThrough.addAll(Arrays.asList(clonedLC.getText().split(" ")));
-
-            else {
-                lastColorL = ColorFinder.find(clonedLC.getText());
-                buffer.append(clonedLC.getText());
-
-            }
-
-            if (checkThrough.size() == 1) {
-                if (clonedLC.getText().startsWith(" "))
-                    buffer.append(" ").append(checkThrough.get(0));
-
-                else if (clonedLC.getText().endsWith(" "))
-                    buffer.append(checkThrough.get(0)).append(" ");
-
-                clonedLC.text(buffer.toString());
-                base.addExtra(clonedLC.create());
-                continue;
-            }
-
-            for (String spacedString : checkThrough) {
-                if (lastColorL == null) {
-                    lastColorL = ColorFinder.find(spacedString);
-                    if (checkThrough.indexOf(spacedString) > 0)
-                        buffer.append(" ").append(spacedString);
-
-                    else
-                        buffer.append(spacedString);
-
-                } else {
-                    ColorFinder colorFinder = ColorFinder.find(spacedString);
-                    StringBuilder spacedBuffer = new StringBuilder(lastColorL.color() + lastColorL.decoration());
-
-                    for (char character : spacedString.toCharArray()) {
-                        if (!spacedBuffer.toString().contains(lastColorL.color() + lastColorL.decoration()))
-                            spacedBuffer.append(lastColorL.color()).append(lastColorL.decoration()).append(character);
-
-                        else
-                            spacedBuffer.append(character);
-
-                    }
-
-                    if (!colorFinder.color().contentEquals(""))
-                        lastColorL = colorFinder;
-
-                    if (checkThrough.indexOf(spacedString) > 0)
-                        buffer.append(" ").append(spacedBuffer);
-
-                    else
-                        buffer.append(spacedBuffer);
-                }
-
-            }
-
-            String[] forLambda = new String[]{buffer.toString()};
-            placeholders.forEach((key, plac) -> forLambda[0] = forLambda[0].replaceAll(key, plac));
-
-            //Set the Text
+            // Set the Text
             clonedLC.text(forLambda[0]);
             base.addExtra(clonedLC.create());
 
             if (autoSpaces)
                 base.addExtra(new TextComponent(" "));
-
         }
 
         base.addExtra(new TextComponent(appendEnd));
@@ -243,26 +212,6 @@ public class MessageLine implements Cloneable {
 
     }
 
-    public static String getLastColors(String input) {
-        StringBuilder result = new StringBuilder();
-        int length = input.length();
-
-        for (int index = length - 1; index > -1; --index) {
-            char section = input.charAt(index);
-            if ((section == '&' || section == '\u00a7') && index < length -1) {
-
-                char c = input.charAt(index + 1);
-                ChatColor color = ChatColor.getByChar(c);
-                if (color == null) continue;
-
-                result.insert(0, color.toString());
-                if (color.isColor() || color.equals(ChatColor.RESET))
-                    break;
-            }
-        }
-        return result.toString();
-    }
-
     public String getRaw() {
         String[] rawText = new String[]{""};
         String space = autoSpaces() ? " " : "";
@@ -270,5 +219,25 @@ public class MessageLine implements Cloneable {
         contentList.forEach(lineContent -> rawText[0] = space + lineContent.getText());
 
         return rawText[0];
+    }
+
+    public MessageLine replace(String key, LineContent content) {
+        /*
+        Let's say key is %test% whenever found in content it should split the content up in two parts
+        And insert the content at the place where it was split
+        */
+        for (LineContent lineContent : new LinkedList<>(this.contentList)) {
+            String[] split = lineContent.getText().split(key);
+            if (split.length == 2) {
+                LineContent firstPart = new LineContent(split[0]);
+                LineContent secondPart = content.clone();
+                LineContent thirdPart = new LineContent(split[1]);
+
+                replace(lineContent, firstPart);
+                insert(secondPart, firstPart, InsertMethod.AFTER);
+                insert(thirdPart, secondPart, InsertMethod.AFTER);
+            }
+        }
+        return this;
     }
 }

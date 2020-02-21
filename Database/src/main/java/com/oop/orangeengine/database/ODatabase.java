@@ -1,10 +1,12 @@
 package com.oop.orangeengine.database;
 
 import com.oop.orangeengine.database.annotations.DatabaseValue;
-import com.oop.orangeengine.database.object.AsyncQueue;
+import com.oop.orangeengine.database.newversion.annotation.PrimaryKey;
+import com.oop.orangeengine.database.newversion.annotation.Table;
 import com.oop.orangeengine.database.types.SqlLiteDatabase;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -74,27 +76,33 @@ public abstract class ODatabase {
         return rowsIds;
     }
 
+    public List<String> getRowIds(PrimaryKey pk, Table table) {
+        List<String> rowsIds = new ArrayList<>();
+
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + pk.name() + " FROM " + table.name())) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next())
+                    rowsIds.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rowsIds;
+    }
+
     public boolean hasColumn(String table, String column) {
         return getColumns(table).contains(column);
     }
 
-    public boolean tableHasValue(String table, String column, int id) {
-        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + column + " from " + table + " where id = '" + id + "'")) {
+    public boolean tableHasPKUsed(String table, PrimaryKey pki, String primaryKey) {
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + pki.name() + " from " + table + " where " + pki.name() + " = '" + primaryKey + "'")) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                resultSet.next();
-                return resultSet.getObject(1) != null;
+                return resultSet.next() && resultSet.getObject(1) != null;
             }
-        } catch (SQLException e) {
-            new SQLException("Failed to check if object has value (table=" + table + ", column=" + column + ", id=" + id + ") cause of " + e.getMessage()).printStackTrace();
+        } catch (Throwable e) {
+            throw new IllegalStateException("Failed to check if table contains value (table=" + table + ", " + pki.name() + "=" + primaryKey + ") cause of " + e.getMessage(), e);
         }
-        return false;
-    }
-
-    public void createColumn(String table, String column, OColumn columnType) {
-        // Make sure the column doesn't exist so we don't get exception
-        if (hasColumn(table, column)) return;
-
-        execute("ALTER TABLE " + table + " ADD " + column + " " + columnType.getSql());
     }
 
     public void execute(String sql) {
@@ -118,6 +126,18 @@ public abstract class ODatabase {
             }
         } catch (SQLException  e) {
             new SQLException("Failed to gather column value (table=" + table + ", column=" + databaseValue.columnName() + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
+        }
+        return null;
+    }
+
+    public String gatherColumnValue(String table, String column, String identifierColumn, String identifierValue) {
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + column + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getString(1);
+            }
+        } catch (SQLException  e) {
+            new SQLException("Failed to gather column value (table=" + table + ", column=" + column + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
         }
         return null;
     }
@@ -253,6 +273,20 @@ public abstract class ODatabase {
             e.printStackTrace();
         }
         return tables;
+    }
+
+    public List<String> getPrimaryKeys(@NonNull String tableName) {
+       Connection connection = getConnection();
+       List<String> primaryKeys = new ArrayList<>();
+
+       try (ResultSet rs = connection.getMetaData().getPrimaryKeys(null, null, tableName)) {
+           while (rs.next())
+               primaryKeys.add(rs.getString("COLUMN_NAME"));
+
+       } catch (Throwable thrw) {
+           throw new IllegalStateException("Failed to get primary keys of table " + tableName + " cause " + thrw.getMessage(), thrw);
+       }
+       return primaryKeys;
     }
 
     private static void close(AutoCloseable... closeables) {

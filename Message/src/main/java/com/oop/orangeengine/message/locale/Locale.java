@@ -7,6 +7,7 @@ import com.oop.orangeengine.message.YamlMessage;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.OConfiguration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -26,10 +27,16 @@ public class Locale {
         section = configuration.createNewSection(locale);
 
         // Load from values
-        section.getValues().forEach((key, value) -> localeMap.put(key, YamlMessage.fromValue(value.getValueAsReq())));
+        section.getValues().forEach((key, value) -> {
+            if (value.getValue() instanceof List)
+                localeMap.put(key, new OMessage(((List<String>)value.getValue())));
+
+            else
+                localeMap.put(key, new OMessage(value.getValueAsReq(String.class)));
+        });
 
         // Load from sections
-        section.getSections().forEach((key, localeSection) -> localeMap.put(localeSection.getKey(), YamlMessage.fromSection(localeSection)));
+        section.getSections().forEach((key, localeSection) -> localeMap.put(localeSection.getKey(), YamlMessage.load(localeSection)));
     }
 
     public static void load(String locale) {
@@ -40,12 +47,12 @@ public class Locale {
         return localeInstance;
     }
 
-    public OMessage getMessage(String id, Supplier<OMessage> ifNotFound) {
-        id = id.toLowerCase().replace("_", " ");
+    public OMessage getMessage(String id, Supplier<OMessage> ifNotFound, boolean flattened, String... description) {
+        id = id.toLowerCase().replace("_", flattened ? " " : ".");
         OMessage message = localeMap.get(id);
         if (message == null) {
             message = ifNotFound.get();
-            YamlMessage.saveToConfig(message, configuration, section.getKey() + "." + id);
+            YamlMessage.save(message, section.getKey() + "." + id, configuration, description);
             configuration.save();
         }
 

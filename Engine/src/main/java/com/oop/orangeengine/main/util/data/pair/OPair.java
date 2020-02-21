@@ -2,8 +2,10 @@ package com.oop.orangeengine.main.util.data.pair;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 @AllArgsConstructor()
 public class OPair<F, S> implements IPair {
 

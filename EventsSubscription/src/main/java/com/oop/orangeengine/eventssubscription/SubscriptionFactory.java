@@ -6,7 +6,9 @@ import com.oop.orangeengine.main.Cleaner;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.util.DefaultInitialization;
+import org.bukkit.block.Block;
 import org.bukkit.event.Event;
+import org.bukkit.material.Bed;
 
 import java.util.function.Consumer;
 
@@ -14,9 +16,11 @@ public class SubscriptionFactory extends AEngineComponent {
 
     private static SubscriptionFactory INSTANCE;
 
-    @DefaultInitialization
-    public SubscriptionFactory() {
+    static {
+        new SubscriptionFactory();
+    }
 
+    public SubscriptionFactory() {
         if (INSTANCE != null) {
             try {
                 throw new IllegalAccessException("Instance of EventsSubscription class already exists!");

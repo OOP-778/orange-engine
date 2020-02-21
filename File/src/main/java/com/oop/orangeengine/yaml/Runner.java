@@ -31,7 +31,6 @@ public class Runner {
 //            e.printStackTrace();
 //        }
 
-        ClassLoader.load();
 
     }
 

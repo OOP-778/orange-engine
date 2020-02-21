@@ -1,4 +1,4 @@
-package com.oop.orangeengine.database.holder;
+package com.oop.orangeengine.database.newversion.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

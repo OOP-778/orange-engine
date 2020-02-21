@@ -1,7 +1,6 @@
 package com.oop.orangeengine.database.types;
 
 import com.oop.orangeengine.database.ODatabase;
-import com.oop.orangeengine.main.events.SyncEvents;
 
 import java.io.File;
 import java.sql.Connection;
@@ -18,6 +17,8 @@ public class SqlLiteDatabase extends ODatabase {
 
     public SqlLiteDatabase(File folder, String name) {
         this("jdbc:sqlite:" + folder.getAbsolutePath() + File.separator + name + ".db");
+        if (!folder.exists())
+            folder.mkdirs();
     }
 
     @Override

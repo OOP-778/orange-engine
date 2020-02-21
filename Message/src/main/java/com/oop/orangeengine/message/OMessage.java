@@ -1,5 +1,6 @@
 package com.oop.orangeengine.message;
 
+import com.oop.orangeengine.message.line.LineContent;
 import com.oop.orangeengine.message.line.MessageLine;
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -10,11 +11,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Getter
 public class OMessage implements Cloneable {
 
     private LinkedList<MessageLine> lineList = new LinkedList<>();
     private boolean center = false;
+
+    public OMessage() {}
+
+    public OMessage(String content) {
+        lineList.add(new MessageLine(content));
+    }
+
+    public OMessage(List<String> list) {
+        lineList.addAll(list.stream().map(MessageLine::new).collect(toList()));
+    }
+
+    public OMessage(MessageLine line) {
+        lineList.add(line);
+    }
+
+    public OMessage(LineContent content) {
+        lineList.add(new MessageLine(content));
+    }
 
     public OMessage appendLine(MessageLine line) {
         this.lineList.add(line);
@@ -62,5 +83,20 @@ public class OMessage implements Cloneable {
 
         message.center = center;
         return message;
+    }
+
+    public OMessage replace(String key, Object value) {
+        lineList.forEach(line -> line.replace(key, value));
+        return this;
+    }
+
+    public OMessage replace(Map<String, Object> placeholders) {
+        lineList.forEach(line -> line.replace(placeholders));
+        return this;
+    }
+
+    public OMessage replace(String key, LineContent content) {
+        lineList.forEach(line -> line.replace(key, content));
+        return this;
     }
 }

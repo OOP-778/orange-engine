@@ -5,170 +5,241 @@ import com.oop.orangeengine.message.line.LineContent;
 import com.oop.orangeengine.message.line.MessageLine;
 import com.oop.orangeengine.yaml.ConfigurationSection;
 import com.oop.orangeengine.yaml.OConfiguration;
+import com.oop.orangeengine.yaml.value.AConfigurationValue;
+import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class YamlMessage {
 
-    public static void saveToConfig(OMessage message, OConfiguration configuration, String path) {
-        if (message.getLineList().size() <= 1) {
+    /*
+    SAVING PART
+    */
+    public static void save(OMessage message, String path, OConfiguration configuration, String... description) {
+        /*
+        If message doesn't have any attributes like center and it's one lined.
+        */
+        if (!requiresSection(message)) {
+            if (requiresSection(message.getLineList().element())) {
+                MessageLine line = message.getLineList().element();
+                ConfigurationSection section = configuration.createNewSection(path);
+                section.description(new ArrayList<>(Arrays.asList(description)));
 
-            //We got one line
-            MessageLine line = message.getLineList().get(0);
-            if (line.contentList().size() == 1) {
-                LineContent lineContent = line.contentList().get(0);
-                if (lineContent.getAdditionList().isEmpty() && lineContent.getHoverText() == null) {
+                save(line, section);
 
-                    //Simple set (as a getValue)
-                    configuration.setValue(path, lineContent.getText());
-
-                } else
-                    saveLine(configuration.createNewSection(path), lineContent);
-            } else {
-
-                ConfigurationSection messageSection = configuration.createNewSection(path);
-                messageSection.setValue("center", message.isCenter());
-
-                ConfigurationSection contentSection = messageSection.createNewSection("content");
-                int index = 1;
-                for (LineContent lineContent : line.contentList()) {
-
-                    ConfigurationSection textSection = contentSection.createNewSection(index + "");
-                    saveLine(textSection, lineContent);
-                    index++;
-
-                }
-            }
-
+            } else
+                configuration.setValue(path, message.getLineList().element().contentList().element().getText()).description(new ArrayList<>(Arrays.asList(description)));
         } else {
-            ConfigurationSection mainSection = configuration.createNewSection(path);
-            ConfigurationSection linesSection = mainSection.createNewSection("lines");
+            if (!message.isCenter() && allOneLined(message)) {
+                configuration.setValue(path, message.getLineList()
+                        .stream()
+                        .map(MessageLine::getRaw)
+                        .collect(Collectors.toList()))
+                        .description(new ArrayList<>(Arrays.asList(description)));
 
-            if (message.isCenter())
-                mainSection.setValue("center", true);
+            } else {
+                ConfigurationSection section = configuration.createNewSection(path);
+                section.description(new ArrayList<>(Arrays.asList(description)));
+                if (message.isCenter())
+                    section.setValue("center", true);
 
-            int currentLine = 1;
-            for (MessageLine line : message.getLineList()) {
-                ConfigurationSection lineSection = linesSection.createNewSection(currentLine + "");
+                if (message.getLineList().size() == 1) {
+                    MessageLine line = message.getLineList().element();
+                    save(line, section);
 
-                if (line.contentList().size() == 1) {
-                    LineContent lineContent = line.contentList().get(0);
-                    if (lineContent.getAdditionList().isEmpty() && lineContent.getHoverText() == null) {
-
-                        //Simple set (as a getValue)
-                        lineSection.setValue("text", lineContent.getText());
-
-                    } else
-                        saveLine(lineSection, lineContent);
                 } else {
-                    ConfigurationSection contentSection = lineSection.createNewSection("content");
-                    int index = 1;
-                    for (LineContent lineContent : line.contentList()) {
+                    ConfigurationSection linesSection = section.createNewSection("lines");
 
-                        ConfigurationSection textSection = contentSection.createNewSection(index + "");
-                        saveLine(textSection, lineContent);
-                        index++;
+                    int i = 1;
+                    for (MessageLine line : message.getLineList()) {
+                        if (requiresSection(line)) {
+                            ConfigurationSection lineSection = linesSection.createNewSection(i + "");
+                            save(line, lineSection);
 
+                        } else linesSection.setValue(i + "", line.contentList().element().getText());
+                        i++;
                     }
                 }
-                currentLine++;
             }
         }
-
     }
 
-    private static void saveLine(ConfigurationSection section, LineContent lineContent) {
+    private static void save(MessageLine line, ConfigurationSection section) {
+        if (line.autoSpaces())
+            section.setValue("auto spaces", true);
 
-        section.setValue("text", lineContent.getText());
-        if (lineContent.getHoverText() != null)
-            section.setValue("hover", lineContent.getHoverText());
+        if (line.center())
+            section.setValue("center", true);
 
-        lineContent.getAdditionList().stream().
-                filter(o -> o instanceof CommandAddition).
-                map(o -> (CommandAddition) o).
-                findFirst().
-                ifPresent(cmdAddition -> section.setValue("runCommand", cmdAddition.getCommand()));
-    }
+        if (line.contentList().size() == 1) {
+            LineContent content = line.contentList().element();
+            save(content, section);
 
-    private static LineContent initContent(ConfigurationSection section) {
+        } else if (line.contentList().size() > 1) {
+            ConfigurationSection allContentSection = section.createNewSection("content");
 
-        LineContent lineContent = new LineContent(section.getValueAsReq("text"));
+            int i = 1;
+            for (LineContent content : line.contentList()) {
+                if (!requiresSection(content)) {
+                    allContentSection.setValue(i + "", content.getText());
 
-        if (section.isPresentValue("hover")) lineContent.hoverText(section.getValueAsReq("hover"));
-        if (section.isPresentValue("runCommand"))
-            lineContent.addAddition(new CommandAddition(section.getValueAsReq("runCommand")));
+                } else {
+                    ConfigurationSection contentSection = allContentSection.createNewSection(i + "");
+                    save(content, contentSection);
+                }
 
-        return lineContent;
-    }
-
-    private static MessageLine initLine(ConfigurationSection section) {
-
-        MessageLine messageLine = new MessageLine();
-        messageLine.autoSpaces(true);
-        if (section.isPresentValue("text"))
-
-            //Single Content = Single LineContent
-            messageLine.append(initContent(section));
-
-        else if (section.isPresentSection("content")) {
-
-            Map<Integer, LineContent> lineContentMap = new HashMap<>();
-            for (ConfigurationSection contentSection : section.getSection("content").getSections().values()) {
-
-                int place = Integer.parseInt(contentSection.getKey());
-                lineContentMap.put(place, initContent(contentSection));
-
+                i++;
             }
+        }
+    }
 
-            List<Integer> places = new ArrayList<>(lineContentMap.keySet());
-            Collections.sort(places);
+    private static void save(LineContent content, ConfigurationSection section) {
+        section.setValue("text", content.getText());
 
-            places.forEach(place -> messageLine.append(lineContentMap.get(place)));
+        // Set hover text
+        if (!content.getHoverText().isEmpty()) {
+            if (content.getHoverText().size() == 1)
+                section.setValue("hover", content.getHoverText().get(0));
 
-        } else {
-            //Throw
+            else
+                section.setValue("hover", content.getHoverText());
         }
 
-        return messageLine;
-
+        // Save Additions
+        content.getAdditionList()
+                .stream()
+                .filter(addition -> addition instanceof CommandAddition)
+                .findFirst()
+                .ifPresent(addition -> section.setValue("command", ((CommandAddition) addition).getCommand()));
     }
 
-    public static OMessage fromConfiguration(OConfiguration configuration, String path) {
-
-        ConfigurationSection section = configuration.getSection(path);
-        if(section == null) return null;
-
-        return fromSection(section);
-
+    private static boolean requiresSection(OMessage message) {
+        if (isMultiLine(message) || message.isCenter()) return true;
+        return requiresSection(message.getLineList().element());
     }
 
-    public static OMessage fromValue(String text) {
-        return new OMessage().appendLine(text);
+    private static boolean requiresSection(MessageLine line) {
+        if (line.contentList().size() > 1) return true;
+
+        LineContent content = line.contentList().element();
+        return !content.getHoverText().isEmpty() || content.getAdditionList().stream().anyMatch(addition -> addition instanceof CommandAddition);
     }
 
-    public static OMessage fromSection(ConfigurationSection section) {
+    private static boolean requiresSection(LineContent content) {
+        return !content.getHoverText().isEmpty() || !content.getAdditionList().isEmpty();
+    }
 
+    private static boolean isMultiLine(OMessage message) {
+        return message.getLineList().size() > 1;
+    }
+
+    private static boolean allOneLined(OMessage message) {
+        return message.getLineList()
+                .stream()
+                .noneMatch(YamlMessage::requiresSection);
+    }
+
+    /*
+    LOADING PART
+    */
+    public static OMessage load(ConfigurationSection section) {
         OMessage message = new OMessage();
-        if (section.isPresentValue("center"))
-            message.setCenter(section.getValueAsReq("center"));
+        loadSection(section, message);
+        return message;
+    }
 
-        if (section.isPresentSection("lines")) {
+    private static void loadSection(ConfigurationSection section, OMessage message) {
+        section.ifValuePresent("center", boolean.class, message::setCenter);
+        ConfigurationSection linesSection = section.getSection("lines");
+        ConfigurationSection contentSection = section.getSection("content");
+        if (contentSection != null)
+            message.appendLine(loadLine(section, contentSection));
 
-            //Multiple Lines
-            Map<Integer, MessageLine> messageLineMap = new HashMap<>();
-            for (ConfigurationSection lineSection : section.getSection("lines").getSections().values()) {
+        else if (linesSection != null) {
+            Map<Integer, MessageLine> lineMap = new HashMap<>();
+            linesSection.getValues().forEach((key, value) -> {
+                if (!NumberUtils.isNumber(key)) return;
 
-                int place = Integer.parseInt(lineSection.getKey());
-                messageLineMap.put(place, initLine(lineSection));
+                lineMap.put(Integer.parseInt(key), new MessageLine().append(new LineContent(value.getValueAsReq())));
+            });
 
-            }
-            messageLineMap.forEach((k, v) -> message.appendLine(v));
+            linesSection.getSections().forEach((key, section2) -> {
+                if (!NumberUtils.isNumber(key)) return;
+
+                ConfigurationSection contentSection2 = section2.getSection("content");
+                if (contentSection2 == null)
+                    lineMap.put(Integer.parseInt(key), new MessageLine().append(loadContentLine(section2)));
+
+                else
+                    lineMap.put(Integer.parseInt(key), loadLine(section2, contentSection2));
+            });
+
+            lineMap.keySet()
+                    .stream()
+                    .sorted()
+                    .forEach(pos -> message.appendLine(lineMap.get(pos)));
+        } else
+            message.appendLine(new MessageLine().append(loadContentLine(section)));
+    }
+
+    public static OMessage load(OConfiguration configuration, String path) {
+        OMessage message = new OMessage();
+        ConfigurationSection section = configuration.getSection(path);
+
+        if (section == null) {
+            AConfigurationValue value = configuration.getValue(path);
+            if (value == null)
+                throw new IllegalStateException("Failed to load message in " + configuration.getOFile().getFileName().replace(".yml", "") + " path " + path + " because the value is not found!");
+
+            // We got multi line text
+            if (value.getValue() instanceof List)
+                ((List<String>) value.getValue()).forEach(message::appendLine);
+
+            else message.appendLine(value.getValueAsReq(String.class));
 
         } else
-            message.appendLine(initLine(section));
+            loadSection(section, message);
 
         return message;
+    }
 
+    private static MessageLine loadLine(ConfigurationSection parentSection, ConfigurationSection contentSection) {
+        MessageLine line = new MessageLine();
+        parentSection.ifValuePresent("auto spaces", boolean.class, line::autoSpaces);
+
+        Map<Integer, LineContent> contentMap = new HashMap<>();
+        contentSection.getValues().forEach((key, value) -> {
+            if (!NumberUtils.isNumber(key)) return;
+
+            contentMap.put(Integer.parseInt(key), new LineContent(value.getValueAsReq()));
+        });
+
+        contentSection.getSections().forEach((key, section) -> {
+            if (!NumberUtils.isNumber(key)) return;
+
+            contentMap.put(Integer.parseInt(key), loadContentLine(section));
+        });
+
+        contentMap.keySet()
+                .stream()
+                .sorted()
+                .forEach(pos -> line.append(contentMap.get(pos)));
+        return line;
+    }
+
+    private static LineContent loadContentLine(ConfigurationSection section) {
+        LineContent lineContent = new LineContent(section.getValueAsReq("text"));
+        Optional.ofNullable(section.getValue("hover")).ifPresent(hover -> {
+            if (hover.getValue() instanceof List)
+                lineContent.setHoverText((List<String>) hover.getValue());
+
+            else
+                lineContent.appendHover(hover.getValueAsReq());
+        });
+
+        section.ifValuePresent("command", String.class, command -> lineContent.addAddition(new CommandAddition(command)));
+        return lineContent;
     }
 
 }

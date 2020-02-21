@@ -15,8 +15,7 @@ public class ColorFinder {
     }
 
     public static ColorFinder find(String input) {
-
-        char[] charArray = input.toCharArray();
+        char[] charArray = input.trim().toCharArray();
         String color = "";
         String decoration = "";
 
@@ -39,13 +38,10 @@ public class ColorFinder {
                 }
 
                 charArray[index] = '@';
-
             }
-
         }
 
         return new ColorFinder(color, decoration);
-
     }
 
     static String string(Object obj) {
@@ -53,9 +49,7 @@ public class ColorFinder {
     }
 
     static boolean arrayHas(int index, char[] array) {
-
         return (array.length - 1) >= index;
-
     }
 
     public String color() {
@@ -67,13 +61,11 @@ public class ColorFinder {
     }
 
     private static ChatColor findColor(String chaz) {
-
         for(ChatColor color : ChatColor.values())
             if(color.getChar() == chaz.toLowerCase().toCharArray()[0])
                 return color;
 
         return null;
-
     }
 
 }

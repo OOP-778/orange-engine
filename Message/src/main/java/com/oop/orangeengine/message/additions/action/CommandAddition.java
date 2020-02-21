@@ -14,6 +14,6 @@ public class CommandAddition extends AAddition {
 
     @Override
     public void apply(TextComponent component) {
-        component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+        component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command.startsWith("/") ? command : "/" + command));
     }
 }

@@ -36,7 +36,6 @@ public abstract class AConfigurationValue extends Descriptionable {
     }
 
     public static AConfigurationValue fromObject(String key, Object obj) {
-
         AConfigurationValue value;
 
         if (obj instanceof ArrayList)

@@ -82,4 +82,7 @@ public class Helper {
                 .collect(Collectors.joining(" "));
     }
 
+    public static String beautify(Object textable) {
+        return capitalizeAll(textable.toString().toLowerCase().replace("_", " "));
+    }
 }

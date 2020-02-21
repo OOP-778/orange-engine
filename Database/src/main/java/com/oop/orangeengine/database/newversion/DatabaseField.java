@@ -1,24 +1,25 @@
-package com.oop.orangeengine.database.holder;
+package com.oop.orangeengine.database.newversion;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-@Accessors(fluent = true)
-@Getter
+@Accessors(fluent = true, chain = true)
+@EqualsAndHashCode
 public class DatabaseField<T> {
     private T object = null;
 
     @Setter
+    @Getter
     private boolean requiresUpdate = false;
 
-    private int hashCode = 0;
+    @Getter
     private Class<T> clazz;
 
     public DatabaseField(@NonNull T object) {
         this.object = object;
-        this.hashCode = object.hashCode();
         this.clazz = (Class<T>) object.getClass();
     }
 
@@ -31,13 +32,26 @@ public class DatabaseField<T> {
     }
 
     public void set(T object) {
+        if (this.object == object) return;
+
         this.object = object;
         this.requiresUpdate = true;
     }
 
     public void set(T object, boolean update) {
+        if (this.object == object) return;
+
         this.object = object;
         if (update)
             this.requiresUpdate = update;
+    }
+
+
+    public T get() {
+        return object;
+    }
+
+    public <O extends T> O getAs(Class<O> clazz) {
+        return (O) get();
     }
 }

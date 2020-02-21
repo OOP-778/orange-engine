@@ -213,30 +213,24 @@ public class OConfiguration implements Valuable {
     }
 
     public ConfigurationSection getSection(String path) {
-
         if (!path.contains("."))
             return getSections().get(path);
 
         else {
-
             String[] split = path.split("\\.");
             ConfigurationSection section = null;
 
             for (int index = 0; index < split.length; index++) {
-
                 String key = split[index];
                 if (section == null) section = getSections().get(key);
                 else section = section.getSections().get(key);
 
             }
-
             return section;
         }
-
     }
 
     public AConfigurationValue setValue(String path, Object object) {
-
         AConfigurationValue value = null;
         if (object instanceof AConfigurationValue) {
             value = (AConfigurationValue) object;
@@ -256,6 +250,7 @@ public class OConfiguration implements Valuable {
             }
             if (value == null) value = AConfigurationValue.fromObject(path, object);
             values.put(path, value);
+
             value.setConfiguration(this);
             return value;
 
@@ -267,8 +262,8 @@ public class OConfiguration implements Valuable {
             int currentSpaces = 0;
 
             for (int index = 0; index < split.length - 1; index++) {
-
                 String key = split[index];
+
                 if (section == null) {
                     if (sections.containsKey(key)) {
                         section = sections.get(key);
@@ -289,14 +284,12 @@ public class OConfiguration implements Valuable {
                 }
 
                 currentSpaces += 2;
-
             }
 
             if (section != null)
                 section.assignValue(value);
 
             return value;
-
         }
     }
 
@@ -305,7 +298,6 @@ public class OConfiguration implements Valuable {
     }
 
     public Map<String, AConfigurationValue> getAllValues() {
-
         Map<String, AConfigurationValue> allValues = new LinkedHashMap<>();
 
         values.forEach((k, v) -> allValues.put(v.path(), v));
@@ -314,16 +306,13 @@ public class OConfiguration implements Valuable {
         }
 
         return allValues;
-
     }
 
     public List<ConfigurationSection> getAllSections() {
-
         List<ConfigurationSection> sections = new ArrayList<>();
         getSections().values().forEach(section -> sections.addAll(section.getAllSections()));
 
         return sections;
-
     }
 
     public Map<String, ConfigurationSection> getSections() {
@@ -335,7 +324,6 @@ public class OConfiguration implements Valuable {
         CustomWriter bw = null;
 
         try {
-
             oFile.createIfNotExists();
             w = new FileWriter(file.getFile());
             bw = new CustomWriter(w);
@@ -356,18 +344,14 @@ public class OConfiguration implements Valuable {
             bw.newLine();
 
             for (AConfigurationValue value : getValues().values()) {
-
                 value.writeDescription(bw, value.getSpaces());
                 value.write(bw);
-
             }
 
             for (ConfigurationSection section : sections.values()) {
-
                 section.writeDescription(bw, section.getSpaces());
                 section.write(bw);
                 bw.newLine();
-
             }
 
         } catch (Exception ex) {
@@ -412,7 +396,6 @@ public class OConfiguration implements Valuable {
     }
 
     public ConfigurationSection createNewSection(String path) {
-
         if (!path.contains(".")) {
             if (sections.containsKey(path))
                 return sections.get(path);
@@ -426,13 +409,11 @@ public class OConfiguration implements Valuable {
             ConfigurationSection parent = null;
 
             for (int index = 0; index < split.length - 1; index++) {
-
                 String key = split[index];
                 if (parent == null)
                     parent = getSections().get(key);
                 else
                     parent = parent.getSections().get(key);
-
             }
 
             if (parent != null) {

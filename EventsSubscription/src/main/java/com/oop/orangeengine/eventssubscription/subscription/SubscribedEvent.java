@@ -21,9 +21,9 @@ public class SubscribedEvent<T extends Event> extends Storegable {
     public SubscribedEvent(SubscriptionProperties<T> props) {
         this.props = props;
     }
-
     private Class<T> type;
-    public SubscribedEvent(Class<T> type){
+
+    public SubscribedEvent(Class<T> type) {
         this.type = type;
     }
 
@@ -39,12 +39,12 @@ public class SubscribedEvent<T extends Event> extends Storegable {
 
     public void end() {
         SubEvent.unregister(subEvent);
-        if(task != null)
+        if (task != null)
             task.cancel();
     }
 
     public void executeTask() {
-        if(props.timeOut() != -1)
+        if (props.timeOut() != -1)
             task = new OTask().
                     delay(props.timeOut()).
                     runnable(() -> {
@@ -57,19 +57,20 @@ public class SubscribedEvent<T extends Event> extends Storegable {
     }
 
     public void tryHandling(T event) {
-
         try {
-
-            if(props.filter() != null && !props.filter().test(event))
+            if (props.filter() != null && !props.filter().test(event))
                 return;
 
-            if(props.async())
+            if (props.async())
                 StaticTask.getInstance().async(() -> listener.accept(event));
             else
                 StaticTask.getInstance().sync(() -> listener.accept(event));
 
             timesRan++;
-            if(timesRan > 0 && timesRan == props.timesToRun())
+            if (props.runTill() != null) {
+                if (props.runTill().test(event))
+                    end();
+            } else if (timesRan > 0 && timesRan == props.timesToRun())
                 end();
 
         } catch (Exception ex) {

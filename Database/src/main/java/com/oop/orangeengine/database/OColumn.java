@@ -1,5 +1,7 @@
 package com.oop.orangeengine.database;
 
+import com.oop.orangeengine.database.newversion.DatabaseField;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -19,19 +21,14 @@ public enum OColumn {
         this.sql = sql;
     }
 
-    public static OColumn fromObject(Object obj) {
+    public static OColumn from(Object obj) {
+        if (obj.getClass() == DatabaseField.class)
+            return from(((DatabaseField) obj).get());
 
-        if (obj instanceof Integer) return INTEGER;
-        if (obj instanceof Float) return FLOAT;
-        if (obj instanceof Double) return DOUBLE;
-        if (obj instanceof Boolean) return BOOLEAN;
-        if (obj instanceof String) return VARCHAR;
-
-        return TEXT;
+        return from(obj.getClass());
     }
 
-    public static OColumn fromClass(Class klass) {
-
+    public static OColumn from(Class klass) {
         if (klass == Integer.class || klass == int.class)
             return INTEGER;
 
@@ -48,7 +45,6 @@ public enum OColumn {
             return VARCHAR;
 
         return TEXT;
-
     }
 
     public String getSql() {

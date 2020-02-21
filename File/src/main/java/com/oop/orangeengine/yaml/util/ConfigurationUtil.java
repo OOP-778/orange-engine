@@ -203,13 +203,11 @@ public class ConfigurationUtil {
     }
 
     public static OPair<String, Integer> parse(String key) {
-
         int spaces = 0;
         StringBuilder builder = new StringBuilder();
         int lcount = 0;
 
         boolean foundFirstChar = false;
-
         for (Character c : key.toCharArray()) {
 
             if ((c.toString().equalsIgnoreCase(" ") || c.toString().equalsIgnoreCase("#")) && !foundFirstChar) spaces++;
@@ -221,11 +219,9 @@ public class ConfigurationUtil {
                 foundFirstChar = true;
                 lcount++;
             }
-
         }
 
         return new OPair<>(builder.toString(), spaces);
-
     }
 
     public static <T> boolean isValidIndex(T[] array, int index) {

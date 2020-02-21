@@ -35,14 +35,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public ItemBuilder(@NonNull ItemStack item) {
         this.itemStack = item;
-
-        if (item.getItemMeta() != null) {
-            if (item.getItemMeta().hasLore())
-                setLore(item.getItemMeta().getLore());
-
-            if (item.getItemMeta().hasDisplayName())
-                setDisplayName(item.getItemMeta().getDisplayName());
-        }
     }
 
     public ItemBuilder(@NonNull OMaterial material) {
@@ -206,7 +198,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public List<String> getLore() {
         ItemMeta meta = getItemMeta();
-        return meta.hasLore() ? meta.getLore() : new ArrayList<>();
+        return (meta == null || !meta.hasLore()) ? new ArrayList<>() : meta.getLore();
     }
 
     public Set<OPair<Enchantment, Integer>> getEnchants() {
@@ -225,8 +217,18 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         return _returnThis();
     }
 
+    public T setMaterial(OMaterial material) {
+        itemStack.setType(material.parseMaterial());
+        itemStack.setDurability(material.getData());
+        return _returnThis();
+    }
+
     public Material getMaterial() {
         return itemStack.getType();
+    }
+
+    public OMaterial getOMaterial() {
+        return OMaterial.matchMaterial(getItemStack());
     }
 
     @Deprecated
@@ -256,7 +258,9 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public T mergeLore(List<String> secondLore) {
-        secondLore.forEach(getLore()::add);
+        List<String> lore = getLore();
+        lore.addAll(secondLore);
+        setLore(lore);
         return _returnThis();
     }
 
@@ -351,6 +355,18 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
             return (ItemBuilder<T>) new OPotion(material);
 
         return (ItemBuilder<T>) new OItem().load(section);
+    }
+
+    public static <T extends ItemBuilder> ItemBuilder<T> fromItem(@NonNull ItemStack item) {
+        OMaterial material = OMaterial.matchMaterial(item);
+
+        if (material.name().contains("HEAD"))
+            return (ItemBuilder<T>) new OSkull(item);
+
+        else if (material.name().contains("POTION"))
+            return (ItemBuilder<T>) new OPotion(item);
+
+        return (ItemBuilder<T>) new OItem(item);
     }
 
     public T clone() {

@@ -46,7 +46,6 @@ public class WrappedArmorStand {
 
         if (marker.getSecond())
             invoke(SET_MARKER_METHOD, entityArmorStand, marker.getFirst());
-
     }
 
     public void spawn(Player player) {

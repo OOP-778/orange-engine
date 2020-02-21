@@ -176,7 +176,6 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         }
 
         return builder.toString();
-
     }
 
     public Map<String, AConfigurationValue> getAllValues() {
@@ -248,14 +247,30 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
     }
 
     public AConfigurationValue setValue(String path, Object object) {
-
         AConfigurationValue value = null;
-        if (object instanceof AConfigurationValue) {
+        if (object instanceof AConfigurationValue)
             value = (AConfigurationValue) object;
-        }
 
-        if (value == null) value = AConfigurationValue.fromObject(path, object);
-        assignValue(value);
+        if (!path.contains("\\.")) {
+            if (value == null)
+                value = AConfigurationValue.fromObject(path, object);
+
+            assignValue(value);
+
+        } else {
+            String pathSplit[] = path.split("\\.");
+            ConfigurationSection currentSection = this;
+            for (String s : pathSplit) {
+                ConfigurationSection oldSection = currentSection;
+                currentSection = currentSection.getSection(s);
+                if (currentSection == null) {
+                    currentSection = new ConfigurationSection(getConfiguration(), s, getSpaces() + 2);
+                    oldSection.assignSection(currentSection);
+                }
+            }
+
+            currentSection.setValue(pathSplit[pathSplit.length -1], object);
+        }
         return value;
 
     }

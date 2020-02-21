@@ -3,6 +3,7 @@ package com.oop.orangeengine.message.line;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.message.additions.AAddition;
 import lombok.Getter;
+import lombok.Setter;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -21,7 +22,8 @@ public class LineContent implements Cloneable {
 
     private List<AAddition> additionList = new ArrayList<>();
     private String text;
-    private String hoverText;
+    @Setter
+    private List<String> hoverText = new ArrayList<>();
 
     public LineContent(String text) {
         this.text = text;
@@ -33,7 +35,18 @@ public class LineContent implements Cloneable {
     }
 
     public LineContent hoverText(String hoverText) {
-        this.hoverText = hoverText;
+        clearHover();
+        appendHover(hoverText);
+        return this;
+    }
+
+    public LineContent clearHover() {
+        hoverText.clear();
+        return this;
+    }
+
+    public LineContent appendHover(String hoverText) {
+        this.hoverText.add(hoverText);
         return this;
     }
 
@@ -43,25 +56,36 @@ public class LineContent implements Cloneable {
     }
 
     public TextComponent create(Map<String, String> placeholders) {
-
         String textCopy = text;
-        String hoverCopy = hoverText != null ? hoverText : "";
+        List<String> hoverClone = new ArrayList<>(hoverText);
 
         for (String key : placeholders.keySet()) {
+            String value = placeholders.get(key);
 
-            textCopy = textCopy.replace(key, placeholders.get(key));
-            hoverCopy = hoverCopy.replace(key, placeholders.get(key));
-
+            textCopy = textCopy.replace(key, value);
+            hoverClone = hoverText
+                    .stream()
+                    .map(text -> text.replace(key, value))
+                    .collect(toList());
         }
 
-        TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', textCopy)));
-        if (hoverText != null)
-            textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Helper.color(hoverCopy)).create()));
+        TextComponent textComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', textCopy));
+        if (!hoverText.isEmpty()) {
+            ComponentBuilder componentBuilder = new ComponentBuilder("");
+            boolean[] first = new boolean[]{true};
+            hoverClone.stream().map(string -> ChatColor.translateAlternateColorCodes('&', string)).forEach(string -> {
+                if (first[0]) {
+                    first[0] = false;
+                    componentBuilder.append(string);
+
+                } else componentBuilder.append("\n").append(string);
+            });
+            textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, componentBuilder.create()));
+        }
 
         additionList.forEach(addition -> addition.apply(textComponent));
 
         return textComponent;
-
     }
 
     public TextComponent create() {
@@ -74,7 +98,6 @@ public class LineContent implements Cloneable {
 
     @Override
     protected LineContent clone() {
-
         try {
 
             LineContent lineContent = (LineContent) super.clone();
@@ -88,6 +111,19 @@ public class LineContent implements Cloneable {
         }
 
         return null;
+    }
 
+    public LineContent replace(String key, Object value) {
+        text = text.replace(key, value.toString());
+        hoverText = hoverText
+                .stream()
+                .map(text -> text.replace(key, value.toString()))
+                .collect(toList());
+        return this;
+    }
+
+    public LineContent replace(Map<String, Object> placeholders) {
+        placeholders.forEach(this::replace);
+        return this;
     }
 }

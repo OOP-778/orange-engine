@@ -67,4 +67,6 @@ public interface Valuable {
         return value != null ? value : ifNotPresent;
     }
 
+    AConfigurationValue setValue(String path, Object object);
+
 }

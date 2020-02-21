@@ -5,14 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.component.IEngineComponent;
 import com.oop.orangeengine.main.events.async.EventData;
-import com.oop.orangeengine.main.gson.BukkitAdapter;
-import com.oop.orangeengine.main.gson.UpdateableAdapterFactory;
+import com.oop.orangeengine.main.gson.ItemStackAdapter;
+import com.oop.orangeengine.main.gson.RuntimeClassFactory;
 import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.ITaskController;
 import com.oop.orangeengine.main.task.StaticTask;
-import com.oop.orangeengine.main.task.SpigotTaskController;
 import lombok.Getter;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +30,13 @@ public class Engine {
     public Engine(EnginePlugin plugin) {
         instance = this;
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.serializeNulls();
+        gson = new GsonBuilder()
+                .serializeNulls()
+                .registerTypeAdapterFactory(RuntimeClassFactory.of(Object.class))
+                .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
+                .create();
 
-        new BukkitAdapter(gsonBuilder);
-        new UpdateableAdapterFactory(gsonBuilder);
-        gson = gsonBuilder.create();
-
-        //Initialize plugin disable actions
+        // Initialize plugin disable actions
         owning = plugin;
         owning.onDisable(() -> {
 
@@ -55,7 +54,7 @@ public class Engine {
         taskController = plugin.provideTaskController();
         logger = new OLogger(owning);
 
-        ClassLoader.load();
+        ClassLoader.load(getClass().getClassLoader());
     }
 
     public static Engine getInstance() {

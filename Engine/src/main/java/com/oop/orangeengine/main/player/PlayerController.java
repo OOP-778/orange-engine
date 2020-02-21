@@ -2,10 +2,13 @@ package com.oop.orangeengine.main.player;
 
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.events.AsyncEvents;
+import com.oop.orangeengine.main.events.SyncEvents;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -21,9 +24,23 @@ public class PlayerController extends AEngineComponent {
     public PlayerController() {
         super();
 
-        AsyncEvents.listen(PlayerEvent.class, event -> {
+        SyncEvents.listen(PlayerEvent.class, event -> {
+            if(event instanceof PlayerMoveEvent) return;
 
-           if(event instanceof PlayerMoveEvent) return;
+            lookup(event.getPlayer()).ifPresent(player -> {
+                if (!player.isEventsDisabled()) return;
+                if (player.getAllowedEventsWhileDisabled().contains(event.getClass())) return;
+
+                if (event instanceof Cancellable)
+                    ((Cancellable) event).setCancelled(true);
+
+            });
+        });
+
+        AsyncEvents.listen(PlayerEvent.class, event -> {
+            if (event instanceof PlayerMoveEvent) return;
+            if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) return;
+
            lookup(event.getPlayer()).ifPresent(player -> {
 
                Consumer<Event> consumer = player.getRegisteredConsumers().get(event.getClass());
@@ -31,7 +48,6 @@ public class PlayerController extends AEngineComponent {
                    consumer.accept(event);
 
            });
-
         });
     }
 
