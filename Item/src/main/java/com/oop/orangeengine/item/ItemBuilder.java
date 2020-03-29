@@ -1,5 +1,6 @@
 package com.oop.orangeengine.item;
 
+import com.google.common.base.Preconditions;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.item.custom.OPotion;
 import com.oop.orangeengine.item.custom.OSkull;
@@ -34,6 +35,8 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     private ItemStack itemStack;
 
     public ItemBuilder(@NonNull ItemStack item) {
+//        if (item.getType() != Material.AIR)
+//            //Preconditions.checkArgument(!item.getType().i, "Failed to initialize ItemBuilder because " + item.getType().name() + " is a block type!");
         this.itemStack = item;
     }
 

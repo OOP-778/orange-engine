@@ -8,6 +8,7 @@ import com.oop.orangeengine.yaml.value.AConfigurationValue;
 import com.oop.orangeengine.yaml.value.ConfigurationList;
 import com.oop.orangeengine.yaml.value.ConfigurationValue;
 import lombok.Getter;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 
 import java.io.IOException;
 import java.util.*;

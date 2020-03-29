@@ -1,9 +1,9 @@
 package com.oop.orangeengine.database;
 
-import com.oop.orangeengine.database.annotations.DatabaseValue;
-import com.oop.orangeengine.database.newversion.annotation.PrimaryKey;
-import com.oop.orangeengine.database.newversion.annotation.Table;
+import com.oop.orangeengine.database.annotation.PrimaryKey;
+import com.oop.orangeengine.database.annotation.Table;
 import com.oop.orangeengine.database.types.SqlLiteDatabase;
+import com.oop.orangeengine.database.util.OColumn;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import lombok.NonNull;
@@ -116,18 +116,6 @@ public abstract class ODatabase {
 
     public void executeNow(String sql) {
         execute(sql);
-    }
-
-    public Object gatherColumnValue(String table, DatabaseValue databaseValue, String identifierColumn, String identifierValue) {
-        try (PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT " + databaseValue.columnName() + " from " + table + " where " + identifierColumn + "='" + identifierValue + "'")) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                resultSet.next();
-                return databaseValue.columnType().getObject(resultSet);
-            }
-        } catch (SQLException  e) {
-            new SQLException("Failed to gather column value (table=" + table + ", column=" + databaseValue.columnName() + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
-        }
-        return null;
     }
 
     public String gatherColumnValue(String table, String column, String identifierColumn, String identifierValue) {
@@ -255,12 +243,6 @@ public abstract class ODatabase {
             database.executeNow(queryBuilder.toString());
 
             return database;
-        }
-
-        public void of(String name, List<OPair<Field, DatabaseValue>> fields) {
-            setName(name);
-            addColumnPrimaryKey();
-            fields.forEach(field -> addColumn(field.getSecond().columnName(), field.getSecond().columnType()));
         }
     }
 

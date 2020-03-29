@@ -164,18 +164,15 @@ public class OConfiguration implements Valuable {
             }
 
             for (OPair<UnreadString, List<String>> headSection : mainSections) {
-
                 int startingIndex = Arrays.asList(array).indexOf(headSection.getFirst());
                 int endIndex = ConfigurationUtil.findSectionEnd(startingIndex, looper);
                 ConfigurationSection section = ConfigurationUtil.loadSection(this, new OIterator(ConfigurationUtil.copy(array, startingIndex, endIndex)));
                 section.description(headSection.getSecond());
 
                 sections.put(section.getKey(), section);
-
             }
 
             if (key != null && key.getParent() == null) sections.put(key.getKey(), key);
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -184,18 +181,14 @@ public class OConfiguration implements Valuable {
 
     @Override
     public AConfigurationValue getValue(String path) {
-
         if (!path.contains(".")) {
-
             return values.getOrDefault(path, null);
 
         } else {
-
             String[] split = path.split("\\.");
             String valueKey = split[split.length - 1];
 
             ConfigurationSection section = null;
-
             for (int index = 0; index < split.length - 1; index++) {
 
                 String key = split[index];
@@ -205,11 +198,9 @@ public class OConfiguration implements Valuable {
             }
 
             if (section != null && section.getValues().containsKey(valueKey)) return section.getValues().get(valueKey);
-
         }
 
         return null;
-
     }
 
     public ConfigurationSection getSection(String path) {

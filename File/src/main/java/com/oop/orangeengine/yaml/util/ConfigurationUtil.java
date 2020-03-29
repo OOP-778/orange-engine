@@ -7,12 +7,14 @@ import com.oop.orangeengine.yaml.mapper.ObjectsMapper;
 import com.oop.orangeengine.yaml.value.AConfigurationValue;
 import com.oop.orangeengine.yaml.value.ConfigurationList;
 import com.oop.orangeengine.yaml.value.ConfigurationValue;
+import org.bukkit.ChatColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -52,7 +54,6 @@ public class ConfigurationUtil {
     }
 
     public static ConfigurationSection loadSection(OConfiguration configuration, OIterator<UnreadString> iterator) {
-
         ConfigurationSection leadSection = null;
         ConfigurationSection currentSection = null;
         List<String> description = new ArrayList<>();
@@ -61,7 +62,7 @@ public class ConfigurationUtil {
             UnreadString line = iterator.next();
             if (line == null) continue;
 
-            if (line.value().contains(":") && !line.value().contains("#")) {
+            if (line.value().contains(":") && !line.value().trim().startsWith("#")) {
 
                 String[] split = splitAtFirst(line.value(), ':');
                 if (split.length == 1) {
@@ -157,7 +158,7 @@ public class ConfigurationUtil {
 
             } else {
 
-                if (line.value().contains("#")) {
+                if (line.value().trim().startsWith("#")) {
                     OPair<String, Integer> parsed = parse(line.value().substring(1));
                     if (parsed.getFirst().equalsIgnoreCase("------------------")) continue;
 

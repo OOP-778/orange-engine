@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.function.Consumer;
 
@@ -22,10 +23,6 @@ public class SubscribedEvent<T extends Event> extends Storegable {
         this.props = props;
     }
     private Class<T> type;
-
-    public SubscribedEvent(Class<T> type) {
-        this.type = type;
-    }
 
     @Setter
     private SubEvent subEvent;
@@ -61,10 +58,13 @@ public class SubscribedEvent<T extends Event> extends Storegable {
             if (props.filter() != null && !props.filter().test(event))
                 return;
 
-            if (props.async())
-                StaticTask.getInstance().async(() -> listener.accept(event));
-            else
-                StaticTask.getInstance().sync(() -> listener.accept(event));
+            if (!(event instanceof AsyncPlayerChatEvent)) {
+                if (props.async())
+                    StaticTask.getInstance().async(() -> listener.accept(event));
+                else
+                    StaticTask.getInstance().sync(() -> listener.accept(event));
+            } else
+                listener.accept(event);
 
             timesRan++;
             if (props.runTill() != null) {
@@ -76,11 +76,5 @@ public class SubscribedEvent<T extends Event> extends Storegable {
         } catch (Exception ex) {
             Engine.getInstance().getLogger().error(ex);
         }
-
     }
-
-    public void subscribe() {
-        SubscriptionFactory.getInstance().subscribeTo(this);
-    }
-
 }

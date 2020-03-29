@@ -160,4 +160,16 @@ public class OCommand {
         return this;
     }
 
+    public CommandArgument argument(String name) {
+        return argumentMap.get(name);
+    }
+
+    public <T> CommandArgument argument(Class<T> type) {
+        return getArgumentMap().values()
+                .stream()
+                .filter(argument -> argument.getClass() == type)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

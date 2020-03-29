@@ -4,6 +4,8 @@ import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -48,6 +50,18 @@ public class WrappedArmorStand {
             invoke(SET_MARKER_METHOD, entityArmorStand, marker.getFirst());
     }
 
+    public void remove(Player player) {
+        try {
+            Object id = invoke(GET_ID, entityArmorStand);
+            Object removePacket = PACKET_ENTITY_REMOVE_CONST.newInstance(id);
+
+            OSimpleReflection.Player.sendPacket(player, removePacket);
+
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to remove armor stand for " + player.getName(), e);
+        }
+    }
+
     public void spawn(Player player) {
         try {
 
@@ -55,12 +69,11 @@ public class WrappedArmorStand {
             OSimpleReflection.Player.sendPacket(player, spawnPacket);
 
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to spawn armor stand for " + player.getName(), e);
         }
     }
 
     static class ReflectionConstant {
-
         static Method
                 SET_GRAVITY_METHOD,
                 SET_VISIBLE_METHOD,
@@ -117,14 +130,12 @@ public class WrappedArmorStand {
                 GET_ID = OSimpleReflection.getMethod(ARMOR_STAND_CLASS, "getId");
                 WORLD_GET_HANDLE_METHOD = OSimpleReflection.getMethod(CRAFT_WORLD_CLASS, "getHandle");
 
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 throw new IllegalStateException(ex);
             }
-
         }
 
         static Object createArmorStand(Location location) {
-
             Object nmsWorld = invoke(WORLD_GET_HANDLE_METHOD, location.getWorld());
             try {
                 return ARMOR_STAND_CONST.newInstance(nmsWorld, location.getX(), location.getY(), location.getZ());
@@ -141,7 +152,6 @@ public class WrappedArmorStand {
                 throw new IllegalStateException(e);
             }
         }
-
     }
 
     boolean isSmall() {

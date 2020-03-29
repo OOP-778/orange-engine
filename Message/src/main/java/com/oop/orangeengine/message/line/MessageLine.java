@@ -3,7 +3,6 @@ package com.oop.orangeengine.message.line;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Chars;
 import com.oop.orangeengine.message.Centered;
-import com.oop.orangeengine.message.ColorFinder;
 import com.oop.orangeengine.message.WordsQueue;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +30,8 @@ public class MessageLine implements Cloneable {
 
     private TextComponent cached;
 
-    public MessageLine() {}
+    public MessageLine() {
+    }
 
     public MessageLine(String content) {
         contentList.add(new LineContent(content));
@@ -40,7 +40,6 @@ public class MessageLine implements Cloneable {
     public MessageLine(LineContent content) {
         contentList.add(content);
     }
-
 
 
     public MessageLine insert(LineContent lineContent, LineContent at, InsertMethod method) {
@@ -227,6 +226,8 @@ public class MessageLine implements Cloneable {
         And insert the content at the place where it was split
         */
         for (LineContent lineContent : new LinkedList<>(this.contentList)) {
+            if (!lineContent.getText().contains(key)) continue;
+
             String[] split = lineContent.getText().split(key);
             if (split.length == 2) {
                 LineContent firstPart = new LineContent(split[0]);
@@ -236,6 +237,11 @@ public class MessageLine implements Cloneable {
                 replace(lineContent, firstPart);
                 insert(secondPart, firstPart, InsertMethod.AFTER);
                 insert(thirdPart, secondPart, InsertMethod.AFTER);
+
+            } else if (split.length == 1) {
+                LineContent firstPart = new LineContent(split[0]);
+                replace(lineContent, firstPart);
+                insert(content, firstPart, InsertMethod.AFTER);
             }
         }
         return this;

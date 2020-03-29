@@ -3,6 +3,8 @@ package com.oop.orangeengine.command;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.OComponent;
+import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.line.LineContent;
@@ -10,46 +12,59 @@ import com.oop.orangeengine.message.line.MessageLine;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 public class CommandController {
 
     private Set<Command> registered = new HashSet<>();
-    private static CommandMap commandMap;
-    private static boolean init = false;
+    private CommandMap commandMap;
 
     private ColorScheme colorScheme;
     private JavaPlugin plugin;
 
     public CommandController(EnginePlugin plugin) {
-
         this.plugin = plugin;
         this.colorScheme = new ColorScheme();
-        if (!init) {
-            try {
+        try {
 
-                Field cMap = SimplePluginManager.class.getDeclaredField("commandMap");
-                cMap.setAccessible(true);
-                commandMap = (CommandMap) cMap.get(Bukkit.getPluginManager());
-                init = true;
+            Field cMap = SimplePluginManager.class.getDeclaredField("commandMap");
+            cMap.setAccessible(true);
+            commandMap = (CommandMap) cMap.get(Bukkit.getPluginManager());
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        } catch (Throwable thrw) {
+            throw new IllegalStateException("Failed to initialize CommandMap", thrw);
         }
-        plugin.onDisable(() -> registered.forEach(cmd -> cmd.unregister(commandMap)));
+        plugin.onDisable(this::unregisterAll);
+    }
+
+    public void unregisterAll() {
+        try {
+            Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+            for (Command command : registered) {
+                knownCommands.remove(command.getName());
+                command.unregister(commandMap);
+
+                getEngine().getLogger().printDebug("Unregistered " + command.getName() + " / " + command.getLabel());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not unregister commands", e);
+        }
     }
 
     public void register(OCommand command) {
-
         Command bukkitCommand = new Command(command.getLabel(), command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
             @Override
             public boolean execute(CommandSender sender, String cmdName, String[] args) {
@@ -82,34 +97,25 @@ public class CommandController {
                     }
 
                 }
-
                 return true;
             }
 
             @Override
             public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-
                 List<String> completion = new ArrayList<>();
                 if (command.getSubCommands().isEmpty())
                     completion.addAll(handleTabComplete(command, args));
 
                 else if (args.length == 1) {
-                    command.getSubCommands().forEach((n, c) -> {
-                        if (c.isSecret())
-                            return;
+                    command.getSubCommands().values()
+                            .stream()
+                            .filter(OCommand::isSecret)
+                            .filter(c -> !c.getPermission().equalsIgnoreCase("NONE") && sender.hasPermission(c.getPermission()))
+                            .filter(c -> args[0].trim().length() != 0 && c.getLabel().startsWith(args[0]))
+                            .forEach(command -> completion.add(command.getLabel()));
 
-                        if (!c.getPermission().equalsIgnoreCase("NONE") && !sender.hasPermission(c.getPermission()))
-                            return;
-
-                        completion.add(c.getLabel());
-
-                    });
-                } else {
-
-                    if (command.isSubCommand(args[0]))
-                        completion.addAll(handleTabComplete(command.subCommand(args[0]), cutArray(args, 1)));
-
-                }
+                } else
+                    completion.addAll(handleTabComplete(command.subCommand(args[0]), cutArray(args, 1)));
 
                 return completion;
             }
@@ -120,7 +126,6 @@ public class CommandController {
     }
 
     public List<String> handleTabComplete(OCommand command, String[] args) {
-
         List<String> completion = new ArrayList<>();
         if (command.getTabComplete().containsKey(args.length))
             completion.addAll(command.getTabComplete().get(args.length).handleTabCompletion(args));
@@ -345,7 +350,6 @@ public class CommandController {
         }
 
         return buffer.toString();
-
     }
 
     private void execCommand(WrappedCommand command, OCommand oopCommand) {
