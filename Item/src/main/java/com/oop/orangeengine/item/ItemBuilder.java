@@ -35,8 +35,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     private ItemStack itemStack;
 
     public ItemBuilder(@NonNull ItemStack item) {
-//        if (item.getType() != Material.AIR)
-//            //Preconditions.checkArgument(!item.getType().i, "Failed to initialize ItemBuilder because " + item.getType().name() + " is a block type!");
         this.itemStack = item;
     }
 
@@ -379,5 +377,13 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public boolean hasEnchant(Enchantment enchantment) {
+        return getItemMeta().hasEnchant(enchantment);
+    }
+
+    public int getEnchantLevel(Enchantment enchantment) {
+        return getItemMeta().getEnchantLevel(enchantment);
     }
 }

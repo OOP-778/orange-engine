@@ -59,7 +59,6 @@ allprojects {
 
         compileOnly 'org.projectlombok:lombok:1.18.8'
         annotationProcessor 'org.projectlombok:lombok:1.18.8'
-
     }
 
     jar {
