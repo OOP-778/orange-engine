@@ -210,7 +210,7 @@ public interface Saveable {
                     throw new IllegalStateException("Failed to serialize field of " + object.getClass().getSimpleName() + " at " + columns.get(index - 1).getSecond().name() + ", cause: ", thrw);
                 }
                 try {
-                    System.out.println(Wrappers.wrap(null, info.getPrimaryKey(), object) + "Stat index: " + index + ", obj: " + wrapped);
+                    getEngine().getLogger().printDebug(Wrappers.wrap(null, info.getPrimaryKey(), object) + "Stat index: " + index + ", obj: " + wrapped);
                     statement.setString(index, wrapped);
                 } catch (Throwable thrw) {
                     throw new IllegalStateException("Failed to set statement's value of index " + index + " for object " + object.getClass().getSimpleName() + " column " + columns.get(index - 1).getSecond().name() + ", cause: ", thrw);
@@ -218,7 +218,6 @@ public interface Saveable {
             });
 
             statement.setString(indexes.stream().max(Comparator.naturalOrder()).orElse(0) + 1, Wrappers.wrap(null, info.getPrimaryKey(), object));
-            int i = statement.executeUpdate();
         } catch (Throwable thrw) {
             thrw.printStackTrace();
         }

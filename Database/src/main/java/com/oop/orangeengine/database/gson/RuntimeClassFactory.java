@@ -118,10 +118,8 @@ public class RuntimeClassFactory<T> implements TypeAdapterFactory {
                                     + label + "; did you forget to register a subtype?");
                         }
                     }
-                    System.out.println(delegate);
                     R object = delegate.fromJsonTree(jsonElement);
                     if (object instanceof Suppliable) {
-                        System.out.println("Loading supplier!");
                         ((Suppliable) object)._loadSupplier();
                     }
 
@@ -137,7 +135,6 @@ public class RuntimeClassFactory<T> implements TypeAdapterFactory {
                     }
                     R object = delegate.fromJsonTree(jsonElement);
                     if (object instanceof Suppliable) {
-                        System.out.println("Loading supplier!");
                         ((Suppliable) object)._loadSupplier();
                     }
 
@@ -157,16 +154,13 @@ public class RuntimeClassFactory<T> implements TypeAdapterFactory {
                 }
 
                 JsonElement jsonTree = delegate.toJsonTree(value);
-                System.out.println(srcType);
                 if (!jsonTree.isJsonObject()) {
                     if (srcType.isEnum()) {
-                        System.out.println("Working with enum!");
                         JsonObject jsonObject = new JsonObject();
 
                         jsonObject.addProperty("value", ((Enum)value).name());
                         jsonObject.add(typeFieldName, new JsonPrimitive(label));
 
-                        System.out.println("Writing enum: " + ((Enum)value).name());
                         Streams.write(jsonObject, out);
 
                     } else

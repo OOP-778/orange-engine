@@ -36,13 +36,18 @@ public abstract class ODatabase {
     public List<String> getColumns(String table) {
         List<String> columns = new ArrayList<>();
 
-        try {
-            try (ResultSet resultSet = getConnection().getMetaData().getColumns(null, null, table, null)) {
-                while (resultSet.next())
-                    columns.add(resultSet.getString("COLUMN_NAME"));
+        try (Statement statement = getConnection().createStatement()) {
+            try (ResultSet rs = statement.executeQuery("SELECT * FROM " + table)) {
+                ResultSetMetaData data = rs.getMetaData();
+                int index = 1;
+                int columnLen = data.getColumnCount();
+                while (index <= columnLen) {
+                    columns.add(data.getColumnName(index));
+                    index++;
+                }
             }
-        } catch (Exception ex){
-            ex.printStackTrace();
+        } catch (Throwable e) {
+            throw new IllegalStateException("Failed to get columns of table " + table, e);
         }
 
         return columns;
@@ -124,7 +129,7 @@ public abstract class ODatabase {
                 resultSet.next();
                 return resultSet.getString(1);
             }
-        } catch (SQLException  e) {
+        } catch (SQLException e) {
             new SQLException("Failed to gather column value (table=" + table + ", column=" + column + ", " + identifierColumn + "=" + identifierValue + ") cause of " + e.getMessage()).printStackTrace();
         }
         return null;
@@ -258,17 +263,17 @@ public abstract class ODatabase {
     }
 
     public List<String> getPrimaryKeys(@NonNull String tableName) {
-       Connection connection = getConnection();
-       List<String> primaryKeys = new ArrayList<>();
+        Connection connection = getConnection();
+        List<String> primaryKeys = new ArrayList<>();
 
-       try (ResultSet rs = connection.getMetaData().getPrimaryKeys(null, null, tableName)) {
-           while (rs.next())
-               primaryKeys.add(rs.getString("COLUMN_NAME"));
+        try (ResultSet rs = connection.getMetaData().getPrimaryKeys(null, null, tableName)) {
+            while (rs.next())
+                primaryKeys.add(rs.getString("COLUMN_NAME"));
 
-       } catch (Throwable thrw) {
-           throw new IllegalStateException("Failed to get primary keys of table " + tableName + " cause " + thrw.getMessage(), thrw);
-       }
-       return primaryKeys;
+        } catch (Throwable thrw) {
+            throw new IllegalStateException("Failed to get primary keys of table " + tableName + " cause " + thrw.getMessage(), thrw);
+        }
+        return primaryKeys;
     }
 
     private static void close(AutoCloseable... closeables) {
