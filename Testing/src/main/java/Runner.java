@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Runner {
-
     public static void main(String[] args) {
         ODatabase database = new MySqlDatabase(
                 new MySqlDatabase.MySqlProperties()
-                .database("customer_103989_test")
-                .user("customer_103989_test")
-                .password("W6OD~ZbtxNjPoIcB#TlT")
-                .url("eu01-sql.pebblehost.com")
+                        .database("customer_103989_test")
+                        .user("customer_103989_test")
+                        .password("W6OD~ZbtxNjPoIcB#TlT")
+                        .url("eu01-sql.pebblehost.com")
         );
         System.out.println(database.getTables());
     }

@@ -29,6 +29,7 @@ public class MapFactory implements TypeAdapterFactory {
                 JsonArray array = new JsonArray();
                 mapObject.add("values", array);
 
+
                 map.forEach((key, value) -> {
                     JsonObject pairObject = new JsonObject();
                     pairObject.add("key", gson.toJsonTree(key));
