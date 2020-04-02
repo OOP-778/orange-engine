@@ -7,7 +7,10 @@ import lombok.experimental.Accessors;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MySqlDatabase extends ODatabase {
 
@@ -39,7 +42,17 @@ public class MySqlDatabase extends ODatabase {
         String build() {
             return "jdbc:mysql://" + url + ":" + port;
         }
-
     }
 
+    @Override
+    public List<String> getTables() {
+        List<String> tables = new ArrayList<>();
+        try (ResultSet resultSet = getConnection().getMetaData().getTables(getConnection().getCatalog(), "", null, new String[]{"TABLE"})) {
+            while (resultSet.next())
+                tables.add(resultSet.getString("TABLE_NAME"));
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get tables", throwable);
+        }
+        return tables;
+    }
 }

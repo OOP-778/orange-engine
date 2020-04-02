@@ -259,8 +259,8 @@ public abstract class ODatabase {
         try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, null, null)) {
             while (resultSet.next())
                 tables.add(resultSet.getString(3));
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get tables", throwable);
         }
         return tables;
     }
