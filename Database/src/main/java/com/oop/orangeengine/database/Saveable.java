@@ -363,7 +363,7 @@ public interface Saveable {
             insertBuilder.append(structure.getPrimaryKey().getSecond().name()).append(" ").append(OColumn.from(structure.getPrimaryKey().getFirst().getGenericType()).getSql()).append(" PRIMARY KEY, ");
 
         } else
-            insertBuilder.append(structure.getPrimaryKey().getSecond().name()).append(" ").append(OColumn.from(structure.getPrimaryKey().getFirst().getGenericType()).getSql()).append(", ");
+            insertBuilder.append(structure.getPrimaryKey().getSecond().name()).append(" VARCHAR(255)").append(", ");
 
         boolean first = true;
         for (OPair<Field, Column> column : structure.getColumns()) {
