@@ -276,6 +276,22 @@ public abstract class ODatabase {
         return primaryKeys;
     }
 
+    public List<Object> getValuesOfColumn(String table, String column) {
+        List<Object> values = new ArrayList<>();
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT " + column + " FROM " + table)) {
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    values.add(rs.getObject(column));
+                }
+            }
+
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get values of column " + column + " in table " + table, throwable);
+        }
+
+        return values;
+    }
+
     private static void close(AutoCloseable... closeables) {
         for (AutoCloseable closeable : closeables) {
             try {
@@ -285,5 +301,4 @@ public abstract class ODatabase {
             }
         }
     }
-
 }

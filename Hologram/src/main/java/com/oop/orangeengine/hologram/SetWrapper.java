@@ -1,4 +1,4 @@
-package com.oop.orangeengine.hologram.newV;
+package com.oop.orangeengine.hologram;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -132,7 +132,6 @@ public class SetWrapper<T> implements Set<T> {
     public void insert(int index, T obj) {
         insert(index, obj, InsertionRule.AFTER);
     }
-
 
     public static enum InsertionRule {
         BEFORE,

@@ -1,26 +1,23 @@
-package com.oop.orangeengine.hologram.newV;
+package com.oop.orangeengine.hologram;
 
+import com.oop.orangeengine.hologram.rules.HologramRule;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
-import org.bukkit.entity.Player;
+import org.bukkit.Location;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.Set;
 
 @Getter
 public class Hologram {
 
     @Setter
-    private Function<Player, List<String>> textRequester;
-
-    @Setter
-    private Function<Player, Boolean> viewRequester;
-
-    @Setter
     private double spacing = 0.21;
 
+    private Location baseLocation;
+
+    private Set<HologramRule> rules = new HashSet<>();
     private SetWrapper<HologramLine> hologramLines = new SetWrapper<>();
 
     public Optional<HologramLine> getLine(int index) {
@@ -50,5 +47,6 @@ public class Hologram {
         return this;
     }
 
-    void update() {}
+    void update() {
+    }
 }

@@ -4,8 +4,6 @@ import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -16,19 +14,19 @@ import java.lang.reflect.Method;
 import static com.oop.orangeengine.hologram.WrappedArmorStand.ReflectionConstant.*;
 
 public class WrappedArmorStand {
-
     private Object entityArmorStand;
     private OPair<Location, Boolean> location;
     private OPair<String, Boolean> customName = new OPair<>("", false);
+
     @Getter
     private int id;
 
     private OPair<Boolean, Boolean> marker = new OPair<>(true, false);
     private OPair<Boolean, Boolean> small = new OPair<>(true, false);
 
-    public HoloLine owner;
+    public HologramLine owner;
 
-    public WrappedArmorStand(HoloLine owner, Location location) {
+    public WrappedArmorStand(HologramLine owner, Location location) {
         this.owner = owner;
         this.entityArmorStand = createArmorStand(location);
         this.location = new OPair<>(location, false);
@@ -40,6 +38,8 @@ public class WrappedArmorStand {
         invoke(SET_SMALL_METHOD, entityArmorStand, true);
         invoke(SET_CUSTOM_NAME_VISIBLE_METHOD, entityArmorStand, true);
         invoke(SET_VISIBLE_METHOD, entityArmorStand, false);
+
+        
     }
 
     public void update() {
@@ -158,9 +158,7 @@ public class WrappedArmorStand {
         return small.getFirst();
     }
 
-    void setSmall(boolean small) {
-        this.small.set(small, true);
-    }
+    void setSmall(boolean small) { this.small.set(small, true); }
 
     boolean isMarker() {
         return marker.getFirst();
@@ -185,5 +183,4 @@ public class WrappedArmorStand {
     public void setCustomName(String customName) {
         this.customName.set(Helper.color(customName), true);
     }
-
 }

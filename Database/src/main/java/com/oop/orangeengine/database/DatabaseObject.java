@@ -32,7 +32,7 @@ public abstract class DatabaseObject implements Suppliable {
 
     private static final Gson gson = new GsonBuilder()
             .serializeNulls()
-            .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
+            //.registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
             .registerTypeAdapterFactory(RuntimeClassFactory.of(Object.class))
             .registerTypeAdapterFactory(new MapFactory())
             .create();

@@ -55,7 +55,8 @@ public class OLogger {
     }
 
     public void printDebug(Object object) {
-        Helper.print(debug_prefix + object);
+        if (debugMode)
+            Helper.print(debug_prefix + object);
     }
 
     public void error(Throwable exception) {

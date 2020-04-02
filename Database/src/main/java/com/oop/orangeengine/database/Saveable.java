@@ -218,6 +218,8 @@ public interface Saveable {
             });
 
             statement.setString(indexes.stream().max(Comparator.naturalOrder()).orElse(0) + 1, Wrappers.wrap(null, info.getPrimaryKey(), object));
+            statement.executeUpdate();
+
         } catch (Throwable thrw) {
             thrw.printStackTrace();
         }

@@ -1,5 +1,7 @@
 package com.oop.orangeengine.main.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -7,8 +9,7 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class OSimpleReflection {
 
@@ -47,8 +48,7 @@ public final class OSimpleReflection {
         return initializeObject(packageType.getClass(className), arguments);
     }
 
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) throws Exception {
-
+    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         if (METHOD_MAP.containsKey(clazz) && METHOD_MAP.get(clazz).containsKey(methodName))
             return METHOD_MAP.get(clazz).get(methodName);
 
@@ -65,7 +65,25 @@ public final class OSimpleReflection {
             }
             return method;
         }
-        throw new IllegalAccessException("There is no such getMethod in this class with the specified displayName and parameter types");
+
+        return null;
+    }
+
+    public static Class<?> findClass(String path) {
+        path = path.replace("{cb}", Package.CB.getPath());
+        path = path.replace("{nms}", Package.NMS.getPath());
+
+        Class<?> clazz = CLASS_MAP.get(path);
+        if (clazz != null) return clazz;
+
+        try {
+            clazz = Class.forName(path);
+            CLASS_MAP.put(path, clazz);
+        } catch (Throwable thrw) {
+            throw new IllegalStateException("Failed to find class at " + path, thrw);
+        }
+
+        return clazz;
     }
 
     public static Method getMethod(String className, Package packageType, String methodName, Class<?>... parameterTypes) throws Exception {
@@ -84,13 +102,52 @@ public final class OSimpleReflection {
         return invokeMethod(instance, packageType.getClass(className), methodName, arguments);
     }
 
-
-    public static Field getField(Class<?> clazz, boolean declared, String fieldName) throws Exception {
-        Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
+    public static Field getField(Class<?> clazz, boolean declared, String fieldName){
+        Field field = null;
+        try {
+            field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
         field.setAccessible(true);
         return field;
     }
 
+    public static <T> Field getField(Class<?> target, String name, Class<T> fieldType, int index) {
+        for (final Field field : target.getDeclaredFields()) {
+            if ((name == null || field.getName().equals(name)) && fieldType.isAssignableFrom(field.getType()) && index-- <= 0) {
+                field.setAccessible(true);
+                return field;
+            }
+        }
+
+        // Search in parent classes
+        if (target.getSuperclass() != null)
+            return getField(target.getSuperclass(), name, fieldType, index);
+
+        throw new IllegalArgumentException("Cannot find field with type " + fieldType);
+    }
+
+    public static Field getField(Class clazz, Class type) {
+        try {
+            return merge(clazz.getDeclaredFields(), clazz.getFields())
+                    .stream()
+                    .filter(field -> field.getType().isAssignableFrom(type))
+                    .findFirst()
+                    .orElse(null);
+        } catch (Throwable thrw) {
+            throw new IllegalStateException("Failed to find field with type " + type.getSimpleName());
+        }
+    }
+
+    private static <T> Set<T> merge(T[] ...arrays) {
+        Set<T> set = Sets.newHashSet();
+        for (T[] array : arrays) {
+            set.addAll(Lists.newArrayList(array));
+        }
+
+        return set;
+    }
 
     public static Field getField(String className, Package packageType, boolean declared, String fieldName) throws Exception {
         return getField(packageType.getClass(className), declared, fieldName);
@@ -149,8 +206,8 @@ public final class OSimpleReflection {
         }
 
         public Class<?> getClass(String className) throws Exception {
-
             if (CLASS_MAP.containsKey(className)) return CLASS_MAP.get(className);
+
             Class<?> clazz = Class.forName(this + "." + className);
             CLASS_MAP.put(className, clazz);
             return clazz;

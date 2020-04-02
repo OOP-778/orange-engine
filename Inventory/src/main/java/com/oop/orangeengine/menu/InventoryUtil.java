@@ -87,7 +87,6 @@ public class InventoryUtil {
                 added += item1.getAmount();
                 item1.setAmount(0);
             }
-
         }
 
         List<Player> viewers = inventory.getViewers().stream()
@@ -101,7 +100,6 @@ public class InventoryUtil {
             int finalSlot = slot;
             viewers.forEach(player -> PacketUtils.updateSlot(player, finalSlot, itemStack, false));
             inventory.setItem(slot, itemStack);
-
         }
 
         return added;
@@ -110,5 +108,4 @@ public class InventoryUtil {
     public static void updateTitle(Inventory inventory, String title) {
         inventory.getViewers().forEach(viewier -> PacketUtils.updateTitle((Player) viewier, inventory, title));
     }
-
 }

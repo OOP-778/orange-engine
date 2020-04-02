@@ -14,7 +14,7 @@ def props = new Properties()
 file("version.properties").withInputStream { props.load(it) }
 if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
     def formatter = new Formatter()
-    version = formatter.format("%.2f", (props.getProperty("VERSION").toDouble() + 0.01))
+    version = formatter.format("%.1f", (props.getProperty("VERSION").toDouble() + 0.1))
     props.setProperty("VERSION", version.toString())
     props.store(new OutputStreamWriter(new FileOutputStream(file("version.properties"))), null)
 }
