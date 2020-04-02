@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 @Getter
 public abstract class ODatabase {
 
@@ -111,6 +113,7 @@ public abstract class ODatabase {
     }
 
     public void execute(String sql) {
+        getEngine().getLogger().printDebug("Executing " + sql);
         try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql)) {
             preparedStatement.execute();
 

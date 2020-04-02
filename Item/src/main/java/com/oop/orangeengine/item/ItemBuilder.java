@@ -380,10 +380,12 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public boolean hasEnchant(Enchantment enchantment) {
+        if (getItemMeta() == null) return false;
         return getItemMeta().hasEnchant(enchantment);
     }
 
     public int getEnchantLevel(Enchantment enchantment) {
+        if (getItemMeta() == null) return -1;
         return getItemMeta().getEnchantLevel(enchantment);
     }
 }

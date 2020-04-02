@@ -5,6 +5,7 @@ import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
@@ -38,8 +39,6 @@ public class WrappedArmorStand {
         invoke(SET_SMALL_METHOD, entityArmorStand, true);
         invoke(SET_CUSTOM_NAME_VISIBLE_METHOD, entityArmorStand, true);
         invoke(SET_VISIBLE_METHOD, entityArmorStand, false);
-
-        
     }
 
     public void update() {
