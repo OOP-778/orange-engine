@@ -1,19 +1,20 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import t.a.ExampleObject;
+import com.oop.orangeengine.database.ODatabase;
+import com.oop.orangeengine.database.types.MySqlDatabase;
+
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Runner {
 
-    final static Gson gson = new GsonBuilder()
-            .registerTypeAdapterFactory(new UpdateableAdapterFactory())
-            .create();
-
     public static void main(String[] args) {
-        String serialized = gson.toJson(new ExampleObject());
-        System.out.println(serialized);
-
-        ExampleObject exampleObject = gson.fromJson(serialized, ExampleObject.class);
-        System.out.println(exampleObject);
-
+        ODatabase database = new MySqlDatabase(
+                new MySqlDatabase.MySqlProperties()
+                .database("customer_103989_test")
+                .user("customer_103989_test")
+                .password("W6OD~ZbtxNjPoIcB#TlT")
+                .url("eu01-sql.pebblehost.com")
+        );
+        System.out.println(database.getTables());
     }
 }

@@ -10,5 +10,5 @@ sourceCompatibility = 1.8
 repositories {}
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.8.6'
+    compile project(":Database")
 }

@@ -37,14 +37,12 @@ public class OTask extends Storegable {
     private boolean cancelled = false;
 
     protected Runnable run() {
-
         return () -> {
-
             if (cancelled) return;
 
             //Check for run times
             OptionalConsumer<Integer> runned = grab("runned");
-            if (runned.isPresent() && (int) runned.get() == runTimes) {
+            if (runned.isPresent() && runned.get() == runTimes) {
                 cancel();
 
                 if (whenFinished != null)
@@ -72,7 +70,6 @@ public class OTask extends Storegable {
             }
             if (runTimes != -1)
                 storeIfPresentUpdate("runned", 1, Integer::sum);
-
         };
 
     }
@@ -148,7 +145,7 @@ public class OTask extends Storegable {
         return this;
     }
 
-    public OTask stopFor(long milis){
+    public OTask stopFor(long milis) {
         return stopFor(TimeUnit.MILLISECONDS, milis);
     }
 

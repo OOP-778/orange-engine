@@ -35,6 +35,7 @@ public class SubscribedEvent<T extends Event> extends Storegable {
 
     @Setter
     private SubscriptionProperties<T> props;
+
     private int timesRan = 0;
 
     public void end() {

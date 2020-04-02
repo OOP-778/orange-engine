@@ -49,7 +49,7 @@ public class MySqlDatabase extends ODatabase {
     @Override
     public List<String> getTables() {
         List<String> tables = new ArrayList<>();
-        try (ResultSet resultSet = getConnection().getMetaData().getTables(getConnection().getCatalog(), "", null, new String[]{"TABLE"})) {
+        try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
             while (resultSet.next())
                 tables.add(resultSet.getString("TABLE_NAME"));
         } catch (Throwable throwable) {
