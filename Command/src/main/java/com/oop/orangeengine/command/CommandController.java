@@ -127,8 +127,11 @@ public class CommandController {
 
     public List<String> handleTabComplete(OCommand command, String[] args) {
         List<String> completion = new ArrayList<>();
-        if (command.getTabComplete().containsKey(args.length))
-            completion.addAll(command.getTabComplete().get(args.length).handleTabCompletion(args));
+        if (command.getTabComplete().containsKey(args.length)) {
+            Collection<String> completions = command.getTabComplete().get(args.length).handleTabCompletion(args);
+            if (args.length > 0 && args[0].trim().length() != 0)
+                completions.removeIf(c -> !c.contains(args[0]));
+        }
 
         return completion;
     }

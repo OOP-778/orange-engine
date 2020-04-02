@@ -30,12 +30,16 @@ public class SubscribedEvent<T extends Event> extends Storegable {
     @Setter
     private Consumer<T> listener;
 
+    @Getter
+    private boolean cancelled;
+
     @Setter
     private SubscriptionProperties<T> props;
     private int timesRan = 0;
 
     public void end() {
         SubEvent.unregister(subEvent);
+        cancelled = true;
         if (task != null)
             task.cancel();
     }

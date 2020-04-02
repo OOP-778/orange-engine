@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 public class MySqlDatabase extends ODatabase {
 
     private MySqlProperties properties;
@@ -53,6 +55,7 @@ public class MySqlDatabase extends ODatabase {
         } catch (Throwable throwable) {
             throw new IllegalStateException("Failed to get tables", throwable);
         }
+        getEngine().getLogger().printDebug("Found Tables for mysql: " + tables);
         return tables;
     }
 }
