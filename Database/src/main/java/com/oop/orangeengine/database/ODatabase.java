@@ -19,15 +19,15 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 @Getter
 public abstract class ODatabase {
 
-    protected abstract Connection provideConnection() throws SQLException, ClassNotFoundException;
+    protected abstract Connection provideConnection() throws Throwable;
 
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
                 connection = provideConnection();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get connection", throwable);
         }
 
         return connection;

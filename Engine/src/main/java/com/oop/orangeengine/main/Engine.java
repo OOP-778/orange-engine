@@ -54,7 +54,7 @@ public class Engine {
         taskController = plugin.provideTaskController();
         logger = new OLogger(owning);
 
-        ClassLoader.load(getClass().getClassLoader());
+        ClassLoader.load(plugin.loader());
     }
 
     public static Engine getInstance() {

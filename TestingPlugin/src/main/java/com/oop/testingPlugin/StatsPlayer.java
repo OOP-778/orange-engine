@@ -11,7 +11,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Getter
-@Table(name = "stats")
+@Table(name = "stats_testing")
 public class StatsPlayer extends DatabaseObject {
 
     @PrimaryKey(name = "uuid")

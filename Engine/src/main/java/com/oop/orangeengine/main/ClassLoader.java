@@ -1,6 +1,8 @@
 package com.oop.orangeengine.main;
 
 import com.google.common.collect.Sets;
+import com.google.common.reflect.ClassPath;
+import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.util.DefaultInitialization;
 import com.oop.orangeengine.main.util.JarUtil;
 
@@ -14,62 +16,39 @@ import java.util.jar.JarFile;
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class ClassLoader {
-
     public static void load(java.lang.ClassLoader loader) {
         try {
-            for (Class<?> clazz : getClasses(loader)) {
-                for (Constructor<?> declaredConstructor : clazz.getDeclaredConstructors())
-                    if (declaredConstructor.getDeclaredAnnotation(DefaultInitialization.class) != null)
-                        declaredConstructor.newInstance();
+            String[] split = getEngine().getOwning().getClass().getName().split("\\.");
+
+            int len = split.length == 3 ? 3 : 2;
+            int count = 0;
+            StringBuilder path = new StringBuilder();
+
+            for (String s : split) {
+                if (count == len) break;
+
+                path.append(s).append(".");
+                count++;
             }
-        } catch (Exception ex){
-            ex.printStackTrace();
+
+            String finalPath = path.substring(0, path.length()-1);
+            for (ClassPath.ClassInfo info : ClassPath.from(loader).getAllClasses()) {
+                if (!info.getName().startsWith(finalPath)) continue;
+
+                Class clazz = null;
+                try {
+                    clazz = Class.forName(info.getName(), true, loader);
+                } catch (Throwable ignored) {}
+                if (clazz == null) continue;
+
+                try {
+                    for (Constructor<?> declaredConstructor : clazz.getDeclaredConstructors())
+                        if (declaredConstructor.getDeclaredAnnotation(DefaultInitialization.class) != null)
+                            declaredConstructor.newInstance();
+                } catch (Throwable ignored) {}
+            }
+        } catch (Throwable thrw) {
+            thrw.printStackTrace();
         }
     }
-
-    public static void load2() {
-        JarFile jarFile = JarUtil.getJarFile(getEngine().getOwning().getClass());
-
-        final Enumeration<JarEntry> entries = jarFile.entries();
-        List<String> classNames = new ArrayList<>();
-
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-
-            if (entry.getName().contains(".class")) {
-                classNames.add(entry.getName().replace("/", ".").replace(".class", ""));
-            }
-        }
-
-        try {
-            jarFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (String className : classNames) {
-
-            try {
-                Class klass = Class.forName(className);
-                for (Constructor constructor : klass.getConstructors())
-                    if (constructor.getDeclaredAnnotation(DefaultInitialization.class) != null) {
-                        constructor.newInstance();
-                    }
-            } catch (Throwable ex) {
-            }
-        }
-    }
-
-    private static Set<Class> getClasses(java.lang.ClassLoader loader) {
-        try {
-            Field f = java.lang.ClassLoader.class.getDeclaredField("classes");
-            f.setAccessible(true);
-
-            Vector<Class> classes = (Vector<Class>) f.get(loader);
-            return new HashSet<>(classes);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return Sets.newHashSet();
-    }
-
 }

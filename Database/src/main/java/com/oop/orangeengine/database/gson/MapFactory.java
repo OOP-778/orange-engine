@@ -1,13 +1,17 @@
 package com.oop.orangeengine.database.gson;
 
 import com.google.gson.*;
+import com.google.gson.internal.LazilyParsedNumber;
 import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.bukkit.util.NumberConversions;
 
 import java.io.IOException;
 import java.util.Map;
+
+import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class MapFactory implements TypeAdapterFactory {
     @Override
@@ -28,7 +32,6 @@ public class MapFactory implements TypeAdapterFactory {
                 // Init values array for map
                 JsonArray array = new JsonArray();
                 mapObject.add("values", array);
-
 
                 map.forEach((key, value) -> {
                     JsonObject pairObject = new JsonObject();
@@ -83,6 +86,9 @@ public class MapFactory implements TypeAdapterFactory {
                             String className = keyObject.getAsJsonPrimitive("class").getAsString();
                             key = gson.fromJson(keyObject, Class.forName(className));
 
+                            if (key instanceof LazilyParsedNumber)
+                                key = numberConversion((LazilyParsedNumber) key);
+
                         } catch (Throwable thrw) {
                             throw new JsonParseException("Failed to parse key value of the map!", thrw);
                         }
@@ -96,6 +102,9 @@ public class MapFactory implements TypeAdapterFactory {
                             JsonObject valueObject = valueJson.getAsJsonObject();
                             String className = valueObject.getAsJsonPrimitive("class").getAsString();
                             value = gson.fromJson(valueObject, Class.forName(className));
+
+                            if (value instanceof LazilyParsedNumber)
+                                value = numberConversion((LazilyParsedNumber) value);
 
                         } catch (Throwable thrw) {
                             throw new JsonParseException("Failed to parse key value of the map!", thrw);
@@ -120,5 +129,9 @@ public class MapFactory implements TypeAdapterFactory {
             return primitive.getAsString();
 
         return "none";
+    }
+
+    private Object numberConversion(LazilyParsedNumber number) {
+        return number;
     }
 }

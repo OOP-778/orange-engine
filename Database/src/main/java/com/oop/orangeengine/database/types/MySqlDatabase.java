@@ -5,15 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
 
+@Getter
 public class MySqlDatabase extends ODatabase {
 
     private MySqlProperties properties;
@@ -25,8 +23,8 @@ public class MySqlDatabase extends ODatabase {
     @Override
     protected Connection provideConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(properties.build(), properties.user(), properties.password);
-        conn.createStatement().execute("CREATE DATABASE IF NOT EXISTS " + properties.database);
-        conn.createStatement().execute("USE " + properties.database + ";");
+//        conn.createStatement().execute("CREATE DATABASE IF NOT EXISTS " + properties.database);
+//        conn.createStatement().execute("USE " + properties.database + ";");
         return conn;
     }
 
@@ -48,14 +46,15 @@ public class MySqlDatabase extends ODatabase {
 
     @Override
     public List<String> getTables() {
+        Connection connection = getConnection();
         List<String> tables = new ArrayList<>();
-        try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
-            while (resultSet.next())
-                tables.add(resultSet.getString("TABLE_NAME"));
+        try (ResultSet resultSet = connection.prepareStatement("SELECT table_name FROM information_schema.tables WHERE table_type = 'base table'").executeQuery()){
+            while (resultSet.next()) {
+                tables.add(resultSet.getString(1));
+            }
         } catch (Throwable throwable) {
             throw new IllegalStateException("Failed to get tables", throwable);
         }
-        getEngine().getLogger().printDebug("Found Tables for mysql: " + tables);
         return tables;
     }
 }
