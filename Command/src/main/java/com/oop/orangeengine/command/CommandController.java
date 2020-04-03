@@ -109,9 +109,9 @@ public class CommandController {
                 else if (args.length == 1) {
                     command.getSubCommands().values()
                             .stream()
-                            .filter(OCommand::isSecret)
+                            .filter(command -> !command.isSecret())
                             .filter(c -> !c.getPermission().equalsIgnoreCase("NONE") && sender.hasPermission(c.getPermission()))
-                            .filter(c -> args[0].trim().length() != 0 && c.getLabel().startsWith(args[0]))
+                            .filter(c -> args[0].trim().length() > 0 && c.getLabel().startsWith(args[0]))
                             .forEach(command -> completion.add(command.getLabel()));
 
                 } else

@@ -14,7 +14,7 @@ repositories {
 dependencies {
     compileOnly 'mysql:mysql-connector-java:8.0.17'
     compileOnly 'org.xerial:sqlite-jdbc:3.28.0'
-    compileOnly 'com.google.code.gson:gson:2.8.6'
+    compile 'com.google.code.gson:gson:2.8.6'
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compileOnly group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'

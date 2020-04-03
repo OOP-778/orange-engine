@@ -1,5 +1,6 @@
 package com.oop.orangeengine.database.gson;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.*;
 import com.google.gson.internal.LazilyParsedNumber;
 import com.google.gson.internal.Streams;
@@ -9,6 +10,9 @@ import com.google.gson.stream.JsonWriter;
 import org.bukkit.util.NumberConversions;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
@@ -35,8 +39,15 @@ public class MapFactory implements TypeAdapterFactory {
 
                 map.forEach((key, value) -> {
                     JsonObject pairObject = new JsonObject();
-                    pairObject.add("key", gson.toJsonTree(key));
-                    pairObject.add("value", gson.toJsonTree(value));
+                    if (isNumber(key))
+                        pairObject.add("key", numberToObject(key));
+                    else
+                        pairObject.add("key", gson.toJsonTree(key));
+
+                    if (isNumber(value))
+                        pairObject.add("value", numberToObject(value));
+                    else
+                        pairObject.add("value", gson.toJsonTree(value));
 
                     array.add(pairObject);
                 });
@@ -82,13 +93,7 @@ public class MapFactory implements TypeAdapterFactory {
 
                     else if (keyJson.isJsonObject()) {
                         try {
-                            JsonObject keyObject = keyJson.getAsJsonObject();
-                            String className = keyObject.getAsJsonPrimitive("class").getAsString();
-                            key = gson.fromJson(keyObject, Class.forName(className));
-
-                            if (key instanceof LazilyParsedNumber)
-                                key = numberConversion((LazilyParsedNumber) key);
-
+                            key = toObject(gson, keyJson.getAsJsonObject());
                         } catch (Throwable thrw) {
                             throw new JsonParseException("Failed to parse key value of the map!", thrw);
                         }
@@ -99,13 +104,7 @@ public class MapFactory implements TypeAdapterFactory {
 
                     else if (valueJson.isJsonObject()) {
                         try {
-                            JsonObject valueObject = valueJson.getAsJsonObject();
-                            String className = valueObject.getAsJsonPrimitive("class").getAsString();
-                            value = gson.fromJson(valueObject, Class.forName(className));
-
-                            if (value instanceof LazilyParsedNumber)
-                                value = numberConversion((LazilyParsedNumber) value);
-
+                            value = toObject(gson, valueJson.getAsJsonObject());
                         } catch (Throwable thrw) {
                             throw new JsonParseException("Failed to parse key value of the map!", thrw);
                         }
@@ -116,6 +115,37 @@ public class MapFactory implements TypeAdapterFactory {
                 return (T) map;
             }
         };
+    }
+
+    public Object toObject(Gson gson, JsonObject object) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+        String className = object.getAsJsonPrimitive("class").getAsString();
+        if (isNumber(className))
+            return objectToNumber(object, className);
+
+        Class clazz = Class.forName(className);
+        return gson.fromJson(object, clazz);
+    }
+
+    private boolean isNumber(Object object) {
+        return isNumber(object.getClass());
+    }
+
+    private boolean isNumber(String clazz) {
+        return
+                clazz.contentEquals("i")
+                || clazz.contentEquals("l")
+                || clazz.contentEquals("f")
+                || clazz.contentEquals("d")
+                || clazz.contentEquals("n");
+    }
+
+    private boolean isNumber(Class clazz) {
+        if (Number.class.isAssignableFrom(clazz)) return true;
+        return
+                clazz == int.class
+                || clazz == long.class
+                || clazz == double.class
+                || clazz == float.class;
     }
 
     private Object parsePrimitive(JsonPrimitive primitive) {
@@ -131,7 +161,37 @@ public class MapFactory implements TypeAdapterFactory {
         return "none";
     }
 
-    private Object numberConversion(LazilyParsedNumber number) {
-        return number;
+    public JsonObject numberToObject(Object numba) {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", numba.toString());
+        object.addProperty("class", wrapNumberClass(numba));
+        return object;
+    }
+
+    public String wrapNumberClass(Object numba) {
+        System.out.println(numba.getClass());
+        return
+                numba instanceof Integer ? "i" :
+                        numba instanceof Long ? "l" :
+                                numba instanceof Double ? "d" :
+                                        numba instanceof Float ? "f" : "n";
+    }
+
+    public Object objectToNumber(JsonObject object, String clazz) {
+        String value = object.remove("value").getAsString();
+        if (clazz.contentEquals("i"))
+            return Integer.valueOf(value);
+
+        else if (clazz.contentEquals("l"))
+            return Long.valueOf(value);
+
+        else if (clazz.contentEquals("d"))
+            return Double.valueOf(value);
+
+        else if (clazz.contentEquals("f"))
+            return Float.valueOf(value);
+
+        else
+            throw new IllegalStateException("Failed to find number type by " + clazz + " for " + value);
     }
 }

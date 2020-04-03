@@ -48,7 +48,8 @@ public class MySqlDatabase extends ODatabase {
     public List<String> getTables() {
         Connection connection = getConnection();
         List<String> tables = new ArrayList<>();
-        try (ResultSet resultSet = connection.prepareStatement("SELECT table_name FROM information_schema.tables WHERE table_type = 'base table'").executeQuery()){
+        try (PreparedStatement statement = connection.prepareStatement("SELECT table_name FROM information_schema.tables WHERE table_type = 'base table'")) {
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 tables.add(resultSet.getString(1));
             }
