@@ -36,8 +36,7 @@ public abstract class CommandArgument<T> {
     // Allows for other arguments to depend on this
     private AtomicReference<T> reference = new AtomicReference<>(null);
 
-    public void onAdd(OCommand command) {
-    }
+    public void onAdd(OCommand command) {}
 
     public interface ArgumentMapper<T> {
         default OPair<T, String> requestProduct(CommandArgument<T> argument, String input) {

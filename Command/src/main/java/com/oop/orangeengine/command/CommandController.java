@@ -2,6 +2,7 @@ package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
+import com.oop.orangeengine.main.events.SyncEvents;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.plugin.OComponent;
 import com.oop.orangeengine.main.util.OSimpleReflection;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
 
@@ -103,20 +105,17 @@ public class CommandController {
             @Override
             public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
                 List<String> completion = new ArrayList<>();
-                if (command.getSubCommands().isEmpty())
-                    completion.addAll(handleTabComplete(command, args));
+                if (command.getSubCommands().isEmpty()) {
+                    completion.addAll(handleTabComplete(command, args, sender));
 
-                else if (args.length == 1) {
-                    command.getSubCommands().values()
-                            .stream()
-                            .filter(command -> !command.isSecret())
-                            .filter(c -> !c.getPermission().equalsIgnoreCase("NONE") && sender.hasPermission(c.getPermission()))
-                            .filter(c -> args[0].trim().length() > 0 && c.getLabel().startsWith(args[0]))
-                            .forEach(command -> completion.add(command.getLabel()));
+                } else if (args.length == 1) {
+                    completion.addAll(getSubCommandsFor(command, sender));
+                    if (args[0].trim().length() > 0) {
+                        completion.removeIf(commandName -> !commandName.toLowerCase().startsWith(args[0].toLowerCase()));
+                    }
 
                 } else
-                    completion.addAll(handleTabComplete(command.subCommand(args[0]), cutArray(args, 1)));
-
+                    completion.addAll(handleTabComplete(command.subCommand(args[0]), cutArray(args, 1), sender));
                 return completion;
             }
         };
@@ -125,12 +124,44 @@ public class CommandController {
 
     }
 
-    public List<String> handleTabComplete(OCommand command, String[] args) {
+    public Collection<String> getSubCommandsFor(OCommand command, CommandSender sender) {
+        return command.getSubCommands().values()
+                .stream()
+                .filter(subCommand -> !subCommand.isSecret())
+                .filter(subCommand -> subCommand.getPermission().equalsIgnoreCase("NONE") || sender.hasPermission(subCommand.getPermission()))
+                .map(OCommand::getLabel)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> handleTabComplete(OCommand command, String[] args, CommandSender sender) {
         List<String> completion = new ArrayList<>();
-        if (command.getTabComplete().containsKey(args.length)) {
-            Collection<String> completions = command.getTabComplete().get(args.length).handleTabCompletion(args);
-            if (args.length > 0 && args[0].trim().length() != 0)
-                completions.removeIf(c -> !c.contains(args[0]));
+        if (args.length >= 1) {
+            System.out.println("Variant one");
+            OCommand subCommand = command.subCommand(args[0]);
+            if (subCommand != null) {
+                completion.addAll(handleTabComplete(subCommand, cutArray(args, 1), sender));
+                return completion;
+            }
+        }
+
+        if (!command.getSubCommands().isEmpty()) {
+            System.out.println("Variant two");
+            completion.addAll(getSubCommandsFor(command, sender));
+        }
+
+        if (completion.isEmpty()) {
+            System.out.println("Variant three");
+            TabCompletion tabCompletion = command.getTabComplete().get(args.length);
+            if (tabCompletion != null) {
+                completion.addAll(tabCompletion.handleTabCompletion(args));
+
+            }
+        }
+
+        if (args.length >= 1) {
+            String lastArg = args[args.length - 1];
+            if (lastArg.trim().length() > 0)
+                completion.removeIf(name -> !name.toLowerCase().startsWith(args[0].toLowerCase()));
         }
 
         return completion;
@@ -237,7 +268,6 @@ public class CommandController {
     }
 
     private void handleProperUsage(OCommand command, CommandSender sender) {
-
         //Check if simple message is required
         if (command.getSubCommands().isEmpty()) {
             OMessage message = new OMessage();
@@ -332,13 +362,10 @@ public class CommandController {
             }
             if (sender instanceof Player)
                 message.send(((Player) sender));
-
         }
-
     }
 
     private String reverseLabel(String labelWithParents) {
-
         List<String> strings = new ArrayList<>();
         if (labelWithParents.contains(" "))
             strings.addAll(Arrays.asList(labelWithParents.split(" ")));
@@ -349,7 +376,7 @@ public class CommandController {
 
         StringBuffer buffer = new StringBuffer();
         for (String append : strings) {
-            buffer.append(append + " ");
+            buffer.append(append).append(" ");
         }
 
         return buffer.toString();
@@ -371,12 +398,9 @@ public class CommandController {
     }
 
     private void buildArgs(Collection<CommandArgument> args, MessageLine line) {
-
         //Format = <required> [optional]
         if (args.stream().anyMatch(CommandArgument::isRequired)) {
-
             args.stream().filter(CommandArgument::isRequired).forEach(arg -> {
-
                 line.append(" <");
                 LineContent content = new LineContent("&f" + arg.getIdentity()).
                         hoverText(colorScheme.getMainColor() + arg.getDescription());
@@ -385,12 +409,11 @@ public class CommandController {
 
             });
             line.append(colorScheme.getMainColor());
-
         }
 
         if (args.stream().anyMatch(a -> !a.isRequired())) {
-
             line.append(colorScheme.getSecondColor()).append(" ");
+
             args.stream().filter(a -> !a.isRequired()).forEach(arg -> {
 
                 line.append("[");
@@ -401,9 +424,6 @@ public class CommandController {
 
             });
             line.append(colorScheme.getMarkupColor());
-
         }
-
     }
-
 }

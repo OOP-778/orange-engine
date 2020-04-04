@@ -23,8 +23,8 @@ public class MySqlDatabase extends ODatabase {
     @Override
     protected Connection provideConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(properties.build(), properties.user(), properties.password);
-//        conn.createStatement().execute("CREATE DATABASE IF NOT EXISTS " + properties.database);
-//        conn.createStatement().execute("USE " + properties.database + ";");
+        conn.createStatement().execute("CREATE DATABASE IF NOT EXISTS " + properties.database);
+        conn.createStatement().execute("USE " + properties.database + ";");
         return conn;
     }
 

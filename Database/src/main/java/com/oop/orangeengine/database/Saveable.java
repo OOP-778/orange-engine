@@ -426,7 +426,7 @@ public interface Saveable {
                     stmt.executeUpdate("ALTER TABLE " + table.name() + " ADD CONSTRAINT " + primaryKey + " PRIMARY KEY CLUSTERED (" + primaryKey + ")");
                 }
             } catch (Throwable thrw) {
-                throw new IllegalStateException("Failed to edit " + table.name() + " cause of " + thrw.getMessage(), thrw);
+                throw new IllegalStateException("Failed to edit " + table.name() + " cause " + thrw.getMessage(), thrw);
             }
         }
 

@@ -23,8 +23,12 @@ public class WrappedCommand {
         return (Player) sender;
     }
 
-    public OptionalConsumer<Object> getArg(String arg) {
-        return OptionalConsumer.of(Optional.ofNullable(arguments.get(arg)));
+    public <T> Optional<T> getArg(String arg) {
+        return Optional.ofNullable((T) arguments.get(arg));
+    }
+
+    public <T> Optional<T> getArg(String arg, Class<T> type) {
+        return Optional.ofNullable((T) arguments.get(arg));
     }
 
     public <T> T getArgAsReq(String arg) {

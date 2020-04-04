@@ -147,7 +147,6 @@ public class OCommand {
     }
 
     private String getLabelWithParents(String current) {
-
         if (getParent() == null)
             return current + getLabel() + " ";
         else
