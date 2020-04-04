@@ -37,7 +37,7 @@ public class ClassLoader {
 
                 Class clazz = null;
                 try {
-                    clazz = Class.forName(info.getName(), true, loader);
+                    clazz = Class.forName(info.getName(), false, loader);
                 } catch (Throwable ignored) {}
                 if (clazz == null) continue;
 
