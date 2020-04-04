@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
@@ -14,8 +15,6 @@ import java.util.List;
 public class WordsQueue {
 
     public static List<OPair<Character, Character>> blacklistedCharsFromColoring = new ArrayList<OPair<Character, Character>>(){{
-        add(new OPair<>('{', '}'));
-        add(new OPair<>('%', '%'));
     }};
 
     private List<Word> words;
@@ -65,6 +64,13 @@ public class WordsQueue {
             */
             if (builder.length() == 0 && character == ' ') {
                 builder.append(character);
+                if (decoration != null) {
+                    if (decoration.getColor() != null)
+                        builder.append(decoration.getColor().toString());
+
+                    if (decoration.getDecoration() != null)
+                        builder.append(decoration.getDecoration().toString());
+                }
                 continue;
             }
 
@@ -73,6 +79,8 @@ public class WordsQueue {
             */
             if (character == ' ') {
                 words.add(new Word(builder.toString(), decoration));
+                Bukkit.broadcastMessage(builder.toString().replace("&", "@"));
+
                 builder = new StringBuilder();
 
                 if (decoration != null) {

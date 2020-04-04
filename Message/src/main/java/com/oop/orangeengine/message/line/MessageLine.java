@@ -160,16 +160,16 @@ public class MessageLine implements Cloneable {
 
         for (LineContent lineContent : contentList) {
             LineContent clonedLC = lineContent.clone();
-            StringBuilder builder = new StringBuilder();
 
-            lastQueue = WordsQueue.of(lineContent.getText(), lastQueue == null ? new WordsQueue.WordDecoration(null, null) : lastQueue.getEndDecoration());
-            lastQueue.getWords().forEach(word -> builder.append(word.getString()));
-
-            String[] forLambda = new String[]{builder.toString()};
+            String[] forLambda = new String[]{lineContent.getText()};
             placeholders.forEach((key, plac) -> forLambda[0] = forLambda[0].replace(key, plac));
 
+            StringBuilder builder = new StringBuilder();
+            lastQueue = WordsQueue.of(forLambda[0], lastQueue == null ? new WordsQueue.WordDecoration(null, null) : lastQueue.getEndDecoration());
+            lastQueue.getWords().forEach(word -> builder.append(word.getString()));
+
             // Set the Text
-            clonedLC.text(forLambda[0]);
+            clonedLC.text(builder.toString());
             base.addExtra(clonedLC.create());
 
             if (autoSpaces)
