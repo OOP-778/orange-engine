@@ -72,4 +72,10 @@ public interface DatabaseHolder<K, T extends DatabaseObject> extends Saveable {
     void onAdd(T object, boolean isNew);
 
     void onRemove(T object);
+
+    default void save() {
+        dataStream()
+                .parallel()
+                .forEach(DatabaseObject::save);
+    }
 }

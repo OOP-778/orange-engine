@@ -100,6 +100,11 @@ public abstract class DatabaseObject implements Suppliable {
         runWhenLoaded.clear();
     }
 
+    public void save() {
+        DatabaseHolder<?, DatabaseObject> holder = (DatabaseHolder<?, DatabaseObject>) this.holder;
+        holder.save(this, holder);
+    }
+
     public void save(boolean async) {
         if (holder != null) {
             DatabaseHolder<?, DatabaseObject> holder = (DatabaseHolder<?, DatabaseObject>) this.holder;

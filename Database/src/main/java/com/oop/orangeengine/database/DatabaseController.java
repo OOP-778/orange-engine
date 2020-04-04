@@ -42,4 +42,7 @@ public class DatabaseController implements Saveable {
         dataHolders.values().forEach(this::load);
     }
 
+    public void save() {
+        dataHolders.values().forEach(DatabaseHolder::save);
+    }
 }

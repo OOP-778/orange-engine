@@ -269,7 +269,7 @@ public abstract class ODatabase {
         Connection connection = getConnection();
         List<String> primaryKeys = new ArrayList<>();
 
-        try (ResultSet rs = connection.getMetaData().getPrimaryKeys(null, null, tableName)) {
+        try (ResultSet rs = connection.getMetaData().getPrimaryKeys(connection.getCatalog(), null, tableName)) {
             while (rs.next())
                 primaryKeys.add(rs.getString("COLUMN_NAME"));
 
