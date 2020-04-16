@@ -8,7 +8,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import java.util.Map;
 
 public class SecretCommandController {
-
     private static SecretCommandController instance;
     private Map<String, SecretCommand> secretCommandMap = Maps.newConcurrentMap();
 

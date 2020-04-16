@@ -76,14 +76,15 @@ public class ConfigurationUtil {
 
                         //IS LIST
                         List<UnreadString> listValues = iterator.nextValuesThatMatches(us -> us.value().contains("-"), true);
+
                         OPair<String, Integer> parsedKey = parse(split[0]);
                         ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
 
                         value.setSpaces(parsedKey.getSecond());
                         value.description(description);
+                        description.clear();
 
                         if (currentSection != null) {
-
                             if (currentSection.getSpaces() >= value.getSpaces()) {
 
                                 //We need to find setParent that has less setSpaces and the different is between 1-4
@@ -109,12 +110,12 @@ public class ConfigurationUtil {
                         OPair<String, Integer> pair = parse(split[0]);
                         ConfigurationSection newSection = new ConfigurationSection(configuration, pair.getFirst(), pair.getSecond());
                         newSection.description(description);
+                        description.clear();
 
                         if (leadSection == null) leadSection = newSection;
                         else currentSection.findAcceptableParent(newSection).assignSection(newSection);
 
                         currentSection = newSection;
-
                     }
 
                 } else {
@@ -132,11 +133,10 @@ public class ConfigurationUtil {
 
                     value.setSpaces(parsedKey.getSecond());
                     value.description(description);
+                    description.clear();
 
                     if (currentSection != null) {
-
                         if (currentSection.getSpaces() >= value.getSpaces()) {
-
                             //We need to find setParent that has less setSpaces and the different is between 1-4
                             ConfigurationSection section = currentSection.getAllParents().stream().
                                     filter(s -> s.getSpaces() < value.getSpaces()).
@@ -148,9 +148,7 @@ public class ConfigurationUtil {
                             }
 
                         } else {
-
                             currentSection.assignValue(value);
-
                         }
                     }
 
@@ -165,17 +163,12 @@ public class ConfigurationUtil {
                     description.add(parsed.getFirst());
 
                 } else if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
-
             }
-
         }
-
         return leadSection;
-
     }
 
     public static int findSpaces(String string) {
-
         int count = 0;
         for (Character c : string.toCharArray()) {
 
@@ -183,24 +176,18 @@ public class ConfigurationUtil {
             else return count;
 
         }
-
         return count;
-
     }
 
     public static <T> List<T> copy(T[] array, int startIndex, int endIndex) {
-
         List<T> list = new ArrayList<>();
-
         for (int index = startIndex; index < array.length; index++) {
 
             list.add(array[index]);
             if (index == endIndex) break;
 
         }
-
         return list;
-
     }
 
     public static OPair<String, Integer> parse(String key) {
@@ -230,9 +217,6 @@ public class ConfigurationUtil {
     }
 
     public static <T> boolean filter(T[] array, int startingIndex, Predicate<T> filter) {
-
-        int valuesFound = 0;
-
         for (int index = startingIndex; index < array.length; index++) {
 
             T value = array[index];
@@ -245,15 +229,11 @@ public class ConfigurationUtil {
             if (toReturn) return true;
 
         }
-
         return false;
-
     }
 
     public static boolean isList(UnreadString[] array, int startingIndex) {
-
         for (int index = startingIndex; index < array.length; index++) {
-
             UnreadString value = array[index];
 
             //We have to test the getSecond if it starts with '-' after all setSpaces is removed.

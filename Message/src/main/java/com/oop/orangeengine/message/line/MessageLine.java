@@ -2,7 +2,9 @@ package com.oop.orangeengine.message.line;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Chars;
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.Centered;
+import com.oop.orangeengine.message.Contentable;
 import com.oop.orangeengine.message.WordsQueue;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,10 +12,9 @@ import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -21,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 @Getter
 @Setter
 @Accessors(chain = true, fluent = true)
-public class MessageLine implements Cloneable {
+public class MessageLine implements Cloneable, Contentable {
 
     private LinkedList<LineContent> contentList = new LinkedList<>();
     private boolean center = false;
@@ -86,9 +87,8 @@ public class MessageLine implements Cloneable {
         return this;
     }
 
-    public MessageLine replace(Map<String, Object> placeholders) {
+    public void replace(Map<String, Object> placeholders) {
         contentList.forEach(content -> content.replace(placeholders));
-        return this;
     }
 
     public void send(Player player) {
@@ -170,6 +170,17 @@ public class MessageLine implements Cloneable {
 
             // Set the Text
             clonedLC.text(builder.toString());
+
+            List<String> hoverText = new ArrayList<>();
+            for (String text : clonedLC.getHoverText()) {
+                forLambda[0] = text;
+                placeholders.forEach((key, plac) -> forLambda[0] = forLambda[0].replace(key, plac));
+                hoverText.add(forLambda[0]);
+            }
+
+            // Set hover text
+            clonedLC.setHoverText(hoverText);
+
             base.addExtra(clonedLC.create());
 
             if (autoSpaces)
@@ -202,6 +213,11 @@ public class MessageLine implements Cloneable {
         }
 
         return messageLine;
+    }
+
+    @Override
+    public <T> void replace(T object, Set<OPair<String, Function<T, String>>> placeholders) {
+        contentList.forEach(content -> content.replace(object, placeholders));
     }
 
     public enum InsertMethod {
@@ -245,5 +261,13 @@ public class MessageLine implements Cloneable {
             }
         }
         return this;
+    }
+
+    public void remove(LineContent lineContent) {
+        contentList.remove(lineContent);
+    }
+
+    public void removeContentIf(Predicate<LineContent> filter) {
+        contentList.removeIf(filter);
     }
 }

@@ -1,24 +1,31 @@
 package com.oop.orangeengine.hologram;
 
+import com.google.common.collect.Sets;
+import com.oop.orangeengine.hologram.line.HologramText;
 import com.oop.orangeengine.hologram.rules.HologramRule;
+import com.oop.orangeengine.main.util.data.pair.OPair;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Location;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 @Getter
 public class Hologram {
-
-    @Setter
-    private double spacing = 0.21;
-
+    private OPair<Float, Boolean> spacing = new OPair<>(0.21f, false);
     private Location baseLocation;
 
-    private Set<HologramRule> rules = new HashSet<>();
+    @Getter(value = AccessLevel.PACKAGE)
+    private Location lastLocation;
+
+    @Getter(AccessLevel.PACKAGE)
+    private Set<HologramRule> rules = Sets.newConcurrentHashSet();
+
     private SetWrapper<HologramLine> hologramLines = new SetWrapper<>();
+
+    @Getter(AccessLevel.PRIVATE)
+    private Set<HologramLine> newLines = Sets.newConcurrentHashSet();
 
     public Optional<HologramLine> getLine(int index) {
         return hologramLines.get(index);
@@ -30,7 +37,8 @@ public class Hologram {
         return this;
     }
 
-    public Hologram setLine(int index, String line) {
+    public Hologram setLine(int index, String text) {
+        hologramLines.set(index, new HologramText(text));
         update();
         return this;
     }
@@ -45,6 +53,12 @@ public class Hologram {
         hologramLines.insert(index, line);
         update();
         return this;
+    }
+
+    private void updateNew() {
+        for (HologramLine line : newLines) {
+
+        }
     }
 
     void update() {

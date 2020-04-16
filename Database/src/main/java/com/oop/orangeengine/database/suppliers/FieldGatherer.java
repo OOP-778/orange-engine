@@ -33,8 +33,8 @@ public class FieldGatherer {
         return parents
                 .stream()
                 .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
-                .filter(field -> filter != null && filter.test(field))
-                .map(field -> runWithObject(field, (field2) -> field.setAccessible(true)))
+                .filter(field -> filter == null || filter.test(field))
+                .peek(field -> field.setAccessible(true))
                 .collect(Collectors.toSet());
     }
 

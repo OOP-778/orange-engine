@@ -15,15 +15,10 @@ public class OSwapper<T> {
         if (accepted) return this;
 
         if (filter.test(object)) {
-
             accepted = true;
             consumer.accept(object);
-
         }
 
         return this;
-
     }
-
-
 }

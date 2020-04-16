@@ -19,8 +19,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
     
-    relocate("de.tr7zw.oop.nbtapi", "com.oop.orangeengine.nbt")
-    relocate("de.tr7zw.oop.nbtinjector", "com.oop.orangeengine.nbt.injector")
+    relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeengine.nbt")
+    relocate("de.tr7zw.changeme.nbtinjector", "com.oop.orangeengine.nbt.injector")
     archiveName = "nbt.jar"
 
     destinationDirectory = file('../Engine/lib')

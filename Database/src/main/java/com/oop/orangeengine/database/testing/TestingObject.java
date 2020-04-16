@@ -1,28 +1,40 @@
 package com.oop.orangeengine.database.testing;
 
-import com.oop.orangeengine.database.DatabaseObject;
-import com.oop.orangeengine.database.annotation.Column;
-import com.oop.orangeengine.database.annotation.PrimaryKey;
-import com.oop.orangeengine.database.annotation.Table;
-import lombok.AllArgsConstructor;
+import com.google.gson.annotations.SerializedName;
+import com.oop.orangeengine.database.suppliers.serializable.SerializableObject;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
-@Table(name = "testing")
 @Getter
-@Setter
-@AllArgsConstructor
-public class TestingObject extends DatabaseObject {
+public class TestingObject implements SerializableObject {
 
-    private TestingObject() {}
+    @SerializedName(value = "id")
+    private String id = ThreadLocalRandom.current().nextInt(555) + "";
 
-    @PrimaryKey(name = "uuid")
-    private UUID uuid;
+    @SerializedName(value = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
-    @Column(name = "kills")
-    private int kills;
+    @SerializedName(value = "random")
+    private int random = ThreadLocalRandom.current().nextInt(25);
 
+    @SerializedName(value = "child")
+    private TestingChild child = new TestingChild();
+
+    @SerializedName(value = "testEnum")
+    private TestEnum testEnum = TestEnum.HElLO_2;
+
+    TestingObject() {}
+
+    public static class TestingChild {
+        @SerializedName(value = "hello")
+        private int id2 = ThreadLocalRandom.current().nextInt(2525);
+
+        @SerializedName(value = "uuid")
+        private UUID uuid = UUID.randomUUID();
+
+        @SerializedName(value = "testEnum")
+        private TestEnum testEnum = TestEnum.HELLO;
+    }
 }

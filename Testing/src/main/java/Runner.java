@@ -1,41 +1,26 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.oop.orangeengine.database.ODatabase;
-import com.oop.orangeengine.database.gson.MapFactory;
-import com.oop.orangeengine.database.gson.RuntimeClassFactory;
-import com.oop.orangeengine.database.types.MySqlDatabase;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public class Runner {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        final Gson gson = new GsonBuilder()
-                .serializeNulls()
-                .registerTypeAdapterFactory(RuntimeClassFactory.of(Object.class))
-                .registerTypeAdapterFactory(new MapFactory())
-                .setPrettyPrinting()
-                .create();
-        Map<Integer, Testinbo> hello = new HashMap<>();
-        hello.put(252, new Testinbo());
-
-        String json = gson.toJson(hello);
-        System.out.println(json);
-
-        hello = gson.fromJson(json, hello.getClass());
-        System.out.println(hello);
+    public static void main(String[] args) {
+        String[] split = new String[]{"prisoner", "ladderrank"};
+        System.out.println(Arrays.toString(addToArray(split, 1, "")));
     }
 
-    public static class Testinbo {
-        private int i = 252525;
-        private long l = 2525252525L;
-        private float f = 252525F;
-    }
+    private static String[] addToArray(String[] split, int index, String s) {
+        String[] newArray = new String[split.length + 1];
+        boolean found = false;
+        for (int i = 0; i < split.length + 1; i++) {
+            if (i == index) {
+                found = true;
+                newArray[i] = s;
+            } else {
+                if (!found)
+                    newArray[i] = split[i];
+                else
+                    newArray[i] = split[i - 1];
+            }
+        }
 
+        return newArray;
+    }
 }

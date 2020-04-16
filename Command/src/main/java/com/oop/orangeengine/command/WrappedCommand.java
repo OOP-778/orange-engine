@@ -1,12 +1,17 @@
 package com.oop.orangeengine.command;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OptionalConsumer;
+import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.message.OMessage;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class WrappedCommand {
 
@@ -37,5 +42,21 @@ public class WrappedCommand {
 
     public <T> T getArgAsReq(String arg, Class<T> type) {
         return type.cast(arguments.get(arg));
+    }
+
+    public void sendMessage(OMessage message, Map<String, String> placeholders) {
+        if (sender instanceof Player)
+            message.send(getSenderAsPlayer(), placeholders);
+
+        else {
+            message = message.clone();
+            List<String> raw = new ArrayList<>();
+            message.getLineList().forEach(line -> {
+                String[] array = new String[]{line.getRaw()};
+                placeholders.forEach((k, v) -> array[0] = array[0].replace(k, v));
+                raw.add(array[0]);
+            });
+            raw.forEach(line -> Bukkit.getConsoleSender().sendMessage(Helper.color(line)));
+        }
     }
 }

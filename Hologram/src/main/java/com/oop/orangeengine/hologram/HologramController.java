@@ -17,6 +17,7 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 public class HologramController {
 
     private Map<Location, Hologram> activeHolograms = Maps.newConcurrentMap();
+
     private static HologramController instance;
     static {
         new HologramController(getEngine().getOwning());

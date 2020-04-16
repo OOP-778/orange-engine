@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 @Getter
 public class SecretCommand {
 
+    private long timeout;
     private Predicate<SecretCommand> disposeWhen;
     private Consumer<Player> run;
 

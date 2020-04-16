@@ -19,4 +19,7 @@ public abstract class AAddition implements Cloneable {
         }
         return null;
     }
+
+    public void replace(String key, Object obj) {}
+
 }

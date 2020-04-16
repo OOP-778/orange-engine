@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import java.util.stream.Collectors;
 
 public class PlayerArg extends CommandArgument<Player> {
-
     public PlayerArg() {
         setDescription("An online player");
         setIdentity("player");
@@ -24,6 +23,6 @@ public class PlayerArg extends CommandArgument<Player> {
 
     @Override
     public void onAdd(OCommand command) {
-        command.nextTabComplete((args) -> Helper.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        command.nextTabComplete((previous, args) -> Helper.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
     }
 }

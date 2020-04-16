@@ -2,27 +2,22 @@ package com.oop.orangeengine.database.gson;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.*;
-import com.google.gson.internal.LazilyParsedNumber;
 import com.google.gson.internal.Streams;
+import com.google.gson.internal.bind.ObjectTypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.bukkit.util.NumberConversions;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import static com.oop.orangeengine.main.Engine.getEngine;
-
 public class MapFactory implements TypeAdapterFactory {
+
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
         Class<? super T> rawType = type.getRawType();
-        if (!Map.class.isAssignableFrom(rawType))
-            return null;
+        if (!Map.class.isAssignableFrom(rawType)) return null;
 
         return new TypeAdapter<T>() {
             @Override
@@ -39,15 +34,9 @@ public class MapFactory implements TypeAdapterFactory {
 
                 map.forEach((key, value) -> {
                     JsonObject pairObject = new JsonObject();
-                    if (isNumber(key))
-                        pairObject.add("key", numberToObject(key));
-                    else
-                        pairObject.add("key", gson.toJsonTree(key));
 
-                    if (isNumber(value))
-                        pairObject.add("value", numberToObject(value));
-                    else
-                        pairObject.add("value", gson.toJsonTree(value));
+                    pairObject.add("key", gson.toJsonTree(key));
+                    pairObject.add("value", gson.toJsonTree(value));
 
                     array.add(pairObject);
                 });
@@ -57,141 +46,41 @@ public class MapFactory implements TypeAdapterFactory {
 
             @Override
             public T read(JsonReader in) throws IOException {
-                JsonElement element = Streams.parse(in);
-                if (!element.isJsonObject())
-                    throw new JsonParseException("Failed to parse a map because it's not an json object!");
+                JsonElement jsonElement = Streams.parse(in);
 
-                JsonObject jsonMap = element.getAsJsonObject();
-                Class<? extends Map> mapClass;
-                Map<Object, Object> map;
+                Preconditions.checkArgument(jsonElement.isJsonObject(), "Wrong type of serialized map, it must be json object!");
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+                String className = jsonObject.get("class").getAsString();
+                Class clazz;
                 try {
-                    mapClass = (Class<? extends Map>) Class.forName(jsonMap.getAsJsonPrimitive("class").getAsString());
-                } catch (Throwable thrw) {
-                    throw new JsonParseException("Failed to find class for map " + jsonMap.getAsJsonPrimitive("class").getAsString(), thrw);
+                    clazz = Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException("Failed to find class by " + className + " for " + FactoryUtil.toPrettyFormat(jsonObject.toString()));
                 }
 
-                if (!Map.class.isAssignableFrom(mapClass))
-                    throw new JsonParseException("The class is not a map!");
-
+                Map map;
                 try {
-                    map = mapClass.newInstance();
-                } catch (Throwable thrw) {
-                    throw new JsonParseException("Failed to construct a map of " + mapClass.getName(), thrw);
+                    Constructor constructor = clazz.getConstructor();
+                    constructor.setAccessible(true);
+
+                    map = (Map) constructor.newInstance();
+                } catch (Throwable throwable) {
+                    throw new IllegalStateException("Failed to find a constructor for " + clazz);
                 }
 
-                JsonArray jsonValues = jsonMap.getAsJsonArray("values");
-                jsonValues.forEach(valuePair -> {
-                    JsonObject valuePairJson = valuePair.getAsJsonObject();
-                    Object key = null;
-                    Object value = null;
+                TypeAdapter<Object> delegateAdapter = gson.getDelegateAdapter(ObjectTypeAdapter.FACTORY, TypeToken.get(Object.class));
 
-                    JsonElement keyJson = valuePairJson.get("key");
-                    JsonElement valueJson = valuePairJson.get("value");
+                JsonArray array = jsonObject.getAsJsonArray("values");
+                for (JsonElement pairElement : array) {
+                    JsonObject pairObject = pairElement.getAsJsonObject();
+                    JsonElement key = pairObject.get("key");
+                    JsonElement value = pairObject.get("value");
 
-                    if (keyJson.isJsonPrimitive())
-                        key = parsePrimitive(keyJson.getAsJsonPrimitive());
-
-                    else if (keyJson.isJsonObject()) {
-                        try {
-                            key = toObject(gson, keyJson.getAsJsonObject());
-                        } catch (Throwable thrw) {
-                            throw new JsonParseException("Failed to parse key value of the map!", thrw);
-                        }
-                    }
-
-                    if (valueJson.isJsonPrimitive())
-                        value = parsePrimitive(valueJson.getAsJsonPrimitive());
-
-                    else if (valueJson.isJsonObject()) {
-                        try {
-                            value = toObject(gson, valueJson.getAsJsonObject());
-                        } catch (Throwable thrw) {
-                            throw new JsonParseException("Failed to parse key value of the map!", thrw);
-                        }
-                    }
-
-                    map.put(key, value);
-                });
+                    map.put(delegateAdapter.fromJsonTree(key), delegateAdapter.fromJsonTree(value));
+                }
                 return (T) map;
             }
         };
-    }
-
-    public Object toObject(Gson gson, JsonObject object) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
-        String className = object.getAsJsonPrimitive("class").getAsString();
-        if (isNumber(className))
-            return objectToNumber(object, className);
-
-        Class clazz = Class.forName(className);
-        return gson.fromJson(object, clazz);
-    }
-
-    private boolean isNumber(Object object) {
-        return isNumber(object.getClass());
-    }
-
-    private boolean isNumber(String clazz) {
-        return
-                clazz.contentEquals("i")
-                || clazz.contentEquals("l")
-                || clazz.contentEquals("f")
-                || clazz.contentEquals("d")
-                || clazz.contentEquals("n");
-    }
-
-    private boolean isNumber(Class clazz) {
-        if (Number.class.isAssignableFrom(clazz)) return true;
-        return
-                clazz == int.class
-                || clazz == long.class
-                || clazz == double.class
-                || clazz == float.class;
-    }
-
-    private Object parsePrimitive(JsonPrimitive primitive) {
-        if (primitive.isBoolean())
-            return primitive.getAsBoolean();
-
-        else if (primitive.isNumber())
-            return primitive.getAsNumber();
-
-        else if (primitive.isString())
-            return primitive.getAsString();
-
-        return "none";
-    }
-
-    public JsonObject numberToObject(Object numba) {
-        JsonObject object = new JsonObject();
-        object.addProperty("value", numba.toString());
-        object.addProperty("class", wrapNumberClass(numba));
-        return object;
-    }
-
-    public String wrapNumberClass(Object numba) {
-        System.out.println(numba.getClass());
-        return
-                numba instanceof Integer ? "i" :
-                        numba instanceof Long ? "l" :
-                                numba instanceof Double ? "d" :
-                                        numba instanceof Float ? "f" : "n";
-    }
-
-    public Object objectToNumber(JsonObject object, String clazz) {
-        String value = object.remove("value").getAsString();
-        if (clazz.contentEquals("i"))
-            return Integer.valueOf(value);
-
-        else if (clazz.contentEquals("l"))
-            return Long.valueOf(value);
-
-        else if (clazz.contentEquals("d"))
-            return Double.valueOf(value);
-
-        else if (clazz.contentEquals("f"))
-            return Float.valueOf(value);
-
-        else
-            throw new IllegalStateException("Failed to find number type by " + clazz + " for " + value);
     }
 }

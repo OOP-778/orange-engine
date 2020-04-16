@@ -1,5 +1,7 @@
 package com.oop.orangeengine.command;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.main.events.SyncEvents;
@@ -10,6 +12,8 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.line.LineContent;
 import com.oop.orangeengine.message.line.MessageLine;
+import lombok.NonNull;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +35,7 @@ public class CommandController {
     private Set<Command> registered = new HashSet<>();
     private CommandMap commandMap;
 
+    @Setter
     private ColorScheme colorScheme;
     private JavaPlugin plugin;
 
@@ -51,7 +56,7 @@ public class CommandController {
 
     public void unregisterAll() {
         try {
-            Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
             knownCommandsField.setAccessible(true);
 
             Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
@@ -70,32 +75,27 @@ public class CommandController {
         Command bukkitCommand = new Command(command.getLabel(), command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
             @Override
             public boolean execute(CommandSender sender, String cmdName, String[] args) {
-
                 if (args.length == 0)
                     handleCommand(args, sender, command);
 
                 else {
-
                     if (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help")) {
-
                         handleProperUsage(command, sender);
                         return true;
-
                     }
+
                     String secondArg = args[0];
                     String subCommandName = command.getSubCommands().keySet().stream().filter(subC -> subC.equalsIgnoreCase(secondArg)).findFirst().orElse(null);
                     if (subCommandName != null)
                         handleCommand(cutArray(args, 1), sender, command.getSubCommands().get(subCommandName));
 
                     else {
-
                         if (command.getListener() == null) {
                             sender.sendMessage(colorize("&cSub Command by name " + secondArg + " not found!"));
                             handleProperUsage(command, sender);
 
                         } else
                             handleCommand(args, sender, command);
-
                     }
 
                 }
@@ -110,18 +110,21 @@ public class CommandController {
 
                 } else if (args.length == 1) {
                     completion.addAll(getSubCommandsFor(command, sender));
-                    if (args[0].trim().length() > 0) {
+                    if (args[0].trim().length() > 0)
                         completion.removeIf(commandName -> !commandName.toLowerCase().startsWith(args[0].toLowerCase()));
-                    }
 
-                } else
-                    completion.addAll(handleTabComplete(command.subCommand(args[0]), cutArray(args, 1), sender));
+                } else if (args.length > 1) {
+                    OCommand subCommand = command.subCommand(args[0]);
+                    if (subCommand == null) return completion;
+
+                    completion.addAll(handleTabComplete(subCommand, cutArray(args, 1), sender));
+                }
                 return completion;
             }
         };
+
         registered.add(bukkitCommand);
         commandMap.register(plugin.getName(), bukkitCommand);
-
     }
 
     public Collection<String> getSubCommandsFor(OCommand command, CommandSender sender) {
@@ -133,10 +136,9 @@ public class CommandController {
                 .collect(Collectors.toList());
     }
 
-    public List<String> handleTabComplete(OCommand command, String[] args, CommandSender sender) {
+    public List<String> handleTabComplete(@NonNull OCommand command, String[] args, CommandSender sender) {
         List<String> completion = new ArrayList<>();
         if (args.length >= 1) {
-            System.out.println("Variant one");
             OCommand subCommand = command.subCommand(args[0]);
             if (subCommand != null) {
                 completion.addAll(handleTabComplete(subCommand, cutArray(args, 1), sender));
@@ -144,18 +146,25 @@ public class CommandController {
             }
         }
 
-        if (!command.getSubCommands().isEmpty()) {
-            System.out.println("Variant two");
+        if (!command.getSubCommands().isEmpty())
             completion.addAll(getSubCommandsFor(command, sender));
-        }
 
         if (completion.isEmpty()) {
-            System.out.println("Variant three");
-            TabCompletion tabCompletion = command.getTabComplete().get(args.length);
-            if (tabCompletion != null) {
-                completion.addAll(tabCompletion.handleTabCompletion(args));
+            List<Object> objects = Lists.newArrayList();
+            List<CommandArgument> arguments = new ArrayList<>(command.getArgumentMap().values());
+            for (int i = 0; i < args.length-1; i++) {
+                if ((arguments.size() - 1) <= i)
+                    break;
 
+                CommandArgument commandArgument = arguments.get(i);
+                Object value = commandArgument.getMapper().product(args[i]).getKey();
+                if (value != null)
+                    objects.add(value);
             }
+
+            TabCompletion tabCompletion = command.getTabComplete().get(args.length);
+            if (tabCompletion != null)
+                completion.addAll(tabCompletion.handleTabCompletion(new CompletionResult(objects), args));
         }
 
         if (args.length >= 1) {

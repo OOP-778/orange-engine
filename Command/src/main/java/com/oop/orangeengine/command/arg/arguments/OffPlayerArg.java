@@ -24,6 +24,6 @@ public class OffPlayerArg extends CommandArgument<OfflinePlayer> {
 
     @Override
     public void onAdd(OCommand command) {
-        command.nextTabComplete((args) -> Helper.getOfflinePlayers().stream().map(OfflinePlayer::getName).collect(Collectors.toList()));
+        command.nextTabComplete((previous, args) -> Helper.getOfflinePlayers().stream().map(OfflinePlayer::getName).collect(Collectors.toList()));
     }
 }

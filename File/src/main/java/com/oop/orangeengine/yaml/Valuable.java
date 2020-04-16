@@ -48,6 +48,8 @@ public interface Valuable {
 
     default <T> T getValueAsReq(String path, Class<T> type) {
         Object value = getValueAsObject(path);
+        if (value == null) return null;
+
         if (type == String.class)
             return (T) String.valueOf(value);
 
@@ -69,4 +71,5 @@ public interface Valuable {
 
     AConfigurationValue setValue(String path, Object object);
 
+    <T> T getOrInsert(String path, Class<T> type, T defaultValue);
 }

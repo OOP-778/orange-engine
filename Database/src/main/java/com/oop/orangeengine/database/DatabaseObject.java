@@ -6,19 +6,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.oop.orangeengine.database.annotation.Column;
 import com.oop.orangeengine.database.annotation.PrimaryKey;
-import com.oop.orangeengine.database.gson.MapFactory;
-import com.oop.orangeengine.database.gson.RuntimeClassFactory;
+import com.oop.orangeengine.database.gson.GetGson;
+import com.oop.orangeengine.database.gson.legacy.MapFactory;
 import com.oop.orangeengine.database.handler.DataHandler;
 import com.oop.orangeengine.database.suppliers.FieldGatherer;
 import com.oop.orangeengine.database.suppliers.Suppliable;
 import com.oop.orangeengine.database.util.ObjectState;
-import com.oop.orangeengine.main.gson.ItemStackAdapter;
 import com.oop.orangeengine.main.task.OTask;
 import com.oop.orangeengine.main.util.data.map.OConcurrentMap;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -29,14 +27,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DatabaseObject implements Suppliable {
-
-    private static final Gson gson = new GsonBuilder()
-            .serializeNulls()
-            .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
-            .registerTypeAdapterFactory(RuntimeClassFactory.of(Object.class))
-            .registerTypeAdapterFactory(new MapFactory())
-            .create();
-
     @Getter
     @Setter
     private ObjectState objectState = ObjectState.UNLOADED;
@@ -45,12 +35,12 @@ public abstract class DatabaseObject implements Suppliable {
         put("default", new DataHandler<Object>() {
             @Override
             public String serialize(@Nullable Field field, Object o) throws Throwable {
-                return gson.toJson(o, o.getClass());
+                return GetGson.get().toJson(o, o.getClass());
             }
 
             @Override
             public Object deserialize(@Nullable Field field, String json) throws Throwable {
-                return gson.fromJson(json, field != null ? field.getGenericType() : Object.class);
+                return GetGson.get().fromJson(json, field != null ? field.getGenericType() : Object.class);
             }
 
             @Override

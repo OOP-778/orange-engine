@@ -5,21 +5,13 @@ import io.netty.channel.Channel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.PacketPlayInUseEntity;
-import net.minecraft.server.v1_8_R3.Vec3D;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
-import java.util.Map.Entry;
 
 public class HologramProtocol extends TinyProtocol {
-
-    public HologramProtocol(JavaPlugin plugin) {
-        super(plugin);
-    }
 
     private static final Class entityUsePacket = OSimpleReflection.findClass("{nms}.PacketPlayInUseEntity");
     private static final Class vector3DClass = OSimpleReflection.findClass("{nms}.Vec3D");
@@ -28,9 +20,11 @@ public class HologramProtocol extends TinyProtocol {
     private static final Field vector3dXField = OSimpleReflection.getField(vector3DClass, null, double.class, 0);
     private static final Field vector3dZField = OSimpleReflection.getField(vector3DClass, null, double.class, 1);
     private static final Field vector3dYField = OSimpleReflection.getField(vector3DClass, null, double.class, 2);
-
     private static final Field idField = OSimpleReflection.getField(entityUsePacket, int.class);
     private static final Field actionField = OSimpleReflection.getField(entityUsePacket, true, "action");
+    public HologramProtocol(JavaPlugin plugin) {
+        super(plugin);
+    }
 
     @Override
     public Object onPacketInAsync(Player sender, Channel channel, Object packet) {

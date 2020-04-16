@@ -24,7 +24,5 @@ repositories {
 }
 
 dependencies {
-
     compile files("lib/nbt.jar")
-    
 }

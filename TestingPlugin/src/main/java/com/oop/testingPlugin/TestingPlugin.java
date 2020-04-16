@@ -1,29 +1,49 @@
 package com.oop.testingPlugin;
 
-import com.oop.orangeengine.database.util.Tester;
 import com.oop.orangeengine.main.events.SyncEvents;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.ClassicTaskController;
 import com.oop.orangeengine.main.task.ITaskController;
+import com.oop.orangeengine.main.task.OTask;
+import com.oop.orangeengine.main.task.StaticTask;
+import net.minecraft.server.v1_12_R1.Blocks;
+import net.minecraft.server.v1_12_R1.IBlockData;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestingPlugin extends EnginePlugin {
 
     @Override
     public void enable() {
-        DatabaseController controller = new DatabaseController(this);
+        SyncEvents.listen(AsyncPlayerChatEvent.class, event -> {
+            StaticTask.getInstance().sync(() -> {
+                List<FallingBlock> blocks = new ArrayList<>();
 
-        SyncEvents.listen(EntityDeathEvent.class, event -> {
-            Player killer = event.getEntity().getKiller();
-            if (killer == null) return;
+                Location baseLocation = event.getPlayer().getLocation().add(0, -1, 0);
+                for (int i = 0; i < 20; i++) {
+                    baseLocation.add(new Vector(1, 0, 0));
+                }
 
-            StatsPlayer orInsert = controller.getHolder().getOrInsert(killer);
-            orInsert.setKills(orInsert.getKills() + 1);
-            killer.sendMessage("Your kills now are " + orInsert.getKills());
+                blocks.forEach(block -> block.setVelocity(event.getPlayer().getEyeLocation().getDirection().multiply(1.5f)));
 
-            Tester.t("Save", () -> orInsert.save(false));
+                new OTask()
+                        .repeat(true)
+                        .runTimes(100)
+                        .delay(500)
+                        .sync(false)
+                        .runnable(() -> {
+                            blocks.forEach(block -> block.setVelocity(block.getVelocity().add(new Vector(0, 1, 0))));
+                        })
+                        .execute();
+            });
         });
     }
 

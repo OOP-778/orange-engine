@@ -59,14 +59,10 @@ public class ClassicTaskController implements ITaskController {
         else if (task.getDelay() != -1)
             return executor.scheduleWithFixedDelay(task.run(), task.getDelay(), task.getDelay(), TimeUnit.MILLISECONDS);
 
-        else if (!isAsyncThread()) {
+        else
             executor.execute(task.run());
-            return null;
 
-        } else {
-            task.run().run();
-            return null;
-        }
+        return null;
     }
 
     private BukkitTask sync(OTask task) {
@@ -76,18 +72,7 @@ public class ClassicTaskController implements ITaskController {
         else if (task.getDelay() != -1)
             return Bukkit.getScheduler().runTaskLater(plugin, task.run(), task.getDelayAsTicks());
 
-        else if (isAsyncThread())
+        else
             return Bukkit.getScheduler().runTask(plugin, task.run());
-
-        else {
-
-            task.run().run();
-            return null;
-        }
     }
-
-    private boolean isAsyncThread() {
-        return !Thread.currentThread().getName().startsWith("OrangeEngine");
-    }
-
 }

@@ -1,4 +1,4 @@
-package com.oop.orangeengine.database.gson;
+package com.oop.orangeengine.database.gson.legacy;
 
 import com.google.gson.*;
 import com.google.gson.internal.Streams;

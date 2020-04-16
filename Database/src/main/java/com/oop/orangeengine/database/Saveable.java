@@ -273,7 +273,7 @@ public interface Saveable {
                 try {
                     wrapped = Wrappers.wrap(info.getColumns().get(index - 2), info.getPrimaryKey(), object);
                 } catch (Throwable thrw) {
-                    throw new IllegalStateException("Failed to serialize field of " + object.getClass().getSimpleName() + " at " + info.getColumns().get(index - 2).getSecond().name() + ", cause: ", thrw);
+                    throw new IllegalStateException("Failed to serialize field of " + object.getClass().getSimpleName() + " at " + info.getColumns().get(index - 2).getSecond().name() + ", cause: " + thrw.getMessage(), thrw);
                 }
                 try {
                     statement.setString(index, wrapped);
@@ -446,7 +446,7 @@ public interface Saveable {
             try {
                 wrapped = dataHandler.serialize(pair != null ? pair.getFirst() : primKey.getFirst(), obj);
             } catch (Throwable thrw) {
-                throw new IllegalStateException("Failed to serialize object of type " + obj.getClass() + " of column " + (pair != null ? pair.getSecond().name() : primKey.getSecond().name()) + " for id: " + primKey.getFirst().get(databaseObject));
+                throw new IllegalStateException("Failed to serialize object of type " + obj.getClass() + " of column " + (pair != null ? pair.getSecond().name() : primKey.getSecond().name()) + " for id: " + primKey.getFirst().get(databaseObject), thrw);
             }
 
             return wrapped;
@@ -476,7 +476,7 @@ public interface Saveable {
 
     default void load(DatabaseHolder<?, ?> holder) {
         ODatabase database = holder.getDatabaseController().getDatabase();
-        holder.getObjectVariants().parallelStream().forEach(tableClazz -> {
+        holder.getObjectVariants().forEach(tableClazz -> {
             TableStructure info = structureOf(tableClazz);
             if (!database.getTables().contains(info.getTable().name()))
                 return;
@@ -536,12 +536,16 @@ public interface Saveable {
                     obj.setObjectState(ObjectState.LOADED);
                     obj._loadSupplier();
                     obj.onLoad();
-
-                    obj.save(true);
                 } catch (Throwable thrw) {
                     throw new IllegalStateException("Failed to load object with primary key of " + primaryKey + " cause of " + thrw.getMessage(), thrw);
                 }
             });
+
+            // Update structure
+            t("Update structure", () -> updateStructure(info, holder.getDatabaseController().getDatabase()));
+
+            // Save updates objects
+            holder.save();
         });
     }
 }

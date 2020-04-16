@@ -8,10 +8,10 @@ import com.oop.orangeengine.yaml.value.AConfigurationValue;
 import com.oop.orangeengine.yaml.value.ConfigurationList;
 import com.oop.orangeengine.yaml.value.ConfigurationValue;
 import lombok.Getter;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Getter
@@ -30,7 +30,7 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         this.spaces = spaces;
     }
 
-   private ConfigurationSection setParent(ConfigurationSection parent) {
+    private ConfigurationSection setParent(ConfigurationSection parent) {
         parent.sections.put(key, this);
         this.parent = parent;
         return this;
@@ -41,11 +41,9 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
     }
 
     public Map<String, Object> getValuesConverted() {
-
         Map<String, Object> values = new HashMap<>();
         getValues().forEach((k, v) -> values.put(k, v.getValue()));
         return values;
-
     }
 
     public Map<String, ConfigurationSection> getSections() {
@@ -146,11 +144,11 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
         boolean first = true;
         for (ConfigurationSection value : sections.values()) {
-            if(first) {
+            if (first) {
                 first = false;
                 value.write(bw);
 
-            }  else {
+            } else {
                 bw.newLine();
                 value.write(bw);
             }
@@ -211,17 +209,12 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
     }
 
     public ConfigurationSection getSection(String sectionName) {
-
         if (!sectionName.contains(".")) {
-
             return getSections().get(sectionName);
 
         } else {
-
             String[] split = sectionName.split("\\.");
-
             ConfigurationSection section = null;
-
             for (int index = 0; index < split.length - 1; index++) {
 
                 String key = split[index];
@@ -232,11 +225,9 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
 
             return section;
         }
-
     }
 
     public ConfigurationSection findAcceptableParent(ConfigurationSection newSection) {
-
         //Check one if createNewSection and this getSection setSpaces are equal
         if (newSection.spaces == spaces) return parent;
 
@@ -244,7 +235,6 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         if (newSection.spaces < spaces) return parent.findAcceptableParent(newSection);
 
         return this;
-
     }
 
     public AConfigurationValue setValue(String path, Object object) {
@@ -261,6 +251,7 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         } else {
             String pathSplit[] = path.split("\\.");
             ConfigurationSection currentSection = this;
+
             for (String s : pathSplit) {
                 ConfigurationSection oldSection = currentSection;
                 currentSection = currentSection.getSection(s);
@@ -270,10 +261,20 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
                 }
             }
 
-            currentSection.setValue(pathSplit[pathSplit.length -1], object);
+            currentSection.setValue(pathSplit[pathSplit.length - 1], object);
         }
         return value;
+    }
 
+    @Override
+    public <T> T getOrInsert(String path, Class<T> type, T defaultValue) {
+        T value = getValueAsReq(path, type);
+        if (value == null) {
+            setValue(path, defaultValue);
+            return defaultValue;
+        }
+
+        return value;
     }
 
     public ConfigurationSection createNewSection(String path) {
@@ -297,4 +298,9 @@ public class ConfigurationSection extends Descriptionable implements Valuable {
         return configuration.getOFile();
     }
 
+    public void ifSectionPresent(String path, Consumer<ConfigurationSection> consumer) {
+        ConfigurationSection section = getSection(path);
+        if (section != null)
+            consumer.accept(section);
+    }
 }

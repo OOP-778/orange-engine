@@ -10,7 +10,6 @@ import java.sql.SQLException;
 public class SqlLiteDatabase extends ODatabase {
 
     private String path;
-
     public SqlLiteDatabase(String path) {
         this.path = path;
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.oop.orangeengine.database.annotation.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Location;
 
 import java.util.Map;
 import java.util.Objects;

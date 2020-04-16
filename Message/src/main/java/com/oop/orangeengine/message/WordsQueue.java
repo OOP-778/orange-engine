@@ -15,6 +15,7 @@ import java.util.List;
 public class WordsQueue {
 
     public static List<OPair<Character, Character>> blacklistedCharsFromColoring = new ArrayList<OPair<Character, Character>>(){{
+
     }};
 
     private List<Word> words;
@@ -79,8 +80,6 @@ public class WordsQueue {
             */
             if (character == ' ') {
                 words.add(new Word(builder.toString(), decoration));
-                Bukkit.broadcastMessage(builder.toString().replace("&", "@"));
-
                 builder = new StringBuilder();
 
                 if (decoration != null) {

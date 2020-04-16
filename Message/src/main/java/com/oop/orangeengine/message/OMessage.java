@@ -1,20 +1,20 @@
 package com.oop.orangeengine.message;
 
+import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.line.LineContent;
 import com.oop.orangeengine.message.line.MessageLine;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 @Getter
-public class OMessage implements Cloneable {
+public class OMessage implements Cloneable, Contentable {
 
     private LinkedList<MessageLine> lineList = new LinkedList<>();
     private boolean center = false;
@@ -90,13 +90,27 @@ public class OMessage implements Cloneable {
         return this;
     }
 
-    public OMessage replace(Map<String, Object> placeholders) {
+    public void replace(Map<String, Object> placeholders) {
         lineList.forEach(line -> line.replace(placeholders));
-        return this;
     }
 
     public OMessage replace(String key, LineContent content) {
         lineList.forEach(line -> line.replace(key, content));
         return this;
+    }
+
+    public OPair<MessageLine, LineContent> findLine(Predicate<LineContent> filter) {
+        for (MessageLine messageLine : lineList) {
+            for (LineContent lineContent : messageLine.contentList()) {
+                if (filter.test(lineContent)) return new OPair<>(messageLine, lineContent);
+            }
+        }
+
+        return new OPair<>(null, null);
+    }
+
+    @Override
+    public <T> void replace(T object, Set<OPair<String, Function<T, String>>> placeholders) {
+        lineList.forEach(line -> line.replace(object, placeholders));
     }
 }

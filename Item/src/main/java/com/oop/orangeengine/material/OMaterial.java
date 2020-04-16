@@ -27,11 +27,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import lombok.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -830,7 +832,7 @@ public enum OMaterial {
     REDSTONE_BLOCK,
     REDSTONE_LAMP("REDSTONE_LAMP_OFF", "REDSTONE_LAMP_ON"),
     REDSTONE_ORE("GLOWING_REDSTONE_ORE"),
-    REDSTONE_TORCH("REDSTONE_TORCH_ON", "REDSTONE_TORCH_OFF"),
+    REDSTONE_TORCH("GLOWING_REDSTONE_TORCH"),
     REDSTONE_WALL_TORCH(1, "REDSTONE_TORCH_ON", "REDSTONE_TORCH_OFF"),
     REDSTONE_WIRE,
     RED_BANNER(1, "BANNER", "STANDING_BANNER"),
@@ -1312,6 +1314,11 @@ public enum OMaterial {
      */
     public static OMaterial matchMaterial(@Nonnull String name) {
         return matchMaterial(name, (byte) -1).orElse(null);
+    }
+
+    public static OMaterial matchMaterial(@NonNull Block block) {
+        if (isNewVersion()) return matchMaterial(block.getType());
+        return matchMaterial(block.getType().name(), block.getData()).orElse(null);
     }
 
     /**

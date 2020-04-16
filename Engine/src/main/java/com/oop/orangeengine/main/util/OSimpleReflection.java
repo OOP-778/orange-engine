@@ -16,12 +16,12 @@ public final class OSimpleReflection {
     private static Map<Class<?>, Constructor<?>> CONSTRUCTOR_MAP = new HashMap<>();
     private static Map<Class<?>, Map<String, Method>> METHOD_MAP = new HashMap<>();
     private static Map<String, Class<?>> CLASS_MAP = new HashMap<>();
+    private static Map<Class<?>, Map<String, Field>> FIELD_MAP = new HashMap<>();
 
     private OSimpleReflection() {
     }
 
     public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) throws Exception {
-
         if (CONSTRUCTOR_MAP.containsKey(clazz)) return CONSTRUCTOR_MAP.get(clazz);
 
         Class<?>[] primitiveTypes = Data.getPrimitive(parameterTypes);
@@ -103,13 +103,17 @@ public final class OSimpleReflection {
     }
 
     public static Field getField(Class<?> clazz, boolean declared, String fieldName){
-        Field field = null;
+        Map<String, Field> stringFieldMap = FIELD_MAP.computeIfAbsent(clazz, clazz2 -> new HashMap<>());
+        Field field = stringFieldMap.get(fieldName);
+        if (field != null) return field;
+
         try {
             field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
+            field.setAccessible(true);
+            stringFieldMap.put(fieldName, field);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-        field.setAccessible(true);
         return field;
     }
 

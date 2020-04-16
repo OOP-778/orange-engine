@@ -1,6 +1,8 @@
 package com.oop.orangeengine.message.line;
 
 import com.oop.orangeengine.main.Helper;
+import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.message.Contentable;
 import com.oop.orangeengine.message.additions.AAddition;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,15 +12,13 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
 
 @Getter
-public class LineContent implements Cloneable {
+public class LineContent implements Cloneable, Contentable {
 
     private List<AAddition> additionList = new ArrayList<>();
     private String text;
@@ -97,7 +97,7 @@ public class LineContent implements Cloneable {
     }
 
     @Override
-    protected LineContent clone() {
+    public LineContent clone() {
         try {
 
             LineContent lineContent = (LineContent) super.clone();
@@ -119,11 +119,17 @@ public class LineContent implements Cloneable {
                 .stream()
                 .map(text -> text.replace(key, value.toString()))
                 .collect(toList());
+        getAdditionList().forEach(add -> add.replace(key, value));
         return this;
     }
 
-    public LineContent replace(Map<String, Object> placeholders) {
+    public void replace(Map<String, Object> placeholders) {
         placeholders.forEach(this::replace);
-        return this;
+    }
+
+    @Override
+    public <T> void replace(T object, Set<OPair<String, Function<T, String>>> placeholders) {
+        text = replaceText(object, text, placeholders);
+        hoverText = replaceList(object, hoverText, placeholders);
     }
 }

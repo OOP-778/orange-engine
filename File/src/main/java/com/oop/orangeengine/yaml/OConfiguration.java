@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
 import static com.oop.orangeengine.yaml.util.ConfigurationUtil.isValidIndex;
@@ -102,7 +103,6 @@ public class OConfiguration implements Valuable {
                     if (line.value().trim().length() == 0 && !description.isEmpty()) description.add("");
 
                 else if (line.value().contains(":")) {
-
                     String[] split = ConfigurationUtil.splitAtFirst(line.value(), ':');
                     if (split.length == 1) {
 
@@ -118,6 +118,7 @@ public class OConfiguration implements Valuable {
 
                             //Is list
                             List<UnreadString> listValues = looper.nextValuesThatMatches(us -> us.value().contains("-"), true);
+
                             OPair<String, Integer> parsedKey = parse(split[0]);
                             ConfigurationList value = new ConfigurationList(parsedKey.getFirst(), listValues.stream().map(UnreadString::value).map(string -> parse(parse(string).getFirst().substring(1)).getFirst()).collect(toList()));
 
@@ -126,6 +127,7 @@ public class OConfiguration implements Valuable {
                             value.setSpaces(0);
 
                             values.put(value.getKey(), value);
+                            description.clear();
 
                         } else {
                             if (ConfigurationUtil.findSpaces(split[0]) != 0) {
@@ -137,7 +139,6 @@ public class OConfiguration implements Valuable {
                         }
 
                     } else {
-
                         if (ConfigurationUtil.findSpaces(split[0]) >= 2) {
                             description.clear();
                             continue;
@@ -158,6 +159,7 @@ public class OConfiguration implements Valuable {
                         value.setSpaces(0);
 
                         values.put(value.getKey(), value);
+                        description.clear();
                     }
                 }
 
@@ -176,7 +178,6 @@ public class OConfiguration implements Valuable {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Override
@@ -487,5 +488,22 @@ public class OConfiguration implements Valuable {
 
         OConfiguration newConfig = new OConfiguration(newConfigFile);
         return new ConfigurationUpdater(newConfig, this);
+    }
+
+    public void ifSectionPresent(String path, Consumer<ConfigurationSection> consumer) {
+        ConfigurationSection section = getSection(path);
+        if (section != null)
+            consumer.accept(section);
+    }
+
+    @Override
+    public <T> T getOrInsert(String path, Class<T> type, T defaultValue) {
+        T value = getValueAsReq(path, type);
+        if (value == null) {
+            setValue(path, defaultValue);
+            return defaultValue;
+        }
+
+        return value;
     }
 }

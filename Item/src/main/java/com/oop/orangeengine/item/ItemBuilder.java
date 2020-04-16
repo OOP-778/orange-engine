@@ -275,6 +275,8 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
 
         setItemStack(material.parseItem());
+        Objects.requireNonNull(getItemStack(), "Invalid item with material: " + material.name() + ". Make sure the material is placeable!");
+
         if (getItemStack().getItemMeta() == null)
             getItemStack().setItemMeta(Bukkit.getItemFactory().getItemMeta(material.parseMaterial()));
 
@@ -387,5 +389,10 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     public int getEnchantLevel(Enchantment enchantment) {
         if (getItemMeta() == null) return -1;
         return getItemMeta().getEnchantLevel(enchantment);
+    }
+
+    public ItemBuilder<T> setItemMeta(ItemMeta meta) {
+        getItemStack().setItemMeta(meta);
+        return this;
     }
 }
