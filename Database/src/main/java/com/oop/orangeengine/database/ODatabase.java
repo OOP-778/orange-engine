@@ -8,7 +8,6 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,6 +17,18 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 
 @Getter
 public abstract class ODatabase {
+
+    private Connection connection;
+
+    private static void close(AutoCloseable... closeables) {
+        for (AutoCloseable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     protected abstract Connection provideConnection() throws Throwable;
 
@@ -32,8 +43,6 @@ public abstract class ODatabase {
 
         return connection;
     }
-
-    private Connection connection;
 
     public List<String> getColumns(String table) {
         List<String> columns = new ArrayList<>();
@@ -162,6 +171,47 @@ public abstract class ODatabase {
         return -1;
     }
 
+    public List<String> getTables() {
+        List<String> tables = new ArrayList<>();
+        try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, null, null)) {
+            while (resultSet.next())
+                tables.add(resultSet.getString(3));
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get tables", throwable);
+        }
+        return tables;
+    }
+
+    public List<String> getPrimaryKeys(@NonNull String tableName) {
+        Connection connection = getConnection();
+        List<String> primaryKeys = new ArrayList<>();
+
+        try (ResultSet rs = connection.getMetaData().getPrimaryKeys(connection.getCatalog(), null, tableName)) {
+            while (rs.next())
+                primaryKeys.add(rs.getString("COLUMN_NAME"));
+
+        } catch (Throwable thrw) {
+            throw new IllegalStateException("Failed to get primary keys of table " + tableName + " cause " + thrw.getMessage(), thrw);
+        }
+        return primaryKeys;
+    }
+
+    public List<Object> getValuesOfColumn(String table, String column) {
+        List<Object> values = new ArrayList<>();
+        try (PreparedStatement statement = getConnection().prepareStatement("SELECT " + column + " FROM " + table)) {
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    values.add(rs.getObject(column));
+                }
+            }
+
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Failed to get values of column " + column + " in table " + table, throwable);
+        }
+
+        return values;
+    }
+
     public static class TableEditor {
 
         private String tableName;
@@ -251,57 +301,6 @@ public abstract class ODatabase {
             database.executeNow(queryBuilder.toString());
 
             return database;
-        }
-    }
-
-    public List<String> getTables() {
-        List<String> tables = new ArrayList<>();
-        try (ResultSet resultSet = getConnection().getMetaData().getTables(null, null, null, null)) {
-            while (resultSet.next())
-                tables.add(resultSet.getString(3));
-        } catch (Throwable throwable) {
-            throw new IllegalStateException("Failed to get tables", throwable);
-        }
-        return tables;
-    }
-
-    public List<String> getPrimaryKeys(@NonNull String tableName) {
-        Connection connection = getConnection();
-        List<String> primaryKeys = new ArrayList<>();
-
-        try (ResultSet rs = connection.getMetaData().getPrimaryKeys(connection.getCatalog(), null, tableName)) {
-            while (rs.next())
-                primaryKeys.add(rs.getString("COLUMN_NAME"));
-
-        } catch (Throwable thrw) {
-            throw new IllegalStateException("Failed to get primary keys of table " + tableName + " cause " + thrw.getMessage(), thrw);
-        }
-        return primaryKeys;
-    }
-
-    public List<Object> getValuesOfColumn(String table, String column) {
-        List<Object> values = new ArrayList<>();
-        try (PreparedStatement statement = getConnection().prepareStatement("SELECT " + column + " FROM " + table)) {
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    values.add(rs.getObject(column));
-                }
-            }
-
-        } catch (Throwable throwable) {
-            throw new IllegalStateException("Failed to get values of column " + column + " in table " + table, throwable);
-        }
-
-        return values;
-    }
-
-    private static void close(AutoCloseable... closeables) {
-        for (AutoCloseable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 }
