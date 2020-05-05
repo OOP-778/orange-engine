@@ -1,14 +1,10 @@
 package com.oop.orangeengine.menu.button;
 
-import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
-import com.oop.orangeengine.main.util.data.map.OMap;
-import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.menu.WrappedInventory;
 import com.oop.orangeengine.menu.button.impl.BukkitItem;
 import com.oop.orangeengine.menu.button.impl.SwappableButton;
-import com.oop.orangeengine.menu.config.action.ActionTypesController;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.sound.WrappedSound;
 import lombok.EqualsAndHashCode;
@@ -18,7 +14,8 @@ import lombok.experimental.Accessors;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @EqualsAndHashCode
@@ -142,7 +139,8 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
         aMenuButton.currentItem = currentItem.clone();
 
         // Copy data
-        aMenuButton.newMap();;
+        aMenuButton.newMap();
+        ;
         forEach(aMenuButton.getData()::put);
 
         // Remove template
@@ -160,13 +158,13 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
         return (T) this;
     }
 
+    public int getAmount() {
+        return currentItem.getAmount();
+    }
+
     public void setAmount(int amount) {
         currentItem.setAmount(amount);
         currentItem(currentItem);
-    }
-
-    public int getAmount() {
-        return currentItem.getAmount();
     }
 
     public AMenuButton addClickHandler(ClickListener listener) {
@@ -181,19 +179,5 @@ public abstract class AMenuButton extends Storegable implements Cloneable {
 
     public OptionalConsumer<ItemStack> getSavedCopy(String id) {
         return grab(id);
-    }
-
-    public static SwappableButton newNextPageButton(ItemStack item) {
-        SwappableButton nextPage = new SwappableButton(item);
-        nextPage.addClickHandler(new ClickListener<ButtonClickEvent>(ButtonClickEvent.class).consumer(ActionTypesController.getActionTypes().get("execute action").apply("next page")));
-        nextPage.appliedActions().add("next page");
-        return nextPage;
-    }
-
-    public static SwappableButton newLastPageButton(ItemStack item) {
-        SwappableButton nextPage = new SwappableButton(item);
-        nextPage.addClickHandler(new ClickListener<ButtonClickEvent>(ButtonClickEvent.class).consumer(ActionTypesController.getActionTypes().get("execute action").apply("last page")));
-        nextPage.appliedActions().add("last page");
-        return nextPage;
     }
 }

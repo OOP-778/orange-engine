@@ -18,6 +18,9 @@ public class ClassicTaskController implements ITaskController {
     public ClassicTaskController(EnginePlugin plugin) {
         this.plugin = plugin;
         plugin.onDisable(() -> {
+            for (OTask asyncTask : asyncTasks) {
+                asyncTask.cancel();
+            }
             asyncTasks.clear();
             try {
                 executor.shutdown();

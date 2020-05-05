@@ -1,14 +1,10 @@
 package com.oop.orangeengine.menu;
 
-import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.storage.Storegable;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.data.list.OList;
-import com.oop.orangeengine.main.util.data.set.OSet;
 import com.oop.orangeengine.menu.button.AMenuButton;
-import com.oop.orangeengine.menu.button.impl.BukkitItem;
-import com.oop.orangeengine.menu.config.action.ActionProperties;
 import com.oop.orangeengine.menu.events.ButtonClickEvent;
 import com.oop.orangeengine.menu.events.MenuCloseEvent;
 import com.oop.orangeengine.menu.events.MenuOpenEvent;
@@ -44,7 +40,8 @@ public abstract class AMenu extends Storegable implements InventoryHolder, Butto
 
     @Getter
     @Setter
-    private Consumer<ButtonClickEvent> globalClickHandler = (button) -> {};
+    private Consumer<ButtonClickEvent> globalClickHandler = (button) -> {
+    };
 
     @Getter
     @Setter
@@ -58,9 +55,6 @@ public abstract class AMenu extends Storegable implements InventoryHolder, Butto
 
     @Getter
     private List<AMenuButton> buttons = new OList<>();
-
-    @Getter
-    private Set<ActionProperties> actionSet = new HashSet<>();
 
     @Getter
     @Setter

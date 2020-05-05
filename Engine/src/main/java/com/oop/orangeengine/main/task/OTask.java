@@ -97,7 +97,7 @@ public class OTask extends Storegable {
         }
 
         if (scheduledFuture != null)
-            scheduledFuture.cancel(false);
+            scheduledFuture.cancel(true);
     }
 
     public OTask runnable(Runnable runnable) {

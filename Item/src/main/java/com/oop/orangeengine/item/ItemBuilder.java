@@ -1,6 +1,5 @@
 package com.oop.orangeengine.item;
 
-import com.google.common.base.Preconditions;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.item.custom.OPotion;
 import com.oop.orangeengine.item.custom.OSkull;
@@ -8,7 +7,7 @@ import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
-import com.oop.orangeengine.yaml.ConfigurationSection;
+import com.oop.orangeengine.yaml.ConfigSection;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -270,9 +269,9 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         return mergeLore(itemStack.getItemMeta().getLore());
     }
 
-    public T load(ConfigurationSection section) {
-        OMaterial material = OMaterial.matchMaterial(section.getValueAsReq("material", String.class));
-        Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
+    public T load(ConfigSection section) {
+        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class));
+        Objects.requireNonNull(material, "Failed to find material by " + section.getAs("material", String.class));
 
         setItemStack(material.parseItem());
         Objects.requireNonNull(getItemStack(), "Invalid item with material: " + material.name() + ". Make sure the material is placeable!");
@@ -310,30 +309,30 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         return _returnThis();
     }
 
-    public void save(ConfigurationSection section, OItem object) {
+    public void save(ConfigSection section, OItem object) {
 
         // Set material
-        section.setValue("material", object.getMaterial().name());
+        section.set("material", object.getMaterial().name());
 
         // Set display name
         if (object.getDisplayName().length() > 0)
-            section.setValue("display name", object.getDisplayName());
+            section.set("display name", object.getDisplayName());
 
         // Set if glow
         if (object.isGlow())
-            section.setValue("glow", true);
+            section.set("glow", true);
 
         if (object.getAmount() > 1)
-            section.setValue("amount", object.getAmount());
+            section.set("amount", object.getAmount());
 
         // Set lore
         if (!object.getLore().isEmpty())
-            section.setValue("lore", object.getLore());
+            section.set("lore", object.getLore());
 
         // Set Enchants
         Set<OPair<Enchantment, Integer>> enchants = object.getEnchants();
         if (!enchants.isEmpty())
-            section.setValue(
+            section.set(
                     "enchants",
                     enchants.stream()
                             .map(enchant -> enchant.getFirst().getName() + ":" + enchant.getSecond())
@@ -347,15 +346,15 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     protected abstract T _returnThis();
 
-    public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigurationSection section) {
-        OMaterial material = OMaterial.matchMaterial(section.getValueAsReq("material", String.class));
-        Objects.requireNonNull(material, "Failed to find material by " + section.getValueAsReq("material"));
+    public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigSection section) {
+        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class));
+        Objects.requireNonNull(material, "Failed to find material by " + section.getAs("material", String.class));
 
         if (material.name().contains("HEAD"))
             return (ItemBuilder<T>) new OSkull().load(section);
 
         else if (material.name().contains("POTION"))
-            return (ItemBuilder<T>) new OPotion(material);
+            return (ItemBuilder<T>) new OPotion(material).load(section);
 
         return (ItemBuilder<T>) new OItem().load(section);
     }

@@ -1,25 +1,18 @@
 package com.oop.orangeengine.item.custom;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import com.oop.orangeengine.item.ItemBuilder;
-import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTCompound;
-import com.oop.orangeengine.nbt.NBTCompoundList;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.nbt.NBTListCompound;
-import com.oop.orangeengine.yaml.ConfigurationSection;
+import com.oop.orangeengine.yaml.ConfigSection;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.apache.commons.codec.binary.Base64;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 @Getter
@@ -71,7 +64,7 @@ public class OSkull extends ItemBuilder<OSkull> {
     }
 
     @Override
-    public OSkull load(ConfigurationSection section) {
+    public OSkull load(ConfigSection section) {
         super.load(section);
 
         // Load texture

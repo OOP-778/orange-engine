@@ -54,11 +54,6 @@ public class FillableButton extends AMenuButton {
                 // Per button listener
                 event.getClickedButton().clickListeners().stream().filter(listener -> listener.accepts(buttonEmptyEvent)).forEach(listener -> listener.consumer().accept(buttonEmptyEvent));
 
-                // Global button events
-                event.getMenu().actionSet().stream()
-                        .filter(props -> props.accepts(buttonEmptyEvent))
-                        .forEach(props -> props.buttonAction().onAction(buttonEmptyEvent));
-
                 if (buttonEmptyEvent.isCancelled()) {
                     event.pickupAtSlot();
                     return;
@@ -75,12 +70,6 @@ public class FillableButton extends AMenuButton {
                 if (!buttonFillEvent.isCancelled())
                     listener.consumer().accept(buttonFillEvent);
             });
-            event.getMenu().actionSet().stream()
-                    .filter(props -> props.accepts(buttonFillEvent))
-                    .forEach(props -> {
-                        if (!buttonFillEvent.isCancelled())
-                            props.buttonAction().onAction(buttonFillEvent);
-                    });
 
             // Cancel operation if the fill event is cancelled
             if (buttonFillEvent.isCancelled()) {

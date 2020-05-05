@@ -56,14 +56,11 @@ public class OFile {
     }
 
     public OFile createIfNotExists(boolean importFromResources) {
-
         try {
-
-            if(folder != null && !folder.exists())
+            if (folder != null && !folder.exists())
                 folder.mkdirs();
 
             if (!file.exists()) {
-
                 if (importFromResources)
                     Engine.getInstance().getOwning().saveResource(fileName, true);
 
@@ -76,7 +73,6 @@ public class OFile {
         }
 
         return this;
-
     }
 
     public void delete() {

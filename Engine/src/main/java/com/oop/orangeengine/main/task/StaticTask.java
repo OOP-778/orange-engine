@@ -22,15 +22,15 @@ public class StaticTask {
         return INSTANCE;
     }
 
-    public BukkitTask runSyncThenAsync(Runnable sync, Runnable async) {
-       return sync(() -> {
+    public void runSyncThenAsync(Runnable sync, Runnable async) {
+        sync(() -> {
             sync.run();
             async(async);
         });
     }
 
-    public BukkitTask runAsyncThenSync(Runnable async, Runnable sync) {
-        return async(() -> {
+    public void runAsyncThenSync(Runnable async, Runnable sync) {
+        async(() -> {
             async.run();
             sync(sync);
         });
@@ -42,8 +42,8 @@ public class StaticTask {
         return future;
     }
 
-    public BukkitTask async(Runnable runnable) {
-        return Bukkit.getScheduler().runTaskAsynchronously(owning, runnable);
+    public void async(Runnable runnable) {
+        new OTask().sync(false).runnable(runnable).execute();
     }
 
     public BukkitTask sync(Runnable runnable) {

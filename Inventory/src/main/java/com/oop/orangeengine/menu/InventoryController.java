@@ -127,10 +127,6 @@ public class InventoryController extends AEngineComponent {
             // Global click event
             menu.globalClickHandler().accept(buttonClickEvent);
 
-            menu.actionSet().stream()
-                    .filter(props -> props.accepts(buttonClickEvent))
-                    .forEach(props -> props.buttonAction().onAction(buttonClickEvent));
-
             button.clickListeners().stream().filter(listener -> listener.accepts(buttonClickEvent)).forEach(listener -> listener.consumer().accept(buttonClickEvent));
 
             if (button.sound() != null)

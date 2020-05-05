@@ -1,245 +1,288 @@
 package com.oop.orangeengine.message;
 
-import com.oop.orangeengine.message.additions.action.CommandAddition;
-import com.oop.orangeengine.message.line.LineContent;
-import com.oop.orangeengine.message.line.MessageLine;
-import com.oop.orangeengine.yaml.ConfigurationSection;
-import com.oop.orangeengine.yaml.OConfiguration;
-import com.oop.orangeengine.yaml.value.AConfigurationValue;
+import com.oop.orangeengine.message.impl.OActionBarMessage;
+import com.oop.orangeengine.message.impl.OChatMessage;
+import com.oop.orangeengine.message.impl.OTitleMessage;
+import com.oop.orangeengine.message.impl.chat.ChatLine;
+import com.oop.orangeengine.message.impl.chat.LineContent;
+import com.oop.orangeengine.message.impl.chat.addition.Addition;
+import com.oop.orangeengine.message.impl.chat.addition.impl.CommandAddition;
+import com.oop.orangeengine.message.impl.chat.addition.impl.HoverTextAddition;
+import com.oop.orangeengine.message.impl.chat.addition.impl.SuggestionAddition;
+import com.oop.orangeengine.yaml.Config;
+import com.oop.orangeengine.yaml.ConfigSection;
+import com.oop.orangeengine.yaml.ConfigValue;
 import org.apache.commons.lang.math.NumberUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class YamlMessage {
+    public static void save(OMessage message, String path, Config config) {
+        if (message instanceof OChatMessage)
+            Chat.save((OChatMessage) message, path, config);
 
-    /*
-    SAVING PART
-    */
-    public static void save(OMessage message, String path, OConfiguration configuration, String... description) {
-        /*
-        If message doesn't have any attributes like center and it's one lined.
-        */
-        if (!requiresSection(message)) {
-            if (requiresSection(message.getLineList().element())) {
-                MessageLine line = message.getLineList().element();
-                ConfigurationSection section = configuration.createNewSection(path);
-                section.description(new ArrayList<>(Arrays.asList(description)));
+        else if (message instanceof OActionBarMessage)
+            save(((OActionBarMessage) message), path, config);
 
-                save(line, section);
+        else if (message instanceof OTitleMessage)
+            save(((OTitleMessage) message), path, config);
+    }
 
-            } else
-                configuration.setValue(path, message.getLineList().element().contentList().element().getText()).description(new ArrayList<>(Arrays.asList(description)));
+    public static OMessage load(ConfigSection section) {
+        String type = section.getAs("type");
+        if (type.equalsIgnoreCase("chat"))
+            return Chat.load(section);
+
+        else if (type.equalsIgnoreCase("actionbar"))
+            return loadActionBar(section);
+
+        else if (type.equalsIgnoreCase("title"))
+            return loadTitle(section);
+        return null;
+    }
+
+    public static OMessage load(String path, Config config) {
+        Optional<ConfigSection> optionalSection = config.getSection(path);
+        if (optionalSection.isPresent()) {
+            return load(optionalSection.get());
+
         } else {
-            if (!message.isCenter() && allOneLined(message)) {
-                configuration.setValue(path, message.getLineList()
-                        .stream()
-                        .map(MessageLine::getRaw)
-                        .collect(Collectors.toList()))
-                        .description(new ArrayList<>(Arrays.asList(description)));
+            Optional<ConfigValue> optionalValue = config.get(path);
+            if (optionalValue.isPresent())
+                return Chat.load(optionalValue.get());
+        }
+        return null;
+    }
 
-            } else {
-                ConfigurationSection section = configuration.createNewSection(path);
-                section.description(new ArrayList<>(Arrays.asList(description)));
-                if (message.isCenter())
-                    section.setValue("center", true);
+    private static OTitleMessage loadTitle(ConfigSection section) {
+        section.ensureHasAny("title", "sub title");
+        OTitleMessage titleMessage = new OTitleMessage();
+        section.ifValuePresent("title", String.class, titleMessage::title);
+        section.ifValuePresent("sub title", String.class, titleMessage::subTitle);
+        section.ifValuePresent("fade in", int.class, titleMessage::fadeIn);
+        section.ifValuePresent("stay", int.class, titleMessage::stay);
+        section.ifValuePresent("fade out", int.class, titleMessage::fadeOut);
+        return titleMessage;
+    }
 
-                if (message.getLineList().size() == 1) {
-                    MessageLine line = message.getLineList().element();
+    private static OActionBarMessage loadActionBar(ConfigSection section) {
+        OActionBarMessage actionBarMessage = new OActionBarMessage();
+        section.ensureHasValues("text");
+
+        actionBarMessage.text(section.getAs("text"));
+        return actionBarMessage;
+    }
+
+    public static void save(OActionBarMessage message, String path, Config config) {
+        ConfigSection section = config.createSection(path);
+        section.set("type", "actionbar");
+        section.set("text", message.text());
+    }
+
+    public static void save(OTitleMessage message, String path, Config config) {
+        ConfigSection section = config.createSection(path);
+        section.set("type", "title");
+        if (message.title() != null)
+            section.set("title", message.title());
+
+        if (message.subTitle() != null)
+            section.set("sub title", message.subTitle());
+
+        section.set("fade in", message.fadeIn());
+        section.set("stay", message.stay());
+        section.set("fade out", message.fadeOut());
+    }
+
+    public static class Chat {
+        public static void save(OChatMessage message, String path, Config config) {
+            /*
+            If message doesn't have any attributes like center and it's one lined.
+            */
+            if (!requiresSection(message)) {
+                if (requiresSection(message.lineList().element())) {
+                    ChatLine line = message.lineList().element();
+                    ConfigSection section = config.createSection(path);
+                    section.set("type", "chat");
+
                     save(line, section);
 
+                } else
+                    config.set(path, message.lineList().element().contentList().element().text());
+            } else {
+                if (!message.centered() && allOneLined(message)) {
+                    config.set(path, message.lineList()
+                            .stream()
+                            .map(ChatLine::raw)
+                            .collect(Collectors.toList()));
+
                 } else {
-                    ConfigurationSection linesSection = section.createNewSection("lines");
+                    ConfigSection section = config.createSection(path);
+                    section.set("type", "chat");
+                    if (message.centered())
+                        section.set("center", true);
 
-                    int i = 1;
-                    for (MessageLine line : message.getLineList()) {
-                        if (requiresSection(line)) {
-                            ConfigurationSection lineSection = linesSection.createNewSection(i + "");
-                            save(line, lineSection);
+                    if (message.lineList().size() == 1) {
+                        ChatLine line = message.lineList().element();
+                        save(line, section);
 
-                        } else linesSection.setValue(i + "", line.contentList().element().getText());
-                        i++;
+                    } else {
+                        ConfigSection linesSection = section.createSection("lines");
+
+                        int i = 1;
+                        for (ChatLine line : message.lineList()) {
+                            if (requiresSection(line)) {
+                                ConfigSection lineSection = linesSection.createSection(i + "");
+                                save(line, lineSection);
+
+                            } else linesSection.set(i + "", line.contentList().element().text());
+                            i++;
+                        }
                     }
                 }
             }
         }
-    }
 
-    private static void save(MessageLine line, ConfigurationSection section) {
-        if (line.autoSpaces())
-            section.setValue("auto spaces", true);
+        private static void save(ChatLine line, ConfigSection section) {
+            if (line.centered())
+                section.set("center", true);
 
-        if (line.center())
-            section.setValue("center", true);
+            if (line.contentList().size() == 1) {
+                LineContent content = line.contentList().element();
+                save(content, section);
 
-        if (line.contentList().size() == 1) {
-            LineContent content = line.contentList().element();
-            save(content, section);
+            } else if (line.contentList().size() > 1) {
+                ConfigSection allContentSection = section.createSection("content");
 
-        } else if (line.contentList().size() > 1) {
-            ConfigurationSection allContentSection = section.createNewSection("content");
+                int i = 1;
+                for (LineContent content : line.contentList()) {
+                    if (!requiresSection(content)) {
+                        allContentSection.set(i + "", content.text());
 
-            int i = 1;
-            for (LineContent content : line.contentList()) {
-                if (!requiresSection(content)) {
-                    allContentSection.setValue(i + "", content.getText());
-
-                } else {
-                    ConfigurationSection contentSection = allContentSection.createNewSection(i + "");
-                    save(content, contentSection);
+                    } else {
+                        ConfigSection contentSection = allContentSection.createSection(i + "");
+                        save(content, contentSection);
+                    }
+                    i++;
                 }
-
-                i++;
             }
         }
-    }
 
-    private static void save(LineContent content, ConfigurationSection section) {
-        section.setValue("text", content.getText());
+        private static void save(LineContent content, ConfigSection section) {
+            section.set("text", content.text());
 
-        // Set hover text
-        if (!content.getHoverText().isEmpty()) {
-            if (content.getHoverText().size() == 1)
-                section.setValue("hover", content.getHoverText().get(0));
-
-            else
-                section.setValue("hover", content.getHoverText());
+            for (Addition addition : content.additionList()) {
+                if (addition instanceof CommandAddition)
+                    section.set("command", ((CommandAddition) addition).command());
+                else if (addition instanceof HoverTextAddition) {
+                    section.set("hover", ((HoverTextAddition) addition).hoverText());
+                } else if (addition instanceof SuggestionAddition)
+                    section.set("suggestion", ((SuggestionAddition) addition).suggestion());
+            }
         }
 
-        // Save Additions
-        content.getAdditionList()
-                .stream()
-                .filter(addition -> addition instanceof CommandAddition)
-                .findFirst()
-                .ifPresent(addition -> section.setValue("command", ((CommandAddition) addition).getCommand()));
-    }
+        private static boolean requiresSection(OChatMessage message) {
+            if (isMultiLine(message) || message.centered()) return true;
+            return requiresSection(message.lineList().element());
+        }
 
-    private static boolean requiresSection(OMessage message) {
-        if (isMultiLine(message) || message.isCenter()) return true;
-        return requiresSection(message.getLineList().element());
-    }
+        private static boolean requiresSection(ChatLine line) {
+            if (line.contentList().size() > 1) return true;
 
-    private static boolean requiresSection(MessageLine line) {
-        if (line.contentList().size() > 1) return true;
+            LineContent content = line.contentList().element();
+            return requiresSection(content);
+        }
 
-        LineContent content = line.contentList().element();
-        return !content.getHoverText().isEmpty() || content.getAdditionList().stream().anyMatch(addition -> addition instanceof CommandAddition);
-    }
+        private static boolean requiresSection(LineContent content) {
+            return !content.additionList().isEmpty();
+        }
 
-    private static boolean requiresSection(LineContent content) {
-        return !content.getHoverText().isEmpty() || !content.getAdditionList().isEmpty();
-    }
+        private static boolean isMultiLine(OChatMessage message) {
+            return message.lineList().size() > 1;
+        }
 
-    private static boolean isMultiLine(OMessage message) {
-        return message.getLineList().size() > 1;
-    }
+        private static boolean allOneLined(OChatMessage message) {
+            return message.lineList()
+                    .stream()
+                    .noneMatch(Chat::requiresSection);
+        }
 
-    private static boolean allOneLined(OMessage message) {
-        return message.getLineList()
-                .stream()
-                .noneMatch(YamlMessage::requiresSection);
-    }
+        public static OChatMessage load(ConfigSection section) {
+            OChatMessage message = new OChatMessage();
+            section.ifValuePresent("center", boolean.class, message::centered);
 
-    /*
-    LOADING PART
-    */
-    public static OMessage load(ConfigurationSection section) {
-        OMessage message = new OMessage();
-        loadSection(section, message);
-        return message;
-    }
+            Optional<ConfigSection> optContent = section.getSection("content");
+            Optional<ConfigSection> optLines = section.getSection("lines");
+            if (optContent.isPresent())
+                return message.append(loadLine(optContent.get()));
 
-    private static void loadSection(ConfigurationSection section, OMessage message) {
-        section.ifValuePresent("center", boolean.class, message::setCenter);
-        ConfigurationSection linesSection = section.getSection("lines");
-        ConfigurationSection contentSection = section.getSection("content");
-        if (contentSection != null)
-            message.appendLine(loadLine(section, contentSection));
+            if (optLines.isPresent()) {
+                ConfigSection linesSection = optLines.get();
+                Map<Integer, ChatLine> lineMap = new HashMap<>();
+                linesSection.getValues().forEach((key, value) -> {
+                    if (!NumberUtils.isNumber(key)) return;
 
-        else if (linesSection != null) {
-            Map<Integer, MessageLine> lineMap = new HashMap<>();
-            linesSection.getValues().forEach((key, value) -> {
+                    lineMap.put(Integer.parseInt(key), new ChatLine(new LineContent(value.getAs(String.class))));
+                });
+
+                linesSection.getSections().forEach((key, section2) -> {
+                    if (!NumberUtils.isNumber(key)) return;
+
+                    ConfigSection contentSection2 = section2.getSection("content").orElseThrow(() -> new IllegalStateException("Missing content section"));
+                    if (contentSection2 == null)
+                        lineMap.put(Integer.parseInt(key), new ChatLine(loadContentLine(section2)));
+
+                    else
+                        lineMap.put(Integer.parseInt(key), loadLine(contentSection2));
+                });
+
+                lineMap.keySet()
+                        .stream()
+                        .sorted()
+                        .forEach(pos -> message.append(lineMap.get(pos)));
+            }
+            return message;
+        }
+
+        private static ChatLine loadLine(ConfigSection contentSection) {
+            ChatLine line = new ChatLine();
+
+            Map<Integer, LineContent> contentMap = new HashMap<>();
+            contentSection.getValues().forEach((key, value) -> {
                 if (!NumberUtils.isNumber(key)) return;
 
-                lineMap.put(Integer.parseInt(key), new MessageLine().append(new LineContent(value.getValueAsReq())));
+                contentMap.put(Integer.parseInt(key), new LineContent(value.getAs(String.class)));
             });
 
-            linesSection.getSections().forEach((key, section2) -> {
+            contentSection.getSections().forEach((key, section) -> {
                 if (!NumberUtils.isNumber(key)) return;
 
-                ConfigurationSection contentSection2 = section2.getSection("content");
-                if (contentSection2 == null)
-                    lineMap.put(Integer.parseInt(key), new MessageLine().append(loadContentLine(section2)));
-
-                else
-                    lineMap.put(Integer.parseInt(key), loadLine(section2, contentSection2));
+                contentMap.put(Integer.parseInt(key), loadContentLine(section));
             });
 
-            lineMap.keySet()
+            contentMap.keySet()
                     .stream()
                     .sorted()
-                    .forEach(pos -> message.appendLine(lineMap.get(pos)));
-        } else
-            message.appendLine(new MessageLine().append(loadContentLine(section)));
+                    .forEach(pos -> line.append(contentMap.get(pos)));
+            return line;
+        }
+
+        public static OChatMessage load(ConfigValue value) {
+            if (value.isList())
+                return new OChatMessage(value.getAsList(String.class));
+
+            return new OChatMessage(((String) value.getObject()));
+        }
+
+        private static LineContent loadContentLine(ConfigSection section) {
+            LineContent lineContent = new LineContent(section.getAs("text", String.class));
+            section.ifValuePresent("command", String.class, lineContent.command()::command);
+            section.ifValuePresent("hover", List.class, hover -> lineContent.hover().hoverText().addAll(hover));
+            section.ifValuePresent("suggestion", String.class, lineContent.suggestion()::suggestion);
+            return lineContent;
+        }
     }
-
-    public static OMessage load(OConfiguration configuration, String path) {
-        OMessage message = new OMessage();
-        ConfigurationSection section = configuration.getSection(path);
-
-        if (section == null) {
-            AConfigurationValue value = configuration.getValue(path);
-            if (value == null)
-                throw new IllegalStateException("Failed to load message in " + configuration.getOFile().getFileName().replace(".yml", "") + " path " + path + " because the value is not found!");
-
-            // We got multi line text
-            if (value.getValue() instanceof List)
-                ((List<String>) value.getValue()).forEach(message::appendLine);
-
-            else message.appendLine(value.getValueAsReq(String.class));
-
-        } else
-            loadSection(section, message);
-
-        return message;
-    }
-
-    private static MessageLine loadLine(ConfigurationSection parentSection, ConfigurationSection contentSection) {
-        MessageLine line = new MessageLine();
-        parentSection.ifValuePresent("auto spaces", boolean.class, line::autoSpaces);
-
-        Map<Integer, LineContent> contentMap = new HashMap<>();
-        contentSection.getValues().forEach((key, value) -> {
-            if (!NumberUtils.isNumber(key)) return;
-
-            contentMap.put(Integer.parseInt(key), new LineContent(value.getValueAsReq()));
-        });
-
-        contentSection.getSections().forEach((key, section) -> {
-            if (!NumberUtils.isNumber(key)) return;
-
-            contentMap.put(Integer.parseInt(key), loadContentLine(section));
-        });
-
-        contentMap.keySet()
-                .stream()
-                .sorted()
-                .forEach(pos -> line.append(contentMap.get(pos)));
-        return line;
-    }
-
-    private static LineContent loadContentLine(ConfigurationSection section) {
-        LineContent lineContent = new LineContent(section.getValueAsReq("text"));
-        Optional.ofNullable(section.getValue("hover")).ifPresent(hover -> {
-            if (hover.getValue() instanceof List)
-                lineContent.setHoverText((List<String>) hover.getValue());
-
-            else
-                lineContent.appendHover(hover.getValueAsReq());
-        });
-
-        section.ifValuePresent("command", String.class, command -> lineContent.addAddition(new CommandAddition(command)));
-        return lineContent;
-    }
-
 }

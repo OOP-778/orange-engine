@@ -1,17 +1,14 @@
 package com.oop.orangeengine.command;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
-import com.oop.orangeengine.main.events.SyncEvents;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
-import com.oop.orangeengine.main.plugin.OComponent;
-import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.OMessage;
-import com.oop.orangeengine.message.line.LineContent;
-import com.oop.orangeengine.message.line.MessageLine;
+import com.oop.orangeengine.message.impl.OChatMessage;
+import com.oop.orangeengine.message.impl.chat.ChatLine;
+import com.oop.orangeengine.message.impl.chat.LineContent;
 import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
@@ -19,8 +16,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -279,24 +274,24 @@ public class CommandController {
     private void handleProperUsage(OCommand command, CommandSender sender) {
         //Check if simple message is required
         if (command.getSubCommands().isEmpty()) {
-            OMessage message = new OMessage();
-            MessageLine line = new MessageLine();
+            OChatMessage message = new OChatMessage();
+            ChatLine line = new ChatLine();
             String allParents = command.getLabelWithParents();
 
             line.append(colorScheme.getMainColor() + "Usage: /");
 
             LineContent labelContent = new LineContent(reverseLabel(allParents.substring(0, allParents.length() - 1)));
             if (!command.getDescription().equalsIgnoreCase("none"))
-                labelContent.hoverText(colorScheme.getMainColor() + command.getDescription());
+                labelContent.hover().add(colorScheme.getMainColor() + command.getDescription());
             line.append(labelContent);
 
             buildArgs(command.getArgumentMap().values(), line);
-            message.appendLine(line);
+            message.append(line);
             if (!command.getPermission().equalsIgnoreCase("none")) {
-                message.appendLine(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Permission: &f" + command.getPermission());
+                message.append(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Permission: &f" + command.getPermission());
             }
             if (!command.getDescription().equalsIgnoreCase("none")) {
-                message.appendLine(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Description: &f" + command.getDescription());
+                message.append(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Description: &f" + command.getDescription());
             }
 
             if (sender instanceof Player)
@@ -312,36 +307,36 @@ public class CommandController {
                     anyMatch(c -> c > 0);
 
             //Advanced
-            OMessage message = new OMessage();
-            message.appendLine(colorScheme.getSecondColor() + "&l---====" + colorScheme.getMainColor() + " " + StringUtils.capitalize(command.getLabel()) + " Help");
+            OChatMessage message = new OChatMessage();
+            message.append(colorScheme.getSecondColor() + "&l---====" + colorScheme.getMainColor() + " " + StringUtils.capitalize(command.getLabel()) + " Help");
 
             //Format Builder
             if (hasOptional && hasRequired)
-                message.appendLine(colorScheme.getSecondColor() + "   <> - Required, [] - Optional");
+                message.append(colorScheme.getSecondColor() + "   <> - Required, [] - Optional");
 
             else if (hasRequired)
-                message.appendLine(colorScheme.getSecondColor() + "   <> - Required");
+                message.append(colorScheme.getSecondColor() + "   <> - Required");
 
             else if (hasOptional)
-                message.appendLine(colorScheme.getSecondColor() + "   [] - Optional");
+                message.append(colorScheme.getSecondColor() + "   [] - Optional");
 
-            message.appendLine(" ");
+            message.append(" ");
 
             //Check if main command has stuff :D
             if(command.getListener() != null) {
-                MessageLine line = new MessageLine();
+                ChatLine line = new ChatLine();
 
                 String allParents = command.getLabelWithParents();
                 LineContent labelContent = new LineContent(colorScheme.getMainColor() + "/" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
                 if (!command.getDescription().equalsIgnoreCase("None"))
-                    labelContent.hoverText(colorScheme.getMainColor() + command.getDescription());
+                    labelContent.hover().add(colorScheme.getMainColor() + command.getDescription());
                 line.append(labelContent);
 
                 buildArgs(command.getArgumentMap().values(), line);
                 if (!command.getDescription().equalsIgnoreCase("None"))
                     line.append(colorScheme.getMainColor() + " - " + command.getDescription());
 
-                message.appendLine(line);
+                message.append(line);
             }
 
             for (OCommand subCommand : command.getSubCommands().values()) {
@@ -354,19 +349,19 @@ public class CommandController {
                 if (subCommand.getPermission().equalsIgnoreCase("none") && !sender.hasPermission(subCommand.getPermission()))
                     continue;
 
-                MessageLine line = new MessageLine();
+                ChatLine line = new ChatLine();
                 line.append(colorScheme.getMainColor() + "/" + reverseLabel(command.getLabelWithParents()));
 
                 LineContent labelContent = new LineContent(colorScheme.getMainColor() + subCommand.getLabel());
                 if (!subCommand.getDescription().equalsIgnoreCase("None"))
-                    labelContent.hoverText(colorScheme.getMainColor() + subCommand.getDescription());
+                    labelContent.hover().add(colorScheme.getMainColor() + subCommand.getDescription());
                 line.append(labelContent);
 
                 buildArgs(subCommand.getArgumentMap().values(), line);
                 if (!subCommand.getDescription().equalsIgnoreCase("None"))
                     line.append(colorScheme.getMainColor() + " - " + subCommand.getDescription());
 
-                message.appendLine(line);
+                message.append(line);
 
             }
             if (sender instanceof Player)
@@ -406,13 +401,13 @@ public class CommandController {
         this.colorScheme = colorScheme;
     }
 
-    private void buildArgs(Collection<CommandArgument> args, MessageLine line) {
+    private void buildArgs(Collection<CommandArgument> args, ChatLine line) {
         //Format = <required> [optional]
         if (args.stream().anyMatch(CommandArgument::isRequired)) {
             args.stream().filter(CommandArgument::isRequired).forEach(arg -> {
                 line.append(" <");
                 LineContent content = new LineContent("&f" + arg.getIdentity()).
-                        hoverText(colorScheme.getMainColor() + arg.getDescription());
+                        hover().add(colorScheme.getMainColor() + arg.getDescription()).parent();
                 line.append(content);
                 line.append(colorScheme.getMainColor() + ">");
 
@@ -427,7 +422,7 @@ public class CommandController {
 
                 line.append("[");
                 LineContent content = new LineContent("&f" + arg.getIdentity()).
-                        hoverText(colorScheme.getSecondColor() + arg.getDescription());
+                        hover().add(colorScheme.getSecondColor() + arg.getDescription()).parent();
                 line.append(content);
                 line.append(colorScheme.getSecondColor() + "]");
 

@@ -189,7 +189,7 @@ public final class OSimpleReflection {
         CB_SCHEDULER(CB, "scheduler"),
         CB_SCOREBOARD(CB, "scoreboard"),
         CB_UPDATER(CB, "updater"),
-        CB_UTIL(CB, "util");
+        CB_UTIL(CB, "interfaces");
 
         private final String path;
 
