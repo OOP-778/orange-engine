@@ -12,15 +12,19 @@ repositories {
 }
 
 dependencies {
-    compile files("lib/nbt.jar")
+    compile fileTree(dir: "lib", include: "*.jar")
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
-    
+
+    from fileTree(dir: "lib").collect {
+        zipTree(it)
+    }
+
     relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeengine.nbt")
-    relocate("de.tr7zw.changeme.nbtinjector", "com.oop.orangeengine.nbt.injector")
+    relocate("de.tr7zw.nbtinjector", "com.oop.orangeengine.nbt.injector")
     archiveName = "nbt.jar"
 
     destinationDirectory = file('../Engine/lib')

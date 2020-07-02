@@ -1,5 +1,6 @@
 package com.oop.orangeengine.main.util;
 
+import com.oop.orangeengine.main.Helper;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 
@@ -72,7 +73,7 @@ public class OActionBar {
         Object packet = null;
 
         try {
-            Object component = CHAT_COMPONENT_TEXT.invoke(message);
+            Object component = CHAT_COMPONENT_TEXT.invoke(Helper.color(message));
             packet = PACKET.invoke(component, CHAT_MESSAGE_TYPE);
         } catch (Throwable throwable) {
             throwable.printStackTrace();

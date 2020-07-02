@@ -4,14 +4,17 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.MessageType;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.impl.chat.ChatLine;
+import com.oop.orangeengine.message.impl.chat.InsertableList;
 import com.oop.orangeengine.message.impl.chat.LineContent;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
 
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,10 +23,9 @@ import java.util.stream.Collectors;
 public class OChatMessage implements OMessage<OChatMessage> {
 
     @Getter
-    private LinkedList<ChatLine> lineList = new LinkedList<>();
+    private InsertableList<ChatLine> lineList = new InsertableList<>();
 
     @Getter
-    @Setter
     private boolean centered = false;
 
     public OChatMessage() {}
@@ -36,8 +38,12 @@ public class OChatMessage implements OMessage<OChatMessage> {
         this(Arrays.asList(lines));
     }
 
+    public OChatMessage(LineContent ...content) {
+        lineList.add(new ChatLine(content));
+    }
+
     public OChatMessage(Collection<String> lines) {
-        lineList = lines.stream().map(ChatLine::new).collect(Collectors.toCollection(LinkedList::new));
+        lineList = lines.stream().map(ChatLine::new).collect(Collectors.toCollection(InsertableList::new));
     }
 
     @Override
@@ -49,7 +55,7 @@ public class OChatMessage implements OMessage<OChatMessage> {
     public OChatMessage clone() {
         OChatMessage clone = new OChatMessage();
         clone.centered = centered;
-        clone.lineList = lineList.stream().map(ChatLine::clone).collect(Collectors.toCollection(LinkedList::new));
+        clone.lineList = lineList.stream().map(ChatLine::clone).collect(Collectors.toCollection(InsertableList::new));
         return clone;
     }
 
@@ -84,9 +90,25 @@ public class OChatMessage implements OMessage<OChatMessage> {
         return this;
     }
 
+    public OChatMessage replace(String key, OChatMessage message) {
+        lineList.forEach(line -> line.replace(key, message));
+        return this;
+    }
+
+    public OChatMessage replace(String key, ChatLine line) {
+        lineList.forEach(line2 -> line2.replace(key, line));
+        return this;
+    }
+
     @Override
     public <E> OChatMessage replace(@NonNull E object, @NonNull Set<OPair<String, Function<E, String>>> placeholders) {
         lineList.forEach(line -> line.replace(object, placeholders));
+        return this;
+    }
+
+    @Override
+    public OChatMessage replace(@NonNull Function<String, String> function) {
+        lineList.forEach(line -> line.replace(function));
         return this;
     }
 
@@ -112,6 +134,10 @@ public class OChatMessage implements OMessage<OChatMessage> {
                 .orElse(null);
     }
 
+    public int indexOf(Predicate<ChatLine> filter) {
+        return lineList.stream().filter(filter).findFirst().map(lineList::indexOf).orElse(-1);
+    }
+
     public OChatMessage removeLineIf(Predicate<ChatLine> filter) {
         lineList.removeIf(filter);
         return this;
@@ -128,4 +154,33 @@ public class OChatMessage implements OMessage<OChatMessage> {
         clone.replace(placeholders);
         clone.send(receivers);
     }
+
+    public OChatMessage centered(boolean centered) {
+        this.centered = centered;
+        lineList.forEach(line -> line.centered(centered));
+        return this;
+    }
+
+    public List<TextComponent> crateTextComponents() {
+        List<TextComponent> components = new ArrayList<>();
+        for (ChatLine chatLine : lineList) {
+            components.add(chatLine.createComponent());
+        }
+        return components;
+    }
+
+    public OChatMessage append(OChatMessage message) {
+        lineList.addAll(message.lineList);
+        return this;
+    }
+
+    public OChatMessage insert(int index, OChatMessage message, InsertableList.InsertMethod method) {
+        lineList.insert(index, method, message.lineList.toArray(new ChatLine[0]));
+        return this;
+    }
+
+    public LineContent lastContent() {
+        return lineList.getLast().contentList().getLast();
+    }
+
 }

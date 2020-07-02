@@ -20,15 +20,30 @@ public interface Replaceable<T extends Replaceable> {
                 ((ChatLine) this).replace(key, (LineContent) value);
             else
                 replace(ImmutableMap.of(key, ((LineContent) value).text()));
-        } else {
+        } else if (value instanceof OChatMessage) {
+            if (this instanceof OChatMessage)
+                ((OChatMessage) this).replace(key, (OChatMessage) value);
+
+            else if (this instanceof ChatLine)
+                ((ChatLine) this).replace(key, (OChatMessage) value);
+
+        } else if (value instanceof ChatLine) {
+            if (this instanceof OChatMessage)
+                ((OChatMessage) this).replace(key, (ChatLine) value);
+
+            else if (this instanceof ChatLine)
+                ((ChatLine) this).replace(key, (ChatLine) value);
+        } else
             replace(ImmutableMap.of(key, value));
-        }
+
         return returnThis();
     }
 
     T replace(Map<String, Object> placeholders);
 
     <E> T replace(@NonNull E object, @NonNull Set<OPair<String, Function<E, String>>> placeholders);
+
+    T replace(@NonNull Function<String, String> function);
 
     T returnThis();
 }

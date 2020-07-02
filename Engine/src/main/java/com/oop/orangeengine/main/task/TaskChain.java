@@ -13,10 +13,8 @@ public class TaskChain extends Storegable {
 
     public TaskChain start(Consumer<TaskChain> consumer, boolean async) {
         this.consumer = (task) -> {
-
             consumer.accept(task);
             next();
-
         };
 
         task = Engine.getInstance().getTaskController().scheduleNow((t) -> consumer.accept(this), !async);

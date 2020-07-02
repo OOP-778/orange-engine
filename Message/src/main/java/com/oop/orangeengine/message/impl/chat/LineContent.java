@@ -22,6 +22,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
 
 public class LineContent implements Cloneable, Additionable, Replaceable<LineContent> {
 
@@ -86,7 +89,7 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
     }
 
     public TextComponent createComponent() {
-        TextComponent textComponent = new TextComponent(Helper.color(text));
+        TextComponent textComponent = new TextComponent(text);
         additions.values().forEach(addition -> addition.apply(textComponent));
         return textComponent;
     }
@@ -94,8 +97,7 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
     @Override
     public LineContent replace(Map<String, Object> placeholders) {
         for (String key : placeholders.keySet()) {
-            Object value = placeholders.get(key);
-            text = text.replace(key, placeholders.get(key).toString());
+            text = text.replace(makeSureNonNull(key), makeSureNonNull(placeholders.get(key)));
         }
         additions.values().forEach(addition -> addition.replace(placeholders));
         return returnThis();
@@ -104,10 +106,17 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
     @Override
     public <E> LineContent replace(@NonNull E object, @NonNull Set<OPair<String, Function<E, String>>> placeholders) {
         for (OPair<String, Function<E, String>> placeholder : placeholders) {
-            text = text.replace(placeholder.getFirst(), Optional.ofNullable(placeholder.getSecond().apply(object)).map(Object::toString).orElse(""));
+            text = text.replace(makeSureNonNull(placeholder.getFirst()), makeSureNonNull(placeholder.getSecond().apply(object)));
         }
         additions.values().forEach(addition -> addition.replace(object, placeholders));
         return returnThis();
+    }
+
+    @Override
+    public LineContent replace(@NonNull Function<String, String> function) {
+        this.text = function.apply(text);
+        additions.values().forEach(addition -> addition.replace(function));
+        return this;
     }
 
     @Override

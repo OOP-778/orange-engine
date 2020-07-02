@@ -96,7 +96,7 @@ public class ConfigSection implements Valuable, ConfigHolder, Spaceable, Pathabl
             }
         }
 
-        writer.write(start + key + ":");
+        writer.write(start + (key.length() == 1 ? "\"" + key + "\"" : key) + ":");
 
         if (!values.isEmpty()) {
             // Write values

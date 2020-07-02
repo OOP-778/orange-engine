@@ -21,9 +21,4 @@ public class HologramText extends HologramLine<HologramText> {
     public HologramText _returnThis() {
         return this;
     }
-
-    @Override
-    public void onAttach(Hologram hologram) {
-        this.hologram = hologram;
-    }
 }

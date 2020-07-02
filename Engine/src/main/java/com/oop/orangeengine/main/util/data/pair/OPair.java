@@ -10,10 +10,8 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor()
 public class OPair<F, S> implements IPair {
 
-    @SerializedName(value = "first")
     private F first;
 
-    @SerializedName(value = "second")
     private S second;
 
     public F getKey(){

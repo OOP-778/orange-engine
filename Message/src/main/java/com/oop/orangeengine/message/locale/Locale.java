@@ -44,8 +44,8 @@ public class Locale {
     public OMessage getMessage(String id, Supplier<OMessage> ifNotFound, boolean flattened, String... description) {
         id = id.toLowerCase().replace("_", flattened ? " " : ".");
         OMessage message = localeMap.get(id);
+
         if (message == null) {
-            getEngine().getLogger().printDebug("[LANG] Lang key not found (" + id + ")");
             message = ifNotFound.get();
             YamlMessage.save(message, section.getKey() + "." + id, configuration);
             configuration.save();

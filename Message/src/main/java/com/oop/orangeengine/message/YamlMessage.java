@@ -33,16 +33,22 @@ public class YamlMessage {
     }
 
     public static OMessage load(ConfigSection section) {
-        String type = section.getAs("type");
-        if (type.equalsIgnoreCase("chat"))
-            return Chat.load(section);
+        Optional<ConfigValue> optType = section.get("type");
+        if (optType.isPresent()) {
+            String type = optType.get().getAs(String.class);
+            if (type.equalsIgnoreCase("chat"))
+                return Chat.load(section);
 
-        else if (type.equalsIgnoreCase("actionbar"))
-            return loadActionBar(section);
+            else if (type.equalsIgnoreCase("actionbar"))
+                return loadActionBar(section);
 
-        else if (type.equalsIgnoreCase("title"))
-            return loadTitle(section);
-        return null;
+            else if (type.equalsIgnoreCase("title"))
+                return loadTitle(section);
+            else
+                return Chat.load(section);
+        }
+
+        return Chat.load(section);
     }
 
     public static OMessage load(String path, Config config) {
@@ -214,6 +220,11 @@ public class YamlMessage {
             OChatMessage message = new OChatMessage();
             section.ifValuePresent("center", boolean.class, message::centered);
 
+            if (section.isValuePresent("text")) {
+                message.append(new ChatLine().append(loadContentLine(section)));
+                return message;
+            }
+
             Optional<ConfigSection> optContent = section.getSection("content");
             Optional<ConfigSection> optLines = section.getSection("lines");
             if (optContent.isPresent())
@@ -279,9 +290,14 @@ public class YamlMessage {
 
         private static LineContent loadContentLine(ConfigSection section) {
             LineContent lineContent = new LineContent(section.getAs("text", String.class));
-            section.ifValuePresent("command", String.class, lineContent.command()::command);
-            section.ifValuePresent("hover", List.class, hover -> lineContent.hover().hoverText().addAll(hover));
-            section.ifValuePresent("suggestion", String.class, lineContent.suggestion()::suggestion);
+            section.ifValuePresent("command", String.class, command -> lineContent.command().command(command));
+            section.ifValuePresent("hover", Object.class, hover -> {
+                if (hover instanceof List)
+                    lineContent.hover().set((List<String>) hover);
+                else
+                    lineContent.hover().add(hover.toString());
+            });
+            section.ifValuePresent("suggestion", String.class, suggestion -> lineContent.suggestion().suggestion(suggestion));
             return lineContent;
         }
     }

@@ -3,6 +3,9 @@ package com.oop.orangeengine.command;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import lombok.Getter;
+import lombok.Setter;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -21,7 +24,7 @@ public class OCommand {
     private String label;
 
     //The description of the command
-    private String description = "None";
+    private String description = null;
 
     //If command will be shown when list of commands are shown / on tab complete
     private boolean secret = false;
@@ -33,7 +36,7 @@ public class OCommand {
     private Set<String> aliases = new HashSet<>();
 
     //Permission of the command / No permission message
-    private String permission = "none", noPermissionMessage = "&c&l(!)&7 You don't have permission to use this command!";
+    private String permission = null;
 
     //Sub commands
     private Map<String, OCommand> subCommands = new HashMap<>();
@@ -52,6 +55,13 @@ public class OCommand {
 
     //for nextTabComplete
     private int currentTabComplete = 0;
+
+    // For registered Bukkit Command
+    @Setter
+    private Command registeredCommand;
+
+    // For scheme cache
+    private Map<String, List<TextComponent>> schemeCache = new HashMap<>();
 
     public OCommand label(String label) {
         this.label = label;
@@ -80,11 +90,6 @@ public class OCommand {
 
     public OCommand permission(String permission) {
         this.permission = permission;
-        return this;
-    }
-
-    public OCommand noPermissionMessage(String noPermissionMessage) {
-        this.noPermissionMessage = noPermissionMessage;
         return this;
     }
 

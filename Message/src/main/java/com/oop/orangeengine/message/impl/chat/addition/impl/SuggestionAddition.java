@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
+
 @Setter
 @Getter
 @Accessors(chain = true, fluent = true)
@@ -22,6 +24,7 @@ public class SuggestionAddition implements Addition<SuggestionAddition> {
     private @NonNull String suggestion;
 
     private LineContent content;
+
     public SuggestionAddition(LineContent content) {
         this.content = content;
     }
@@ -50,7 +53,7 @@ public class SuggestionAddition implements Addition<SuggestionAddition> {
     @Override
     public SuggestionAddition replace(Map<String, Object> placeholders) {
         for (String key : placeholders.keySet()) {
-            suggestion = suggestion.replace(key, placeholders.get(key).toString());
+            suggestion = suggestion.replace(makeSureNonNull(key), makeSureNonNull(placeholders.get(key)));
         }
         return returnThis();
     }
@@ -58,10 +61,17 @@ public class SuggestionAddition implements Addition<SuggestionAddition> {
     @Override
     public <E> SuggestionAddition replace(@NonNull E object, @NonNull Set<OPair<String, Function<E, String>>> placeholders) {
         for (OPair<String, Function<E, String>> placeholder : placeholders) {
-            suggestion = suggestion.replace(placeholder.getFirst(), placeholder.getSecond().apply(object));
+            suggestion = suggestion.replace(makeSureNonNull(placeholder.getFirst()), makeSureNonNull(placeholder.getSecond().apply(object)));
         }
         return returnThis();
     }
+
+    @Override
+    public SuggestionAddition replace(@NonNull Function<String, String> function) {
+        this.suggestion = function.apply(suggestion);
+        return this;
+    }
+
     @Override
     public SuggestionAddition returnThis() {
         return this;

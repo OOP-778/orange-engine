@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Getter
 public class OLogger {
     private String error_prefix = "&c[OLogger ERROR]: &r";
@@ -34,7 +37,34 @@ public class OLogger {
         return name(plugin.getName());
     }
 
-    private void send(String message) {
+    private void send(String message, Object ...args) {
+        if (message.contains("{}") && args.length > 0) {
+            int currentObjectIndex = 0;
+            int currentCharIndex = 0;
+            char[] messageArray = message.toCharArray();
+
+            StringBuilder builder = new StringBuilder();
+
+            while (currentCharIndex < message.length()) {
+                char currentChar = messageArray[currentCharIndex];
+                if (currentChar == '{' && messageArray.length > currentCharIndex + 1) {
+                    char nextChar = messageArray[currentCharIndex + 1];
+                    if (nextChar == '}') {
+                        currentCharIndex += 2;
+                        if (args.length > currentObjectIndex) {
+                            builder.append(args[currentObjectIndex]);
+                            currentObjectIndex += 1;
+                        }
+                        continue;
+                    }
+                }
+
+                builder.append(currentChar);
+                currentCharIndex++;
+            }
+            message = builder.toString();
+        }
+
         Helper.print(message);
     }
 
@@ -42,36 +72,39 @@ public class OLogger {
         send("");
     }
 
-    public void print(Object object) {
-        send(normal_prefix + object.toString());
+    public void print(Object object, Object ...args) {
+        send(normal_prefix + object.toString(), args);
     }
 
-    public void printError(Object object) {
-        send(error_prefix + object.toString());
+    public void printError(Object object, Object ...args) {
+        send(error_prefix + object.toString(), args);
     }
 
-    public void printWarning(Object object) {
-        send(warn_prefix + object.toString());
+    public void printWarning(Object object, Object ...args) {
+        send(warn_prefix + object.toString(), args);
     }
 
-    public void printDebug(Object object) {
+    public void printDebug(Object object, Object ...args) {
         if (debugMode)
-            Helper.print(debug_prefix + object);
+            send(debug_prefix + object, args);
     }
 
     public void error(Throwable exception) {
-
         printError(exception.getClass().getSimpleName() + " was caught in " + getLoggerName() + ": " + exception.getMessage());
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());
         }
 
         send("");
-
+        if (exception.getCause() != null) {
+            send("&4Caused By " + exception.getCause().getMessage());
+            for (StackTraceElement ste : exception.getCause().getStackTrace()) {
+                send("&c - " + ste.toString());
+            }
+        }
     }
 
     public void error(Throwable exception, String message) {
-
         printError("Exception was caught in " + getLoggerName() + ": " + message);
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());

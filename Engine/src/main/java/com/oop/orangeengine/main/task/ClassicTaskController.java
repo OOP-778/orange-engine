@@ -1,26 +1,37 @@
 package com.oop.orangeengine.main.task;
 
+import com.google.common.collect.Maps;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.util.DisablePriority;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.time.Instant;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
-public class ClassicTaskController implements ITaskController {
+import static com.oop.orangeengine.main.Engine.getEngine;
+
+public class ClassicTaskController implements TaskController {
 
     private Set<OTask> asyncTasks = new HashSet<>();
-    private ScheduledExecutorService executor;
+    private ScheduledThreadPoolExecutor executor;
     private EnginePlugin plugin;
+
+    @Getter
+    private Map<OTask, Long> trackingTasks = Maps.newConcurrentMap();
+
+    private int threadsCount = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
     public ClassicTaskController(EnginePlugin plugin) {
         this.plugin = plugin;
         plugin.onDisable(() -> {
-            for (OTask asyncTask : asyncTasks) {
+            for (OTask asyncTask : asyncTasks)
                 asyncTask.cancel();
-            }
+
             asyncTasks.clear();
             try {
                 executor.shutdown();
@@ -30,32 +41,62 @@ public class ClassicTaskController implements ITaskController {
             }
 
         }, DisablePriority.LAST);
-        ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(1, runnable -> new Thread(runnable, "OrangeEngine-Executor-" + ThreadLocalRandom.current().nextInt(100)));
-        threadPoolExecutor.setRemoveOnCancelPolicy(true);
-        executor = Executors.unconfigurableScheduledExecutorService(threadPoolExecutor);
+
+        executor = new ScheduledThreadPoolExecutor(threadsCount, runnable -> {
+            String name = "OrangeEngine-Executor-" + ThreadLocalRandom.current().nextInt(100);
+            return new Thread(runnable, name);
+        });
+        executor.setRemoveOnCancelPolicy(true);
     }
 
     @Override
     public OTask runTask(OTask task) {
-        BukkitTask bukkitTask = null;
-        ScheduledFuture<?> future = null;
+        Object nativeTask;
 
         if (task.isSync())
-            bukkitTask = sync(task);
+            nativeTask = sync(task);
 
         else
-            future = async(task);
+            nativeTask = async(task);
 
-        if (bukkitTask != null) {
-            task.setBukkitTask(bukkitTask);
+        if (nativeTask == null) return task;
 
-        } else if (future != null)
-            task.setScheduledFuture(future);
+        if (nativeTask instanceof ScheduledFuture)
+            task.setScheduledFuture((ScheduledFuture<?>) nativeTask);
+
+        else if (nativeTask instanceof BukkitTask)
+            task.setBukkitTask((BukkitTask) nativeTask);
 
         return task;
     }
 
-    private ScheduledFuture<?> async(OTask task) {
+    @Override
+    public void trackTask(OTask task) {
+        trackingTasks.put(task, Instant.now().toEpochMilli());
+    }
+
+    @Override
+    public void untrackTask(OTask task) {
+        trackingTasks.remove(task);
+    }
+
+    private Object async(OTask task) {
+        if (getEngine().getOwning().isDisabling()) {
+            task.run();
+            return null;
+        }
+
+        if (threadsCount <= executor.getQueue().size() && !getEngine().getOwning().isDisabling()) {
+            if (task.isRepeat())
+                return Bukkit.getScheduler().runTaskTimerAsynchronously(getEngine().getOwning(), task.run(), 0, task.getDelayAsTicks());
+
+            else if (task.getDelay() != -1)
+                return Bukkit.getScheduler().runTaskLater(getEngine().getOwning(), task.run(), task.getDelayAsTicks());
+
+            else
+                return Bukkit.getScheduler().runTaskAsynchronously(getEngine().getOwning(), task.run());
+        }
+
         if (task.isRepeat())
             return executor.scheduleAtFixedRate(task.run(), 0, task.getDelay(), TimeUnit.MILLISECONDS);
 
@@ -69,13 +110,23 @@ public class ClassicTaskController implements ITaskController {
     }
 
     private BukkitTask sync(OTask task) {
+        if (getEngine().getOwning().isDisabling()) {
+            task.run();
+            return null;
+        }
+
         if (task.isRepeat())
             return Bukkit.getScheduler().runTaskTimer(plugin, task.run(), 0, task.getDelayAsTicks());
 
         else if (task.getDelay() != -1)
             return Bukkit.getScheduler().runTaskLater(plugin, task.run(), task.getDelayAsTicks());
 
-        else
-            return Bukkit.getScheduler().runTask(plugin, task.run());
+        else {
+            if (Thread.currentThread().getName().equalsIgnoreCase("Server Thread"))
+                task.run();
+            else
+               return Bukkit.getScheduler().runTask(plugin, task.run());
+        }
+        return null;
     }
 }

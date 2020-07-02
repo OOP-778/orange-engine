@@ -2,7 +2,9 @@ package com.oop.orangeengine.message.impl.chat;
 
 import com.google.common.base.Preconditions;
 import com.oop.orangeengine.main.Helper;
+import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.message.Replaceable;
 import com.oop.orangeengine.message.Sendable;
 import com.oop.orangeengine.message.impl.OChatMessage;
@@ -11,21 +13,31 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import javax.swing.plaf.synth.SynthUI;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.oop.orangeengine.message.ChatUtil.parseHexColor;
 
 @Accessors(chain = true, fluent = true)
 public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
 
     @Getter
-    private LinkedList<LineContent> contentList = new LinkedList<>();
+    private InsertableList<LineContent> contentList = new InsertableList<>();
 
     @Getter
     @Setter
@@ -39,7 +51,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         contentList.addAll(Arrays.asList(content));
     }
 
-    public ChatLine insert(LineContent lineContent, LineContent at, InsertMethod method) {
+    public ChatLine insert(LineContent lineContent, LineContent at, InsertableList.InsertMethod method) {
         int indexOfAt = contentList.indexOf(at);
         if (indexOfAt == -1) throw new IllegalStateException("List doesn't contain location of message getObject!");
 
@@ -55,8 +67,17 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return this;
     }
 
+    public int indexOf(LineContent content) {
+        return contentList.indexOf(content);
+    }
+
     public ChatLine insert(LineContent what, int at) {
         contentList.add(at, what);
+        return this;
+    }
+
+    public ChatLine insert(int at, LineContent ...content) {
+        contentList.insert(at, content);
         return this;
     }
 
@@ -68,8 +89,8 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return this;
     }
 
-    public ChatLine append(LineContent content) {
-        contentList.add(content);
+    public ChatLine append(LineContent ...content) {
+        contentList.addAll(Arrays.asList(content));
         return this;
     }
 
@@ -77,25 +98,85 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return append(LineContent.of(content));
     }
 
+    public ChatLine replace(String key, ChatLine value) {
+        for (LineContent lineContent : new LinkedList<>(this.contentList)) {
+            if (!lineContent.text().contains(key)) continue;
+
+            String[] split = lineContent.text().split(Pattern.quote(key));
+            if (split.length == 2) {
+                LineContent firstPart = new LineContent(split[0]);
+                ChatLine secondPart = value.clone();
+                LineContent thirdPart = new LineContent(split[1]);
+
+                replace(lineContent, firstPart);
+                int index = contentList.insert(firstPart, InsertableList.InsertMethod.REPLACE, secondPart.contentList.toArray(new LineContent[0]));
+                insert(index, thirdPart);
+
+            } else if (split.length == 1) {
+                LineContent firstPart = new LineContent(split[0]);
+                replace(lineContent, firstPart);
+                contentList.insert(firstPart, InsertableList.InsertMethod.AFTER, value.clone().contentList.toArray(new LineContent[0]));
+
+            } else
+                contentList.insert(lineContent, InsertableList.InsertMethod.REPLACE, value.clone().contentList.toArray(new LineContent[0]));
+        }
+        return this;
+    }
+
+    public ChatLine replace(String key, OChatMessage message) {
+        for (LineContent lineContent : new LinkedList<>(this.contentList)) {
+            if (!lineContent.text().contains(key)) continue;
+
+            String[] split = lineContent.text().split(Pattern.quote(key));
+            if (split.length == 2) {
+                LineContent firstPart = new LineContent(split[0]);
+                OChatMessage secondPart = message.clone();
+                LineContent thirdPart = new LineContent(split[1]);
+
+                int index = insert(indexOf(lineContent), secondPart.lineList().toArray(new ChatLine[0]));
+                replace(lineContent, firstPart);
+                insert(index, thirdPart);
+
+            } else if (split.length == 1) {
+                LineContent firstPart = new LineContent(split[0]);
+                insert(indexOf(lineContent), message.clone().lineList().toArray(new ChatLine[0]));
+                replace(lineContent, firstPart);
+
+            } else
+                contentList.insert(lineContent, InsertableList.InsertMethod.REPLACE, message.clone().lineList().stream().flatMap(line -> line.contentList.stream()).toArray(LineContent[]::new));
+        }
+        return this;
+    }
+
+    private int insert(int indexOf, ChatLine ...lines) {
+        for (ChatLine chatLine : lines) {
+            for (LineContent lineContent : chatLine.contentList) {
+                contentList.add(indexOf += 1, lineContent);
+            }
+        }
+        return indexOf;
+    }
+
     public ChatLine replace(String key, LineContent content) {
         for (LineContent lineContent : new LinkedList<>(this.contentList)) {
             if (!lineContent.text().contains(key)) continue;
 
-            String[] split = lineContent.text().split(key);
+            String[] split = lineContent.text().split(Pattern.quote(key));
             if (split.length == 2) {
                 LineContent firstPart = new LineContent(split[0]);
                 LineContent secondPart = content.clone();
                 LineContent thirdPart = new LineContent(split[1]);
 
                 replace(lineContent, firstPart);
-                insert(secondPart, firstPart, InsertMethod.AFTER);
-                insert(thirdPart, secondPart, InsertMethod.AFTER);
+                insert(secondPart, firstPart, InsertableList.InsertMethod.AFTER);
+                insert(thirdPart, secondPart, InsertableList.InsertMethod.AFTER);
 
             } else if (split.length == 1) {
                 LineContent firstPart = new LineContent(split[0]);
                 replace(lineContent, firstPart);
-                insert(content, firstPart, InsertMethod.AFTER);
-            }
+                insert(content.clone(), firstPart, InsertableList.InsertMethod.AFTER);
+            } else
+                contentList.insert(lineContent, InsertableList.InsertMethod.REPLACE, content.clone());
         }
         return this;
     }
@@ -113,8 +194,29 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     }
 
     @Override
+    public ChatLine replace(@NonNull Function<String, String> function) {
+        contentList.forEach(content -> content.replace(function));
+        return this;
+    }
+
+    @Override
     public ChatLine returnThis() {
         return this;
+    }
+
+    public TextComponent createComponent() {
+        StringBuilder appendStart = new StringBuilder(), appendEnd = new StringBuilder();
+        if (centered) {
+            String content = Centered.getCenteredMessage(raw());
+            IntStream.range(1, findSpaces(content, false)).forEach(i -> appendStart.append(" "));
+            IntStream.range(1, findSpaces(content, true)).forEach(i -> appendEnd.append(" "));
+        }
+
+        List<BaseComponent> components = buildComponents();
+        TextComponent base = new TextComponent(appendStart.toString());
+        components.forEach(base::addExtra);
+        base.addExtra(appendEnd.toString());
+        return base;
     }
 
     @Override
@@ -125,33 +227,13 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                 receiver.sendMessage(raw);
 
         } else {
-            StringBuilder appendStart = new StringBuilder(), appendEnd = new StringBuilder();
-            if (centered) {
-                String content = contentList.stream().map(LineContent::text).collect(Collectors.joining());
-                IntStream.range(1, findSpaces(content, false)).forEach(i -> appendStart.append(" "));
-                IntStream.range(1, findSpaces(content, true)).forEach(i -> appendEnd.append(" "));
-            }
-
-            TextComponent base = new TextComponent(appendStart.toString());
-            WordsQueue lastQueue = null;
-
-            for (LineContent lineContent : contentList) {
-                LineContent clone = lineContent.clone();
-                WordsQueue queue = WordsQueue.of(clone.text(), lastQueue == null ? new WordsQueue.WordDecoration(null, null) : lastQueue.getEndDecoration());
-                clone.text(queue.getWords().stream().map(WordsQueue.Word::getString).collect(Collectors.joining("")));
-
-                base.addExtra(clone.createComponent());
-                lastQueue = queue;
-            }
-
-            base.addExtra(appendEnd.toString());
-
+            TextComponent component = createComponent();
             for (CommandSender receiver : receivers) {
                 if (receiver instanceof Player)
-                    ((Player) receiver).spigot().sendMessage(base);
+                    ((Player) receiver).spigot().sendMessage(component);
 
                 else
-                    receiver.sendMessage(Helper.color(base.toLegacyText()));
+                    receiver.sendMessage(Helper.color(component.toLegacyText()));
             }
         }
     }
@@ -188,16 +270,15 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         }
     }
 
-    public static enum InsertMethod {
-        AFTER,
-        BEFORE
+    public void append(ChatLine parentLine) {
+        contentList.addAll(parentLine.contentList);
     }
 
     @SneakyThrows
     public ChatLine clone() {
         ChatLine clone = new ChatLine();
         clone.centered = centered;
-        clone.contentList = contentList.stream().map(LineContent::clone).collect(Collectors.toCollection(LinkedList::new));
+        clone.contentList = contentList.stream().map(LineContent::clone).collect(Collectors.toCollection(InsertableList::new));
         return clone;
     }
 
@@ -216,5 +297,157 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     public ChatLine removeContentIf(Predicate<LineContent> filter) {
         contentList.removeIf(filter);
         return this;
+    }
+
+    @SneakyThrows
+    private ChatColor colorOf(String color) {
+        if (OVersion.isOrAfter(16)) {
+            Method of = OSimpleReflection.getMethod(ChatColor.class, "of", String.class);
+            return (ChatColor) of.invoke(null, color);
+        } else {
+            Preconditions.checkArgument(color.length() > 1, "Invalid color by " + color);
+            return ChatColor.getByChar(color.toCharArray()[0]);
+        }
+    }
+
+    private boolean isFormat(ChatColor color) {
+        try {
+            org.bukkit.ChatColor chatColor = org.bukkit.ChatColor.valueOf(color.name());
+            return chatColor.isFormat();
+        } catch (Throwable throwable) {
+            return false;
+        }
+    }
+
+    public List<BaseComponent> buildComponents() {
+        StringBuilder builder = new StringBuilder();
+        List<BaseComponent> components = new ArrayList<>();
+
+        ComponentDecoration decoration = new ComponentDecoration();
+        for (LineContent lineContent : contentList) {
+            @NonNull String text = lineContent.text();
+
+            List<TextComponent> contentComponents = new ArrayList<>();
+
+            char[] chars = text.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                char character = chars[i];
+
+                // Check for hex Colors
+                if (character == '#' && OVersion.isOrAfter(16)) {
+                    String hex = getNextOrNull(Arrays.copyOfRange(chars, i + 1, chars.length), 6);
+                    if (hex != null) {
+                        ChatColor parsed = colorOf("#" + hex);
+
+                        if (i != 0) {
+                            if (chars.length > i + 6 && chars[i + 6] == '&') {
+                                i += 6;
+                                continue;
+                            }
+
+                            TextComponent component = new TextComponent(builder.toString());
+                            builder = new StringBuilder();
+                            decoration.apply(component);
+                            contentComponents.add(component);
+                        }
+
+                        decoration.setColor(parsed);
+                        i += 6;
+                        continue;
+                    }
+                }
+
+                // Check for bukkit colors
+                if (character == '&' || character == ChatColor.COLOR_CHAR) {
+                    char codeAfter = chars[i + 1];
+                    ChatColor color = ChatColor.getByChar(codeAfter);
+                    if (color == null) {
+                        i += 1;
+                        continue;
+                    }
+
+                    if (i != 0) {
+                        if (chars.length > i + 1 && chars[i + 1] == '&') {
+                            i += 1;
+                            continue;
+                        }
+                        TextComponent component = new TextComponent(builder.toString());
+                        builder = new StringBuilder();
+                        decoration.apply(component);
+                        contentComponents.add(component);
+                    }
+
+                    if (isFormat(color))
+                        decoration.decorations().add(color);
+
+                    else {
+                        decoration.setColor(color);
+                    }
+
+                    i += 1;
+                    continue;
+                }
+
+                builder.append(character);
+            }
+
+            TextComponent component = new TextComponent(builder.toString());
+            builder = new StringBuilder();
+            decoration.apply(component);
+            contentComponents.add(component);
+
+            contentComponents.forEach(comp -> lineContent.additionList().forEach(addition -> addition.apply(comp)));
+            components.addAll(contentComponents);
+        }
+
+        return components;
+    }
+
+    private static String getNextOrNull(char[] array, int amount) {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i == amount)
+                return builder.toString();
+
+            char character = array[i];
+            builder.append(character);
+        }
+
+        return null;
+    }
+
+    @Getter
+    private class ComponentDecoration {
+        private ChatColor color = ChatColor.RESET;
+        private List<ChatColor> decorations = new ArrayList<>();
+
+        public void applyColor(TextComponent component) {
+            component.setColor(color);
+        }
+
+        public void apply(TextComponent component) {
+            applyColor(component);
+            applyDecor(component);
+        }
+
+        public void applyDecor(TextComponent component) {
+            for (ChatColor decoration : decorations) {
+                if (decoration == ChatColor.BOLD)
+                    component.setBold(true);
+                else if (decoration == ChatColor.UNDERLINE)
+                    component.setUnderlined(true);
+                else if (decoration == ChatColor.ITALIC)
+                    component.setItalic(true);
+                else if (decoration == ChatColor.MAGIC)
+                    component.setObfuscated(true);
+            }
+        }
+
+        public void setColor(ChatColor color) {
+            decorations.clear();
+            System.out.println("Set color to " + color.toString());
+            this.color = color;
+        }
     }
 }

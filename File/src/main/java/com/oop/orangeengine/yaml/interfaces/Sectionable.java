@@ -14,11 +14,15 @@ public interface Sectionable {
     Map<String, ConfigSection> getSections();
 
     default ConfigSection createSection(String path) {
+        return createSection(path, true);
+    }
+
+    default ConfigSection createSection(String path, boolean splitAtDots) {
         Optional<ConfigSection> section = getSection(path);
         if (section.isPresent())
             return section.get();
 
-        if (path.contains(".")) {
+        if (path.contains(".") && splitAtDots) {
             String[] split = path.split("\\.");
             String sectionName = split[split.length - 1];
 

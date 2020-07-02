@@ -167,7 +167,7 @@ public abstract class TinyProtocol {
 	}
 
 	/**
-	 * Register bukkit events.
+	 * Register bukkit targets.
 	 */
 	private void registerBukkitEvents() {
 		listener = new Listener() {

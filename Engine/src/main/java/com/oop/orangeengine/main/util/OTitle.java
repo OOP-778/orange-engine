@@ -1,5 +1,6 @@
 package com.oop.orangeengine.main.util;
 
+import com.oop.orangeengine.main.Helper;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.bukkit.entity.Player;
@@ -28,8 +29,8 @@ public class OTitle {
     private static final MethodHandle CHAT_COMPONENT_TEXT;
 
     static {
-        Class<?> chatComponentText = OSimpleReflection.findClass("ChatComponentText");
-        Class<?> packet = OSimpleReflection.findClass("PacketPlayOutTitle");
+        Class<?> chatComponentText = OSimpleReflection.findClass("{nms}.ChatComponentText");
+        Class<?> packet = OSimpleReflection.findClass("{nms}.PacketPlayOutTitle");
         Class<?> titleTypes = packet.getDeclaredClasses()[0];
         MethodHandle packetCtor = null;
         MethodHandle chatComp = null;
@@ -61,7 +62,7 @@ public class OTitle {
 
             packetCtor = lookup.findConstructor(packet,
                     MethodType.methodType(void.class, titleTypes,
-                            OSimpleReflection.findClass("IChatBaseComponent"), int.class, int.class, int.class));
+                            OSimpleReflection.findClass("{nms}.IChatBaseComponent"), int.class, int.class, int.class));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -97,15 +98,15 @@ public class OTitle {
 
         Object[] packets = new Object[3];
 
-        Object timesPacket = PACKET.invoke(TIMES, CHAT_COMPONENT_TEXT.invoke(title), fadeIn, stay, fadeOut);
+        Object timesPacket = PACKET.invoke(TIMES, CHAT_COMPONENT_TEXT.invoke(Helper.color(title)), fadeIn, stay, fadeOut);
         packets[0] = timesPacket;
 
         if (title != null) {
-            Object titlePacket = PACKET.invoke(TITLE, CHAT_COMPONENT_TEXT.invoke(title), fadeIn, stay, fadeOut);
+            Object titlePacket = PACKET.invoke(TITLE, CHAT_COMPONENT_TEXT.invoke(Helper.color(title)), fadeIn, stay, fadeOut);
             packets[1] = titlePacket;
         }
         if (subtitle != null) {
-            Object subtitlePacket = PACKET.invoke(SUBTITLE, CHAT_COMPONENT_TEXT.invoke(subtitle), fadeIn, stay, fadeOut);
+            Object subtitlePacket = PACKET.invoke(SUBTITLE, CHAT_COMPONENT_TEXT.invoke(Helper.color(subtitle)), fadeIn, stay, fadeOut);
             packets[2] = subtitlePacket;
         }
 

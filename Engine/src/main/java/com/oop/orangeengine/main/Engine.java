@@ -2,10 +2,9 @@ package com.oop.orangeengine.main;
 
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.component.IEngineComponent;
-import com.oop.orangeengine.main.events.async.EventData;
 import com.oop.orangeengine.main.logger.OLogger;
 import com.oop.orangeengine.main.plugin.EnginePlugin;
-import com.oop.orangeengine.main.task.ITaskController;
+import com.oop.orangeengine.main.task.TaskController;
 import com.oop.orangeengine.main.task.StaticTask;
 import lombok.Getter;
 
@@ -21,29 +20,26 @@ public class Engine {
     private static Engine instance;
     private EnginePlugin owning;
     private List<AEngineComponent> components = new ArrayList<>();
-    private ITaskController taskController;
+    private TaskController taskController;
     private OLogger logger;
 
     public Engine(EnginePlugin plugin) {
         instance = this;
 
-        // Initialize plugin disable actions
+        // Initialize plugin disable action
         owning = plugin;
         owning.onDisable(() -> {
             components.forEach(IEngineComponent::onDisable);
             instance = null;
         });
 
-        Cleaner cleaner = new Cleaner();
-        cleaner.registerClass(StaticTask.class);
-        cleaner.registerClass(EventData.class);
-
-        new StaticTask(this);
+        new StaticTask();
 
         taskController = plugin.provideTaskController();
+        taskController.loadTask();
+
         logger = new OLogger(owning);
 
-        ClassLoader.load(plugin.loader());
         Logger.getLogger("NBTAPI").setLevel(Level.OFF);
     }
 
@@ -79,5 +75,4 @@ public class Engine {
     public void onDisable() {
         instance = null;
     }
-
 }

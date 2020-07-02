@@ -2,7 +2,6 @@ package com.oop.orangeengine.eventssubscription;
 
 import com.oop.orangeengine.eventssubscription.subscription.SubEvent;
 import com.oop.orangeengine.eventssubscription.subscription.SubscribedEvent;
-import com.oop.orangeengine.main.Cleaner;
 import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.component.AEngineComponent;
 import org.bukkit.event.Event;
@@ -26,7 +25,6 @@ public class SubscriptionFactory extends AEngineComponent {
         }
 
         INSTANCE = this;
-        Engine.getInstance().findComponentByClass(Cleaner.class).registerClass(SubscriptionFactory.class);
     }
 
     public static SubscriptionFactory getInstance() {

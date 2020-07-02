@@ -15,6 +15,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
+
 @Accessors(fluent = true, chain = true)
 public class HoverTextAddition implements Addition<HoverTextAddition> {
 
@@ -71,7 +73,7 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
         String[] hoverArray = hoverText.toArray(new String[0]);
         for (int i = 0; i < hoverArray.length; i++) {
             int finalI = i;
-            placeholders.forEach((key, value) -> hoverArray[finalI] = hoverArray[finalI].replace(key, value.toString()));
+            placeholders.forEach((key, value) -> hoverArray[finalI] = hoverArray[finalI].replace(makeSureNonNull(key), makeSureNonNull(value)));
         }
 
         this.hoverText = Arrays.asList(hoverArray);
@@ -83,8 +85,18 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
         String[] hoverArray = hoverText.toArray(new String[0]);
         for (int i = 0; i < hoverArray.length; i++) {
             int finalI = i;
-            placeholders.forEach(pair -> hoverArray[finalI] = hoverArray[finalI].replace(pair.getFirst(), pair.getSecond().apply(object)));
+            placeholders.forEach(pair -> hoverArray[finalI] = hoverArray[finalI].replace(makeSureNonNull(pair.getFirst()), makeSureNonNull(pair.getSecond().apply(object))));
         }
+
+        this.hoverText = Arrays.asList(hoverArray);
+        return returnThis();
+    }
+
+    @Override
+    public HoverTextAddition replace(@NonNull Function<String, String> function) {
+        String[] hoverArray = hoverText.toArray(new String[0]);
+        for (int i = 0; i < hoverArray.length; i++)
+            hoverArray[i] = function.apply(hoverArray[i]);
 
         this.hoverText = Arrays.asList(hoverArray);
         return returnThis();

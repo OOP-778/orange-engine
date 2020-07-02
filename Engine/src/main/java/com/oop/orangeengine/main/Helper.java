@@ -1,24 +1,42 @@
 package com.oop.orangeengine.main;
 
+import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.OptionalConsumer;
+import com.oop.orangeengine.main.util.version.OVersion;
+import lombok.SneakyThrows;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class Helper {
 
+    private static final Pattern HEX_PATTERN = Pattern.compile("#(?:[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})");
+
+    @SneakyThrows
     public static String color(String text) {
-        return ChatColor.translateAlternateColorCodes('&', text);
+        if (OVersion.isOrAfter(16)) {
+            Matcher matcher = HEX_PATTERN.matcher(text);
+            while (matcher.find()) {
+                String hex = matcher.group();
+                Method of = OSimpleReflection.getMethod(net.md_5.bungee.api.ChatColor.class, "of", String.class);
+                text = text.replace(hex, of.invoke(null, hex).toString());
+            }
+        }
+        text = ChatColor.translateAlternateColorCodes('&', text);
+        return text;
     }
 
     public static void print(Object object) {

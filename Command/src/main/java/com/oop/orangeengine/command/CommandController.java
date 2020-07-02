@@ -2,41 +2,58 @@ package com.oop.orangeengine.command;
 
 import com.google.common.collect.Lists;
 import com.oop.orangeengine.command.arg.CommandArgument;
+import com.oop.orangeengine.command.scheme.DefaultScheme;
+import com.oop.orangeengine.command.scheme.Scheme;
+import com.oop.orangeengine.command.scheme.SchemeHolder;
 import com.oop.orangeengine.command.req.RequirementMapper;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
-import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.impl.OChatMessage;
 import com.oop.orangeengine.message.impl.chat.ChatLine;
-import com.oop.orangeengine.message.impl.chat.LineContent;
+import com.oop.orangeengine.message.impl.chat.InsertableList;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.apache.commons.lang.StringUtils;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
+import static com.oop.orangeengine.main.Helper.color;
 
 public class CommandController {
 
-    private Set<Command> registered = new HashSet<>();
-    private CommandMap commandMap;
+    private String[] CACHE_KEYS = {"proper usage", "sub list"};
 
     @Setter
-    private ColorScheme colorScheme;
-    private JavaPlugin plugin;
+    private SchemeHolder schemeHolder;
 
-    public CommandController(EnginePlugin plugin) {
-        this.plugin = plugin;
-        this.colorScheme = new ColorScheme();
+    @Getter
+    private Map<String, OCommand> registeredCommands = new ConcurrentHashMap<>();
+
+    private CommandMap commandMap;
+
+    public CommandController() {
+        this(null);
+    }
+
+    public CommandController(SchemeHolder holder) {
+        this.schemeHolder = holder;
+        if (schemeHolder == null)
+            schemeHolder = DefaultScheme.getDefaultHolder();
+
+        getEngine().getOwning().onDisable(this::unregisterAll);
         try {
 
             Field cMap = SimplePluginManager.class.getDeclaredField("commandMap");
@@ -46,53 +63,40 @@ public class CommandController {
         } catch (Throwable thrw) {
             throw new IllegalStateException("Failed to initialize CommandMap", thrw);
         }
-        plugin.onDisable(this::unregisterAll);
     }
 
-    public void unregisterAll() {
-        try {
-            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-            knownCommandsField.setAccessible(true);
-
-            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
-            for (Command command : registered) {
-                knownCommands.remove(command.getName());
-                command.unregister(commandMap);
-
-                getEngine().getLogger().printDebug("Unregistered " + command.getName() + " / " + command.getLabel());
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not unregister commands", e);
-        }
-    }
 
     public void register(OCommand command) {
-        Command bukkitCommand = new Command(command.getLabel(), command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
+        Command bukkitCommand = new Command(command.getLabel(), command.getDescription() == null ? "" : command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
             @Override
             public boolean execute(CommandSender sender, String cmdName, String[] args) {
-                if (args.length == 0)
-                    handleCommand(args, sender, command);
-
-                else {
-                    if (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help")) {
-                        handleProperUsage(command, sender);
-                        return true;
-                    }
-
-                    String secondArg = args[0];
-                    String subCommandName = command.getSubCommands().keySet().stream().filter(subC -> subC.equalsIgnoreCase(secondArg)).findFirst().orElse(null);
-                    if (subCommandName != null)
-                        handleCommand(cutArray(args, 1), sender, command.getSubCommands().get(subCommandName));
+                try {
+                    if (args.length == 0)
+                        handleCommand(args, sender, command);
 
                     else {
-                        if (command.getListener() == null) {
-                            sender.sendMessage(colorize("&cSub Command by name " + secondArg + " not found!"));
+                        if (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help")) {
                             handleProperUsage(command, sender);
+                            return true;
+                        }
 
-                        } else
-                            handleCommand(args, sender, command);
+                        String secondArg = args[0];
+                        String subCommandName = command.getSubCommands().keySet().stream().filter(subC -> subC.equalsIgnoreCase(secondArg)).findFirst().orElse(null);
+                        if (subCommandName != null)
+                            handleCommand(cutArray(args, 1), sender, command.getSubCommands().get(subCommandName));
+
+                        else {
+                            if (command.getListener() == null) {
+                                sender.sendMessage(color("&cSub Command by name " + secondArg + " not found!"));
+                                handleProperUsage(command, sender);
+
+                            } else
+                                handleCommand(args, sender, command);
+                        }
+
                     }
-
+                } catch (Throwable throwable) {
+                    getEngine().getLogger().error(throwable);
                 }
                 return true;
             }
@@ -118,15 +122,16 @@ public class CommandController {
             }
         };
 
-        registered.add(bukkitCommand);
-        commandMap.register(plugin.getName(), bukkitCommand);
+        command.setRegisteredCommand(bukkitCommand);
+        registeredCommands.put(command.getLabel().toLowerCase(), command);
+        commandMap.register(getEngine().getOwning().getName(), bukkitCommand);
     }
 
     public Collection<String> getSubCommandsFor(OCommand command, CommandSender sender) {
         return command.getSubCommands().values()
                 .stream()
                 .filter(subCommand -> !subCommand.isSecret())
-                .filter(subCommand -> subCommand.getPermission().equalsIgnoreCase("NONE") || sender.hasPermission(subCommand.getPermission()))
+                .filter(subCommand -> subCommand.getPermission() == null || sender.hasPermission(subCommand.getPermission()))
                 .map(OCommand::getLabel)
                 .collect(Collectors.toList());
     }
@@ -147,7 +152,7 @@ public class CommandController {
         if (completion.isEmpty()) {
             List<Object> objects = Lists.newArrayList();
             List<CommandArgument> arguments = new ArrayList<>(command.getArgumentMap().values());
-            for (int i = 0; i < args.length-1; i++) {
+            for (int i = 0; i < args.length - 1; i++) {
                 if ((arguments.size() - 1) <= i)
                     break;
 
@@ -171,28 +176,23 @@ public class CommandController {
         return completion;
     }
 
-    private String colorize(String string) {
-        return ChatColor.translateAlternateColorCodes('&', string);
-    }
-
     private void handleCommand(String[] args, CommandSender sender, OCommand command) {
-
-        //Check for permission
-        if (!command.getPermission().equalsIgnoreCase("none") && !sender.hasPermission(command.getPermission())) {
-
-            sender.sendMessage(colorize(command.getNoPermissionMessage()));
+        // Check for permission
+        if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+            OChatMessage message = new OChatMessage(schemeHolder.getScheme(command, "no permission").getScheme());
+            message.replace(getPlaceholdersForCommand(command));
+            message.send(sender);
             return;
-
         }
 
-        //Check for ableToExecute
+        // Check for ableToExecute
         int found = 0;
         for (Class executerClass : command.getAbleToExecute())
-            if(executerClass.isAssignableFrom(sender.getClass())) found++;
+            if (executerClass.isAssignableFrom(sender.getClass())) found++;
 
-        if(found == 0) {
+        if (found == 0) {
 
-            sender.sendMessage(colorize(command.getNotAbleToExecuteMessage().replace("%sender%", sender instanceof Player ? "Console" : "Player")));
+            sender.sendMessage(color(command.getNotAbleToExecuteMessage().replace("%sender%", sender instanceof Player ? "Console" : "Player")));
             return;
 
         }
@@ -203,7 +203,7 @@ public class CommandController {
             OPair<Boolean, String> mapped = requirementMapper.accepts(sender);
             if (!mapped.getFirst()) {
 
-                sender.sendMessage(colorize(mapped.getSecond()));
+                sender.sendMessage(color(mapped.getSecond()));
                 return;
 
             }
@@ -218,9 +218,9 @@ public class CommandController {
         }
 
         Map<String, Object> arguments = new HashMap<>();
-
         if (command.getArgumentMap().isEmpty())
             execCommand(new WrappedCommand(sender, arguments), command);
+
         else {
 
             String[] argsCopy = args.clone();
@@ -228,166 +228,94 @@ public class CommandController {
 
             for (CommandArgument arg : commandArguments) {
                 if (argsCopy.length == 0) {
-
                     if (!arg.isRequired()) continue;
                     handleProperUsage(command, sender);
                     return;
-
                 }
 
                 String stringValue = argsCopy[0];
-                if (arg.getMapper() != null) {
+                try {
+                    if (arg.getMapper() != null) {
 
-                    OPair<Object, String> value = arg.getMapper().product(stringValue);
-                    if (value.getFirst() == null) {
+                        OPair<Object, String> value = arg.getMapper().product(stringValue);
+                        if (value.getFirst() == null) {
+                            Scheme error = schemeHolder.getScheme(command, "error");
+                            OChatMessage message = new OChatMessage(error.getScheme());
+                            message.replace(getPlaceholdersForCommand(command));
+                            message.replace("{error_cause}", value.getSecond());
+                            message.send(sender);
+                            return;
 
-                        sender.sendMessage(colorize("&c&l* &7Error: &c" + value.getSecond()));
-                        handleProperUsage(command, sender);
-                        return;
-
-                    } else {
-
-                        arguments.put(arg.getIdentity(), value.getFirst());
-                        argsCopy = cutArray(argsCopy, 1);
-
+                        } else {
+                            arguments.put(arg.getIdentity(), value.getFirst());
+                            argsCopy = cutArray(argsCopy, 1);
+                        }
                     }
+                } catch (Throwable throwable) {
+                    Scheme error = schemeHolder.getScheme(command, "error");
+                    OChatMessage message = new OChatMessage(error.getScheme());
+                    message.replace(getPlaceholdersForCommand(command));
+                    message.replace("{error_cause}", throwable.getMessage());
+                    message.send(sender);
                 }
 
-                if (arg.isGrabAllNextArgs()){
-                    String current = (String) arguments.get(arg.getIdentity());
+                if (arg.isGrabAllNextArgs()) {
+                    StringBuilder current = new StringBuilder((String) arguments.get(arg.getIdentity()));
                     for (String nextArg : argsCopy) {
-                        current += " " + nextArg;
+                        current.append(" ").append(nextArg);
                     }
 
                     arguments.remove(arg.getIdentity());
-                    arguments.put(arg.getIdentity(), current);
+                    arguments.put(arg.getIdentity(), current.toString());
 
                     break;
                 }
-
             }
 
             execCommand(new WrappedCommand(sender, arguments), command);
         }
     }
 
-    private void handleProperUsage(OCommand command, CommandSender sender) {
-        //Check if simple message is required
-        if (command.getSubCommands().isEmpty()) {
-            OChatMessage message = new OChatMessage();
-            ChatLine line = new ChatLine();
-            String allParents = command.getLabelWithParents();
+    public void unregisterAll() {
+        try {
+            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
 
-            line.append(colorScheme.getMainColor() + "Usage: /");
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+            for (OCommand command : registeredCommands.values()) {
+                if (command.getRegisteredCommand() == null) continue;
 
-            LineContent labelContent = new LineContent(reverseLabel(allParents.substring(0, allParents.length() - 1)));
-            if (!command.getDescription().equalsIgnoreCase("none"))
-                labelContent.hover().add(colorScheme.getMainColor() + command.getDescription());
-            line.append(labelContent);
-
-            buildArgs(command.getArgumentMap().values(), line);
-            message.append(line);
-            if (!command.getPermission().equalsIgnoreCase("none")) {
-                message.append(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Permission: &f" + command.getPermission());
+                knownCommands.remove(command.getLabel());
+                command.getRegisteredCommand().unregister(commandMap);
             }
-            if (!command.getDescription().equalsIgnoreCase("none")) {
-                message.append(colorScheme.getMainColor() + "&l* " + colorScheme.getMainColor() + "Description: &f" + command.getDescription());
-            }
-
-            if (sender instanceof Player)
-                message.send(((Player) sender));
-
-        } else {
-
-            boolean hasRequired = command.getSubCommands().values().stream().
-                    map(cmd -> (int) cmd.getArgumentMap().values().stream().filter(CommandArgument::isRequired).count()).
-                    anyMatch(c -> c > 0);
-            boolean hasOptional = command.getSubCommands().values().stream().
-                    map(cmd -> (int) cmd.getArgumentMap().values().stream().filter(a -> !a.isRequired()).count()).
-                    anyMatch(c -> c > 0);
-
-            //Advanced
-            OChatMessage message = new OChatMessage();
-            message.append(colorScheme.getSecondColor() + "&l---====" + colorScheme.getMainColor() + " " + StringUtils.capitalize(command.getLabel()) + " Help");
-
-            //Format Builder
-            if (hasOptional && hasRequired)
-                message.append(colorScheme.getSecondColor() + "   <> - Required, [] - Optional");
-
-            else if (hasRequired)
-                message.append(colorScheme.getSecondColor() + "   <> - Required");
-
-            else if (hasOptional)
-                message.append(colorScheme.getSecondColor() + "   [] - Optional");
-
-            message.append(" ");
-
-            //Check if main command has stuff :D
-            if(command.getListener() != null) {
-                ChatLine line = new ChatLine();
-
-                String allParents = command.getLabelWithParents();
-                LineContent labelContent = new LineContent(colorScheme.getMainColor() + "/" + reverseLabel(allParents.substring(0, allParents.length() - 1)));
-                if (!command.getDescription().equalsIgnoreCase("None"))
-                    labelContent.hover().add(colorScheme.getMainColor() + command.getDescription());
-                line.append(labelContent);
-
-                buildArgs(command.getArgumentMap().values(), line);
-                if (!command.getDescription().equalsIgnoreCase("None"))
-                    line.append(colorScheme.getMainColor() + " - " + command.getDescription());
-
-                message.append(line);
-            }
-
-            for (OCommand subCommand : command.getSubCommands().values()) {
-
-                //Check if the command is hidden
-                if (subCommand.isSecret())
-                    continue;
-
-                //Check for permission (if sender has the permission to use this command)
-                if (subCommand.getPermission().equalsIgnoreCase("none") && !sender.hasPermission(subCommand.getPermission()))
-                    continue;
-
-                ChatLine line = new ChatLine();
-                line.append(colorScheme.getMainColor() + "/" + reverseLabel(command.getLabelWithParents()));
-
-                LineContent labelContent = new LineContent(colorScheme.getMainColor() + subCommand.getLabel());
-                if (!subCommand.getDescription().equalsIgnoreCase("None"))
-                    labelContent.hover().add(colorScheme.getMainColor() + subCommand.getDescription());
-                line.append(labelContent);
-
-                buildArgs(subCommand.getArgumentMap().values(), line);
-                if (!subCommand.getDescription().equalsIgnoreCase("None"))
-                    line.append(colorScheme.getMainColor() + " - " + subCommand.getDescription());
-
-                message.append(line);
-
-            }
-            if (sender instanceof Player)
-                message.send(((Player) sender));
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not unregister commands", e);
         }
     }
 
     private String reverseLabel(String labelWithParents) {
-        List<String> strings = new ArrayList<>();
+        List<String> strings;
         if (labelWithParents.contains(" "))
-            strings.addAll(Arrays.asList(labelWithParents.split(" ")));
+            strings = new ArrayList<>(Arrays.asList(labelWithParents.split(" ")));
         else
             return labelWithParents;
 
         Collections.reverse(strings);
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
         for (String append : strings) {
-            buffer.append(append).append(" ");
+            builder.append(append).append(" ");
         }
 
-        return buffer.toString();
+        return builder.toString();
     }
 
     private void execCommand(WrappedCommand command, OCommand oopCommand) {
-        oopCommand.getListener().accept(command);
+        try {
+            oopCommand.getListener().accept(command);
+        } catch (Throwable throwable) {
+            getEngine().getLogger().error(throwable);
+        }
     }
 
     private String[] cutArray(String[] array, int amount) {
@@ -397,37 +325,157 @@ public class CommandController {
             return Arrays.copyOfRange(array, amount, array.length);
     }
 
-    public void properUsage(ColorScheme colorScheme) {
-        this.colorScheme = colorScheme;
+    private Map<String, Object> getPlaceholdersForCommand(OCommand command) {
+        Map<String, Object> placeholders = new HashMap<>();
+        placeholders.put("{command_label}", command.getLabel());
+        placeholders.put("{command_full_label}", reverseLabel(command.getLabelWithParents()));
+        placeholders.put("{command_description}", command.getDescription() == null ? "none" : command.getDescription());
+        placeholders.put("{command_permission}", command.getPermission() == null ? "none" : command.getPermission());
+
+        return placeholders;
     }
 
-    private void buildArgs(Collection<CommandArgument> args, ChatLine line) {
-        //Format = <required> [optional]
-        if (args.stream().anyMatch(CommandArgument::isRequired)) {
-            args.stream().filter(CommandArgument::isRequired).forEach(arg -> {
-                line.append(" <");
-                LineContent content = new LineContent("&f" + arg.getIdentity()).
-                        hover().add(colorScheme.getMainColor() + arg.getDescription()).parent();
-                line.append(content);
-                line.append(colorScheme.getMainColor() + ">");
+    private List<TextComponent> getCache(OCommand command, String scheme, Supplier<List<TextComponent>> supplier) {
+        return command.getSchemeCache().computeIfAbsent(scheme, key -> supplier.get());
+    }
 
+    private void handleProperUsage(OCommand command, CommandSender sender) {
+        // Check if simple message is required
+        if (command.getSubCommands().isEmpty()) {
+            List<TextComponent> components = getCache(command, CACHE_KEYS[0], () -> {
+                OChatMessage message = new OChatMessage();
+                Scheme scheme = schemeHolder.getScheme(command, CACHE_KEYS[0]);
+
+                for (String line : scheme.getScheme()) {
+                    if ((line.contains("{command_description}") && command.getDescription() == null) && (line.contains("{command_permission}") && command.getPermission() == null))
+                        continue;
+                    message.append(line);
+                }
+
+                scheme.getTemplates().forEach((key, value) -> message.replace("{" + key.replace(" ", "_") + "}", value));
+                message.replace(getPlaceholdersForCommand(command));
+
+                boolean hasRequired = command.getArgumentMap().values()
+                        .stream()
+                        .anyMatch(CommandArgument::isRequired);
+
+                boolean hasOptional = command.getArgumentMap().values()
+                        .stream()
+                        .anyMatch(argument -> !argument.isRequired());
+
+                if (!hasRequired)
+                    message.replace("{command_required_args}", "");
+                else
+                    buildArgs(message, "{command_required_args}", scheme.getTemplate("required arg").get(), command.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
+
+                if (!hasOptional)
+                    message.replace("{command_optional_args}", "");
+                else
+                    buildArgs(message, "{command_optional_args}", scheme.getTemplate("optional arg").get(), command.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
+
+                return message.crateTextComponents();
             });
-            line.append(colorScheme.getMainColor());
+
+            for (TextComponent component : components)
+                if (sender instanceof Player)
+                    ((Player) sender).spigot().sendMessage(component);
+                else
+                    sender.sendMessage(Helper.color(component.getText()));
+
+        } else {
+            boolean wholeHasRequired = command.getSubCommands().values().stream().
+                    map(cmd -> (int) cmd.getArgumentMap().values().stream().filter(CommandArgument::isRequired).count()).
+                    anyMatch(c -> c > 0);
+
+            boolean wholeHasOptional = command.getSubCommands().values().stream().
+                    map(cmd -> (int) cmd.getArgumentMap().values().stream().filter(a -> !a.isRequired()).count()).
+                    anyMatch(c -> c > 0);
+
+            List<TextComponent> components = getCache(command, CACHE_KEYS[1], () -> {
+                Scheme scheme = schemeHolder.getScheme(command, CACHE_KEYS[1]);
+                OChatMessage message = new OChatMessage();
+
+                // Append scheme to the messsge
+                for (String text : scheme.getScheme())
+                    message.append(text);
+
+                message.replace(getPlaceholdersForCommand(command));
+
+                // Replace {required}, {optional}
+                if (wholeHasRequired)
+                    scheme.getTemplate("required").ifPresent(rm -> message.replace("{required}", rm));
+                else
+                    message.replace("{required}", "");
+
+                if (wholeHasOptional)
+                    scheme.getTemplate("optional").ifPresent(rm -> message.replace("{optional}", rm));
+                else
+                    message.replace("{optional}", "");
+
+                // Construct sub commands message
+                scheme.getTemplate("sub command").ifPresent(sct -> {
+                    OChatMessage subCommandsMessage = new OChatMessage();
+                    for (OCommand sc : command.getSubCommands().values()) {
+                        if (sc.isSecret() || (sc.getPermission() != null && !sender.hasPermission(sc.getPermission())))
+                            continue;
+
+                        OChatMessage scm = sct.clone();
+                        boolean hasRequired = sc.getArgumentMap().values()
+                                .stream()
+                                .anyMatch(CommandArgument::isRequired);
+
+                        boolean hasOptional = sc.getArgumentMap().values()
+                                .stream()
+                                .anyMatch(argument -> !argument.isRequired());
+
+                        if (!hasRequired)
+                            scm.replace("{command_required_args}", "");
+                        else
+                            buildArgs(scm, "{command_required_args}", scheme.getTemplate("required arg").get(), sc.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
+
+                        if (!hasOptional)
+                            scm.replace("{command_optional_args}", "");
+                        else
+                            buildArgs(scm, "{command_optional_args}", scheme.getTemplate("optional arg").get(), sc.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
+
+                        scm.replace(getPlaceholdersForCommand(sc));
+                        subCommandsMessage.append(scm);
+                    }
+
+                    int index = message.indexOf(line -> line.raw().contains("{sub_command_template}"));
+                    message.insert(index, subCommandsMessage, InsertableList.InsertMethod.REPLACE);
+                });
+
+                return message.crateTextComponents();
+            });
+
+            for (TextComponent component : components)
+                if (sender instanceof Player)
+                    ((Player) sender).spigot().sendMessage(component);
+                else
+                    sender.sendMessage(Helper.color(component.getText()));
+        }
+    }
+
+    public Map<String, Object> getPlaceholdersForArgument(CommandArgument argument) {
+        Map<String, Object> placeholders = new HashMap<>();
+        placeholders.put("{arg_identifier}", argument.getIdentity());
+        placeholders.put("{arg_description}", argument.getDescription() == null ? "none" : argument.getDescription());
+        return placeholders;
+    }
+
+    public void buildArgs(OChatMessage parent, String pkey, OChatMessage argTemplate, List<CommandArgument> arguments) {
+        ChatLine parentLine = new ChatLine();
+        for (CommandArgument argument : arguments) {
+            ChatLine line = argTemplate.lineList().get(0).clone();
+            line.replace(getPlaceholdersForArgument(argument));
+
+            if (arguments.indexOf(argument) < arguments.size()) {
+                parentLine.append(line);
+                parentLine.append(" ");
+            }
         }
 
-        if (args.stream().anyMatch(a -> !a.isRequired())) {
-            line.append(colorScheme.getSecondColor()).append(" ");
-
-            args.stream().filter(a -> !a.isRequired()).forEach(arg -> {
-
-                line.append("[");
-                LineContent content = new LineContent("&f" + arg.getIdentity()).
-                        hover().add(colorScheme.getSecondColor() + arg.getDescription()).parent();
-                line.append(content);
-                line.append(colorScheme.getSecondColor() + "]");
-
-            });
-            line.append(colorScheme.getMarkupColor());
-        }
+        parent.replace(pkey, parentLine);
     }
 }

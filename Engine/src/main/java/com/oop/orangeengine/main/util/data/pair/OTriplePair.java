@@ -8,12 +8,9 @@ import lombok.Data;
 @AllArgsConstructor()
 public class OTriplePair<F, S, T> implements IPair {
 
-    @SerializedName(value = "first")
     private F first;
 
-    @SerializedName(value = "second")
     private S second;
 
-    @SerializedName(value = "third")
     private T third;
 }

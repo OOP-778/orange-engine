@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,7 +18,7 @@ public class ConfigUtil {
 
     @SneakyThrows
     public static void load(Config config, Yaml yaml) {
-        Map<Object, Object> data = (Map<Object, Object>) yaml.load(new FileInputStream(config.getFile().getFile()));
+        Map<Object, Object> data = (Map<Object, Object>) yaml.load(new InputStreamReader(new FileInputStream(config.getFile().getFile()), "UTF-8"));
         if (data == null) return;
         data.forEach((key, value) -> {
             if (value instanceof Map) {

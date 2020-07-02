@@ -1,0 +1,7 @@
+- action based
+- child/parents
+- buttons with states
+- refreshing single slot (no need to refresh whole menu for one slot)
+- changing titles
+- animated buttons
+- click sounds

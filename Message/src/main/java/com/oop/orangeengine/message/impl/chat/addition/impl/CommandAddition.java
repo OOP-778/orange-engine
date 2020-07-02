@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
+
 @Accessors(chain = true, fluent = true)
 public class CommandAddition implements Addition<CommandAddition> {
     @Getter @Setter
@@ -54,8 +56,9 @@ public class CommandAddition implements Addition<CommandAddition> {
 
     @Override
     public CommandAddition replace(Map<String, Object> placeholders) {
+        if (command == null) return this;
         for (String key : placeholders.keySet()) {
-            command = command.replace(key, placeholders.get(key).toString());
+            command = command.replace(makeSureNonNull(key), makeSureNonNull(placeholders.get(key)));
         }
         return returnThis();
     }
@@ -63,10 +66,19 @@ public class CommandAddition implements Addition<CommandAddition> {
     @Override
     public <E> CommandAddition replace(@NonNull E object, @NonNull Set<OPair<String, Function<E, String>>> placeholders) {
         for (OPair<String, Function<E, String>> placeholder : placeholders) {
-            command = command.replace(placeholder.getFirst(), placeholder.getSecond().apply(object));
+            command = command.replace(makeSureNonNull(placeholder.getFirst()), makeSureNonNull(placeholder.getSecond().apply(object)));
         }
         return returnThis();
     }
+
+    @Override
+    public CommandAddition replace(@NonNull Function<String, String> function) {
+        if (command == null) return this;
+
+        this.command = function.apply(command);
+        return this;
+    }
+
     @Override
     public CommandAddition returnThis() {
         return this;

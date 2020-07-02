@@ -12,10 +12,11 @@ public interface OComponent<O extends EnginePlugin> {
         return (O) getEngine().getOwning();
     }
 
-    boolean load();
-
-    default void disable() {
+    default boolean load() {
+        return true;
     }
+
+    default void disable() {}
 
     default boolean reload() {
         disable();

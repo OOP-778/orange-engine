@@ -1,6 +1,5 @@
 package com.oop.orangeengine.reflection;
 
-import com.oop.orangeengine.main.Cleaner;
 import com.oop.orangeengine.main.Engine;
 
 import java.util.HashMap;
@@ -13,11 +12,9 @@ public class OReflection {
 
     static {
         INSTANCE = new OReflection();
-        Engine.getInstance().findComponentByClass(Cleaner.class).registerClass(OReflection.class);
     }
 
     public OClass resolveClass(String path) {
-
         try {
 
             OClass oClass = classMap.get(path);

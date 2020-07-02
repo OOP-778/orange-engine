@@ -68,6 +68,11 @@ public class OTitleMessage implements OMessage<OTitleMessage> {
         int i = -1;
         for (String s : array) {
             i++;
+            if (s == null) {
+                array[i] = null;
+                continue;
+            }
+
             for (String key : placeholders.keySet()) {
                 s = s.replace(key, placeholders.get(key).toString());
             }
@@ -85,9 +90,11 @@ public class OTitleMessage implements OMessage<OTitleMessage> {
 
         int i = -1;
         for (String s : array) {
-            if (s == null) continue;
-
             i++;
+            if (s == null) {
+                array[i] = null;
+                continue;
+            }
             for (OPair<String, Function<E, String>> placeholder : placeholders) {
                 s = s.replace(placeholder.getFirst(), placeholder.getSecond().apply(object));
             }
@@ -98,6 +105,14 @@ public class OTitleMessage implements OMessage<OTitleMessage> {
         subTitle = array[1];
 
         return returnThis();
+    }
+
+    @Override
+    public OTitleMessage replace(Function<String, String> function) {
+        this.title = function.apply(title);
+        if (subTitle != null)
+            this.subTitle = function.apply(subTitle);
+        return this;
     }
 
     @Override

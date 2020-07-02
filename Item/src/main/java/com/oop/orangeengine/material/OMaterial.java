@@ -21,12 +21,14 @@ package com.oop.orangeengine.material;
  * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.common.base.Enums;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.oop.orangeengine.main.util.data.cache.OCache;
 import lombok.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -1068,8 +1070,113 @@ public enum OMaterial {
     ZOMBIE_PIGMAN_SPAWN_EGG(57, "MONSTER_EGG"),
     ZOMBIE_SPAWN_EGG(54, "MONSTER_EGG"),
     ZOMBIE_VILLAGER_SPAWN_EGG(27, "MONSTER_EGG"),
-    ZOMBIE_WALL_HEAD(2, "SKULL", "SKULL_ITEM");
+    ZOMBIE_WALL_HEAD(2, "SKULL", "SKULL_ITEM"),
 
+    /*
+    1.16 Support
+    */
+    ANCIENT_DEBRIS("1.16", "COBBLESTONE"),
+    BASALT("1.16", "COBBLESTONE"),
+    BLACKSTONE("1.16", "COBBLESTONE"),
+    BLACKSTONE_SLAB("1.16", "COBBLESTONE"),
+    BLACKSTONE_STAIRS("1.16", "COBBLESTONE"),
+    BLACKSTONE_WALL("1.16", "COBBLESTONE"),
+    CHAIN("1.16", "COBBLESTONE"),
+    CHISELED_NETHER_BRICKS("1.16", "COBBLESTONE"),
+    CHISELED_POLISHED_BLACKSTONE("1.16", "COBBLESTONE"),
+    CRACKED_NETHER_BRICKS("1.16", "COBBLESTONE"),
+    CRACKED_POLISHED_BLACKSTONE_BRICKS("1.16", "COBBLESTONE"),
+    CRIMSON_BUTTON("1.16", "COBBLESTONE"),
+    CRIMSON_DOOR("1.16", "COBBLESTONE"),
+    CRIMSON_FENCE("1.16", "COBBLESTONE"),
+    CRIMSON_FENCE_GATE("1.16", "COBBLESTONE"),
+    CRIMSON_FUNGUS("1.16", "COBBLESTONE"),
+    CRIMSON_HYPHAE("1.16", "COBBLESTONE"),
+    CRIMSON_NYLIUM("1.16", "COBBLESTONE"),
+    CRIMSON_PLANKS("1.16", "COBBLESTONE"),
+    CRIMSON_PRESSURE_PLATE("1.16", "COBBLESTONE"),
+    CRIMSON_ROOTS("1.16", "COBBLESTONE"),
+    CRIMSON_SIGN("1.16", "COBBLESTONE"),
+    CRIMSON_SLAB("1.16", "COBBLESTONE"),
+    CRIMSON_STAIRS("1.16", "COBBLESTONE"),
+    CRIMSON_STEM("1.16", "COBBLESTONE"),
+    CRIMSON_TRAPDOOR("1.16", "COBBLESTONE"),
+    CRIMSON_WALL_SIGN("1.16", "COBBLESTONE"),
+    CRYING_OBSIDIAN("1.16", "COBBLESTONE"),
+    GILDED_BLACKSTONE("1.16", "COBBLESTONE"),
+    HOGLIN_SPAWN_EGG("1.16", "MONSTER_EGG"),
+    LODESTONE("1.16", "COBBLESTONE"),
+    MUSIC_DISC_PIGSTEP("1.16", "COBBLESTONE"),
+    NETHERITE_AXE("1.16", "WOODEN_AXE"),
+    NETHERITE_BLOCK("1.16", "COBBLESTONE"),
+    NETHERITE_BOOTS("1.16", "LEATER_BOOTS"),
+    NETHERITE_CHESTPLATE("1.16", "LEATER_CHESTPLATE"),
+    NETHERITE_HELMET("1.16", "LEATER_HELMET"),
+    NETHERITE_HOE("1.16", "WOODEN_HOE"),
+    NETHERITE_INGOT("1.16", "IRON"),
+    NETHERITE_LEGGINGS("1.16", "LEATER_LEGGINGS"),
+    NETHERITE_PICKAXE("1.16", "WOODEN_PICKAXE"),
+    NETHERITE_SCRAP("1.16", "SHEARS"),
+    NETHERITE_SHOVEL("1.16", "WOODEN_SHOVEL"),
+    NETHERITE_SWORD("1.16", "WOODEN_SWORD"),
+    NETHER_GOLD_ORE("1.16", "COBBLESTONE"),
+    NETHER_SPROUTS("1.16", "COBBLESTONE"),
+    PIGLIN_BANNER_PATTERN("1.16", "COBBLESTONE"),
+    PIGLIN_SPAWN_EGG("1.16", "MONSTER_EGG"),
+    POLISHED_BASALT("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_BRICKS("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_BRICK_SLAB("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_BRICK_STAIRS("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_BRICK_WALL("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_BUTTON("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_PRESSURE_PLATE("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_SLAB("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_STAIRS("1.16", "COBBLESTONE"),
+    POLISHED_BLACKSTONE_WALL("1.16", "COBBLESTONE"),
+    POTTED_CRIMSON_FUNGUS("1.16", "COBBLESTONE"),
+    POTTED_CRIMSON_ROOTS("1.16", "COBBLESTONE"),
+    POTTED_WARPED_FUNGUS("1.16", "COBBLESTONE"),
+    POTTED_WARPED_ROOTS("1.16", "COBBLESTONE"),
+    QUARTZ_BRICKS("1.16", "COBBLESTONE"),
+    RESPAWN_ANCHOR("1.16", "COBBLESTONE"),
+    SHROOMLIGHT("1.16", "COBBLESTONE"),
+    SOUL_CAMPFIRE("1.16", "COBBLESTONE"),
+    SOUL_FIRE("1.16", "COBBLESTONE"),
+    SOUL_LANTERN("1.16", "COBBLESTONE"),
+    SOUL_SOIL("1.16", "COBBLESTONE"),
+    SOUL_TORCH("1.16", "TORCH"),
+    SOUL_WALL_TORCH("1.16", "COBBLESTONE"),
+    STRIDER_SPAWN_EGG("1.16", "COBBLESTONE"),
+    STRIPPED_CRIMSON_HYPHAE("1.16", "COBBLESTONE"),
+    STRIPPED_CRIMSON_STEM("1.16", "COBBLESTONE"),
+    STRIPPED_WARPED_HYPHAE("1.16", "COBBLESTONE"),
+    STRIPPED_WARPED_STEM("1.16", "COBBLESTONE"),
+    TARGET("1.16", "COBBLESTONE"),
+    TWISTING_VINES("1.16", "COBBLESTONE"),
+    TWISTING_VINES_PLANT("1.16", "COBBLESTONE"),
+    WARPED_BUTTON("1.16", "COBBLESTONE"),
+    WARPED_DOOR("1.16", "COBBLESTONE"),
+    WARPED_FENCE("1.16", "COBBLESTONE"),
+    WARPED_FENCE_GATE("1.16", "COBBLESTONE"),
+    WARPED_FUNGUS("1.16", "COBBLESTONE"),
+    WARPED_FUNGUS_ON_A_STICK("1.16", "COBBLESTONE"),
+    WARPED_HYPHAE("1.16", "COBBLESTONE"),
+    WARPED_NYLIUM("1.16", "COBBLESTONE"),
+    WARPED_PLANKS("1.16", "COBBLESTONE"),
+    WARPED_PRESSURE_PLATE("1.16", "COBBLESTONE"),
+    WARPED_ROOTS("1.16", "COBBLESTONE"),
+    WARPED_SIGN("1.16", "COBBLESTONE"),
+    WARPED_SLAB("1.16", "COBBLESTONE"),
+    WARPED_STAIRS("1.16", "COBBLESTONE"),
+    WARPED_STEM("1.16", "COBBLESTONE"),
+    WARPED_TRAPDOOR("1.16", "COBBLESTONE"),
+    WARPED_WALL_SIGN("1.16", "COBBLESTONE"),
+    WARPED_WART_BLOCK("1.16", "COBBLESTONE"),
+    WEEPING_VINES("1.16", "COBBLESTONE"),
+    WEEPING_VINES_PLANT("1.16", "COBBLESTONE"),
+    ZOGLIN_SPAWN_EGG("1.16", "MONSTER_EGG"),
+    ZOMBIFIED_PIGLIN_SPAWN_EGG("1.16", "MONSTER_EGG");
 
     /**
      * An immutable cached set of {@link OMaterial#values()} to avoid allocating memory for
@@ -1136,20 +1243,22 @@ public enum OMaterial {
      *
      * @since 1.0.0
      */
-    private static final Cache<String, OMaterial> NAME_CACHE = CacheBuilder.newBuilder()
-            .softValues()
-            .expireAfterAccess(15, TimeUnit.MINUTES)
+    private static final OCache<String, OMaterial> NAME_CACHE = OCache.builder()
+            .expireAfter(5, TimeUnit.MINUTES)
+            .resetExpireAfterAccess(true)
+            .concurrencyLevel(1)
             .build();
+
     /**
      * Guava (Google Core Libraries for Java)'s cache for performance and timed caches.
      * For XMaterials that are already parsed once.
      *
      * @since 3.0.0
      */
-    private static final Cache<OMaterial, Material> PARSED_CACHE = CacheBuilder.newBuilder()
-            .softValues()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+    private static final OCache<OMaterial, Material> PARSED_CACHE = OCache.builder()
+            .expireAfter(5, TimeUnit.MINUTES)
+            .resetExpireAfterAccess(true)
+            .concurrencyLevel(1)
             .build();
 
     /**
@@ -1186,6 +1295,10 @@ public enum OMaterial {
      */
     private final String[] legacy;
 
+    private int id = Integer.MIN_VALUE;
+
+    private int combinedData = Integer.MIN_VALUE;
+
     OMaterial(int data, String... legacy) {
         this.data = (byte) data;
         this.legacy = legacy;
@@ -1219,7 +1332,6 @@ public enum OMaterial {
     /**
      * This is just an extra method that method that can be used for many cases.
      * It can be used in {@link org.bukkit.event.player.PlayerInteractEvent}
-     * or when accessing {@link org.bukkit.entity.Player#getMainHand()},
      * or other compatibility related methods.
      * <p>
      * An invocation of this method yields exactly the same result as the expression:
@@ -1256,7 +1368,7 @@ public enum OMaterial {
     @Nullable
     private static OMaterial requestOldMaterial(@Nonnull String name, byte data) {
         String holder = name + data;
-        OMaterial material = NAME_CACHE.getIfPresent(holder);
+        OMaterial material = NAME_CACHE.get(holder);
         if (material != null) return material;
 
         for (OMaterial materials : VALUES) {
@@ -1624,7 +1736,8 @@ public enum OMaterial {
         Validate.notEmpty(version, "Cannot get exact major minecraft version for null or empty version");
 
         // getBukkitVersion()
-        if (version.contains("-R") || version.endsWith("SNAPSHOT")) version = version.substring(0, version.indexOf('-'));
+        if (version.contains("-R") || version.endsWith("SNAPSHOT"))
+            version = version.substring(0, version.indexOf('-'));
 
         // getVersion()
         int index = version.indexOf("MC:");
@@ -1786,6 +1899,7 @@ public enum OMaterial {
     public boolean isOneOf(@Nullable List<String> materials) {
         Material material = this.parseMaterial();
         if (material == null) return false;
+
         return isOneOf(material, materials);
     }
 
@@ -1821,18 +1935,19 @@ public enum OMaterial {
         return toWord(this.name());
     }
 
-    /**
-     * Gets the ID (Magic value) of the material.
-     *
-     * @return the ID of the material or <b>-1</b> if it's a new block or the material is not supported.
-     * @see #matchMaterial(int, byte)
-     * @since 2.2.0
-     */
-    @SuppressWarnings("deprecation")
     public int getId() {
-        if (this.isNew()) return -1;
-        Material material = this.parseMaterial();
-        return material == null ? -1 : material.getId();
+        if (id == Integer.MIN_VALUE) {
+            Material material = parseMaterial();
+            id = isNewVersion() ? -1 : material == null ? -1 : material.getId();
+        }
+        return id;
+    }
+
+    public int getCombinedData() {
+        if (combinedData == Integer.MIN_VALUE) {
+            combinedData = getId() + (data << 12);
+        }
+        return combinedData;
     }
 
     /**
@@ -1952,7 +2067,7 @@ public enum OMaterial {
      */
     @Nullable
     public Material parseMaterial(boolean suggest) {
-        Material mat = PARSED_CACHE.getIfPresent(this);
+        Material mat = PARSED_CACHE.get(this);
         if (mat != null) return mat;
 
         if (!ISFLAT && this.isDuplicated()) mat = requestOldMaterial(suggest);

@@ -115,7 +115,7 @@ public class InventoryController extends AEngineComponent {
             }
             button.updateButtonFromHolder();
 
-            // Call events
+            // Call targets
             ButtonClickEvent buttonClickEvent = new ButtonClickEvent(wrappedInventory, menu, event, (Player) event.getWhoClicked(), button, beforeChange, ClickEnum.match(event));
             Bukkit.getPluginManager().callEvent(buttonClickEvent);
 

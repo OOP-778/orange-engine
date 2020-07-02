@@ -18,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.oop.orangeengine.main.Engine.getEngine;
+
 public class Config implements Valuable, Sectionable, Commentable {
 
     private final Yaml yaml = new Yaml();
@@ -38,7 +40,11 @@ public class Config implements Valuable, Sectionable, Commentable {
         this.file = file;
 
         // Load data
-        ConfigUtil.load(this, yaml);
+        try {
+            ConfigUtil.load(this, yaml);
+        } catch (Throwable throwable) {
+            getEngine().getLogger().printError(new IllegalStateException("Failed to load yaml for file: " + file.getFileName(), throwable));
+        }
 
         // Load comments
         new Commentator(this);

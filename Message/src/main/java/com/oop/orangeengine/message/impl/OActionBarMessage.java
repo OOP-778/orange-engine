@@ -63,6 +63,12 @@ public class OActionBarMessage implements OMessage<OActionBarMessage> {
     }
 
     @Override
+    public OActionBarMessage replace(@NonNull Function<String, String> function) {
+        this.text = function.apply(text);
+        return this;
+    }
+
+    @Override
     public OActionBarMessage returnThis() {
         return this;
     }

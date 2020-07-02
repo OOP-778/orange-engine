@@ -19,6 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
+
 @Setter
 @Getter
 @Accessors(chain = true, fluent = true)
@@ -57,10 +59,14 @@ public class HoverItemAddition implements Addition<HoverItemAddition> {
         List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
         String[] loreArray = lore.toArray(new String[0]);
-        for (int i = 0; i < loreArray.length; i++)
-            placeholders.forEach((key, value) -> loreArray[0] = loreArray[0].replace(key, value.toString()));
+        for (int i = 0; i < loreArray.length; i++) {
+            int finalI = i;
+            placeholders.forEach((key, value) -> loreArray[finalI] = loreArray[finalI].replace(key, value.toString()));
+        }
 
+        placeholders.forEach((key, value) -> meta.setDisplayName(meta.getDisplayName().replace(makeSureNonNull(key), makeSureNonNull(value))));
         meta.setLore(Arrays.asList(loreArray));
+
         return returnThis();
     }
     
@@ -77,11 +83,30 @@ public class HoverItemAddition implements Addition<HoverItemAddition> {
         List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
         String[] loreArray = lore.toArray(new String[0]);
-        for (int i = 0; i < loreArray.length; i++)
-            placeholders.forEach(pair -> loreArray[0] = loreArray[0].replace(pair.getFirst(), pair.getSecond().apply(object)));
+        for (int i = 0; i < loreArray.length; i++) {
+            int finalI = i;
+            placeholders.forEach(pair -> loreArray[finalI] = loreArray[finalI].replace(makeSureNonNull(pair.getFirst()), makeSureNonNull(pair.getSecond().apply(object))));
+        }
 
+        placeholders.forEach(pair -> meta.setDisplayName(meta.getDisplayName().replace(makeSureNonNull(pair.getFirst()), makeSureNonNull(pair.getSecond().apply(object)))));
         meta.setLore(Arrays.asList(loreArray));
+
         return returnThis();
+    }
+
+    @Override
+    public HoverItemAddition replace(@NonNull Function<String, String> function) {
+        ItemMeta meta = getMeta();
+        List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+
+        String[] loreArray = lore.toArray(new String[0]);
+        for (int i = 0; i < loreArray.length; i++)
+            loreArray[0] = function.apply(loreArray[0]);
+
+        meta.setDisplayName(function.apply(meta.getDisplayName()));
+        meta.setLore(Arrays.asList(loreArray));
+
+        return this;
     }
 
     @Override

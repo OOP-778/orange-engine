@@ -5,6 +5,8 @@ import com.oop.orangeengine.item.custom.OPotion;
 import com.oop.orangeengine.item.custom.OSkull;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.main.util.version.MCVersion;
+import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.yaml.ConfigSection;
@@ -181,11 +183,24 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public T makeGlow() {
-        return addNBTTag("ench", "OrangeEngine");
+        if (!getEnchants().isEmpty()) return _returnThis();
+        if (OVersion.isAfter(8)) {
+            addItemFlag(ItemFlag.HIDE_ENCHANTS);
+            addEnchant(Enchantment.DAMAGE_ALL, 1);
+
+        } else
+            addNBTTag("ench", "OrangeEngine");
+        return _returnThis();
     }
 
     public T replaceDisplayName(String key, String value) {
         setDisplayName(getDisplayName().replace(key, value));
+        return _returnThis();
+    }
+
+    public T replace(String key, Object value) {
+        replaceDisplayName(key, value.toString());
+        replaceInLore(key, value.toString());
         return _returnThis();
     }
 
@@ -287,6 +302,12 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
         // Load amount
         section.ifValuePresent("amount", Integer.class, this::setAmount);
+
+        // Load stackable
+        section.ifValuePresent("stackable", boolean.class, bool -> {
+            if (bool)
+                makeUnstackable();
+        });
 
         //Load glow
         section.ifValuePresent("glow", boolean.class, bool -> {

@@ -4,10 +4,8 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import sun.security.action.GetPropertyAction;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 
 public class Writer extends BufferedWriter {
@@ -15,7 +13,7 @@ public class Writer extends BufferedWriter {
     private String lastWritten = null;
 
     public Writer(@NonNull File file) throws IOException {
-        super(new FileWriter(file));
+        super(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
     }
 
     @SneakyThrows

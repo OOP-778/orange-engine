@@ -1,6 +1,7 @@
 package com.oop.orangeengine.yaml.interfaces;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.internal.Primitives;
 import com.oop.orangeengine.yaml.Config;
 import com.oop.orangeengine.yaml.ConfigSection;
 import com.oop.orangeengine.yaml.ConfigValue;
@@ -15,7 +16,11 @@ public interface Valuable extends ConfigHolder, Sectionable {
     Map<String, ConfigValue> getHierarchyValues();
 
     default ConfigValue set(String path, Object object) {
-        if (path.contains(".")) {
+        return set(path, object, true);
+    }
+
+    default ConfigValue set(String path, Object object, boolean splitAtDots) {
+        if (path.contains(".") && splitAtDots) {
             String[] split = path.split("\\.");
             String valueName = split[split.length - 1];
 
@@ -60,7 +65,51 @@ public interface Valuable extends ConfigHolder, Sectionable {
     }
 
     default <T> T getAs(String path, Class<T> type) {
-        return getAs(path, (Supplier<T>) null);
+        Object object = getAs(path, (Supplier<T>) null);
+        if (type == null)
+            return (T) object;
+
+        type = Primitives.wrap(type);
+        if (type.isAssignableFrom(Primitives.unwrap(object.getClass())))
+            return (T) object;
+
+        if (type != Primitives.unwrap(object.getClass()))
+            return (T) doConversion(object, type);
+
+        return (T) object;
+    }
+
+    default  <T> Object doConversion(Object parsed, Class<T> clazz) {
+        String value = parsed.toString();
+        if (clazz == String.class) return value;
+
+        if ((parsed.getClass() == Double.class || parsed.getClass() == Float.class && clazz == Integer.class)) {
+            if (value.contains(".")) {
+                String[] splitValue = value.split("\\.");
+                int original = Integer.parseInt(splitValue[0]);
+                int secondPart = splitValue[1].toCharArray()[0];
+
+                if (secondPart > 4)
+                    original += 1;
+
+                value = Integer.toString(original);
+            }
+        }
+
+        if (clazz == Integer.class)
+            return Integer.valueOf(value);
+
+        else if (clazz == Long.class)
+            return Long.valueOf(value);
+
+        else if (clazz == Float.class)
+            return Float.valueOf(value);
+
+        else if (clazz == Double.class)
+            return Double.valueOf(value);
+
+        else
+            throw new IllegalStateException("Incorrect object type required: " + clazz.getSimpleName() + " found: " + parsed.getClass().getSimpleName());
     }
 
     default <T> T getAs(String path, Class<T> type, Supplier<T> supplier) {

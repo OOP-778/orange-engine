@@ -14,6 +14,7 @@ import java.util.Set;
 @Getter
 public class Hologram {
     private OPair<Float, Boolean> spacing = new OPair<>(0.21f, false);
+
     private Location baseLocation;
 
     @Getter(value = AccessLevel.PACKAGE)
@@ -53,12 +54,6 @@ public class Hologram {
         hologramLines.insert(index, line);
         update();
         return this;
-    }
-
-    private void updateNew() {
-        for (HologramLine line : newLines) {
-
-        }
     }
 
     void update() {
