@@ -10,17 +10,6 @@ sourceCompatibility = 1.8
 repositories {
     jcenter()
     mavenLocal()
-    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
-    maven { url "https://jitpack.io" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://mvnrepository.com/artifact/net.sf.json-lib/json-lib" }
-    maven { url "https://mvnrepository.com/artifact/mysql/mysql-connector-java" }
-    maven { url "http://repo.maven.apache.org/maven2" }
-    maven { url "https://mvnrepository.com/artifact/org.apache.commons/commons-math3" }
-    maven { url "https://mvnrepository.com/artifact/org.apache.commons/commons-lang3" }
-    maven { url 'https://mvnrepository.com/artifact/com.google.inject/guice' }
-    maven { url 'https://mvnrepository.com/artifact/org.projectlombok/lombok' }
-    maven { url 'https://mvnrepository.com/artifact/commons-io/commons-io' }
 }
 
 dependencies {

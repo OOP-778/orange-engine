@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.oop.orangeengine.nbt.NBTContainer;
 import com.oop.orangeengine.nbt.NBTItem;
 import lombok.NonNull;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Type;
@@ -12,7 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ItemStackAdapter implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
-
     private static final String UNICODE_REGEX = "\\\\u([0-9a-f]{4})";
     private static final Pattern UNICODE_PATTERN = Pattern.compile(UNICODE_REGEX);
 
