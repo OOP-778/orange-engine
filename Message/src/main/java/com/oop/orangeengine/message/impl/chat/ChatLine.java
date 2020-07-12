@@ -446,7 +446,6 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
 
         public void setColor(ChatColor color) {
             decorations.clear();
-            System.out.println("Set color to " + color.toString());
             this.color = color;
         }
     }

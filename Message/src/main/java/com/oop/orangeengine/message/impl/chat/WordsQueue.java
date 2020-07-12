@@ -102,7 +102,6 @@ public class WordsQueue {
                 String hex = getNextOrNull(Arrays.copyOfRange(textChars, i + 1, textChars.length), 6);
                 if (hex != null) {
                     String parsed = parseHexColor(hex);
-                    System.out.println("Parsed: " + parsed);
                     decoration.setColor(parsed);
 
                     OPair<String, Integer> whileMatches = getWhileMatches(Arrays.copyOfRange(textChars, i + 7, textChars.length), in -> in != '&' && in != '#' && in != ChatColor.COLOR_CHAR);
@@ -125,7 +124,6 @@ public class WordsQueue {
                     continue;
                 }
 
-                System.out.println(dec.getName());
                 WordsColor wordsColor = new WordsColor(dec.toString(), dec.name());
 
                 if (wordsColor.isFormat()) {

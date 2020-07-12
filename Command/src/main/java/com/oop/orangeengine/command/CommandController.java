@@ -170,7 +170,7 @@ public class CommandController {
         if (args.length >= 1) {
             String lastArg = args[args.length - 1];
             if (lastArg.trim().length() > 0)
-                completion.removeIf(name -> !name.toLowerCase().startsWith(args[0].toLowerCase()));
+                completion.removeIf(name -> name == null || !name.toLowerCase().startsWith(args[0].toLowerCase()));
         }
 
         return completion;

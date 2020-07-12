@@ -13,14 +13,11 @@ public class Tester {
         Matcher matcher = HEX_PATTERN.matcher(input);
         StringBuffer builder = new StringBuffer(input);
         while (matcher.find()) {
-            System.out.println("Found");
             String group = matcher.group();
-            System.out.println("group: " + group);
 
             input = input.replace(group, "Hello");
         }
 
-        System.out.println(input);
     }
 
 }

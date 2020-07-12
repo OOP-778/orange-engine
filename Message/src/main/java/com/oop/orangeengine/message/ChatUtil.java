@@ -17,8 +17,6 @@ public class ChatUtil {
         StringBuilder magic = new StringBuilder(ChatColor.COLOR_CHAR + "x");
         int multiplier = hexColor.length() == 3 ? 2 : 1;
 
-        System.out.println("Parsing: " + hexColor);
-
         for(char ch : hexColor.toCharArray()) {
             for(int i = 0; i < multiplier; i++)
                 magic.append(ChatColor.COLOR_CHAR).append(ch);
