@@ -6,6 +6,7 @@ import com.oop.orangeengine.message.impl.OTitleMessage;
 import com.oop.orangeengine.message.impl.chat.ChatLine;
 import com.oop.orangeengine.message.impl.chat.LineContent;
 import com.oop.orangeengine.message.impl.chat.addition.Addition;
+import com.oop.orangeengine.message.impl.chat.addition.impl.ChatAddition;
 import com.oop.orangeengine.message.impl.chat.addition.impl.CommandAddition;
 import com.oop.orangeengine.message.impl.chat.addition.impl.HoverTextAddition;
 import com.oop.orangeengine.message.impl.chat.addition.impl.SuggestionAddition;
@@ -118,6 +119,7 @@ public class YamlMessage {
 
                 } else
                     config.set(path, message.lineList().element().contentList().element().text());
+
             } else {
                 if (!message.centered() && allOneLined(message)) {
                     config.set(path, message.lineList()
@@ -187,6 +189,8 @@ public class YamlMessage {
                     section.set("hover", ((HoverTextAddition) addition).hoverText());
                 } else if (addition instanceof SuggestionAddition)
                     section.set("suggestion", ((SuggestionAddition) addition).suggestion());
+                else if (addition instanceof ChatAddition)
+                    section.set("chat", ((ChatAddition)addition).message());
             }
         }
 
@@ -284,13 +288,14 @@ public class YamlMessage {
         public static OChatMessage load(ConfigValue value) {
             if (value.isList())
                 return new OChatMessage(value.getAsList(String.class));
-
+            
             return new OChatMessage(((String) value.getObject()));
         }
 
         private static LineContent loadContentLine(ConfigSection section) {
             LineContent lineContent = new LineContent(section.getAs("text", String.class));
             section.ifValuePresent("command", String.class, command -> lineContent.command().command(command));
+            section.ifValuePresent("chat", String.class, chat -> lineContent.chat().message(chat));
             section.ifValuePresent("hover", Object.class, hover -> {
                 if (hover instanceof List)
                     lineContent.hover().set((List<String>) hover);

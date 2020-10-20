@@ -1,24 +1,39 @@
 package com.oop.orangeengine.hologram.line;
 
-import com.oop.orangeengine.hologram.Hologram;
 import com.oop.orangeengine.hologram.HologramLine;
-import com.oop.orangeengine.hologram.wrapped.WrappedArmorStand;
-import com.oop.orangeengine.main.util.data.pair.OPair;
-import org.bukkit.Location;
+import lombok.NonNull;
+import lombok.Setter;
+
+import java.util.function.Supplier;
 
 public class HologramText extends HologramLine<HologramText> {
-    private String text;
-    private Hologram hologram;
-    private WrappedArmorStand armorStand;
 
-    private OPair<Location, Boolean> location = new OPair<>(null, false);
+    @Setter @NonNull
+    private Supplier<String> textSupplier;
+
+    // < CACHE >
+    private String oldText;
 
     public HologramText(String text) {
-        this.text = text;
+        this.textSupplier = () -> text;
+    }
+
+    public HologramText(@NonNull Supplier<String> textSupplier) {
+        this.textSupplier = textSupplier;
+    }
+
+    public void setText(String text) {
+        this.textSupplier = () -> text;
     }
 
     @Override
-    public HologramText _returnThis() {
-        return this;
+    public void update() {
+        super.update();
+        String newText = textSupplier.get();
+        if (oldText != null && newText.hashCode() == oldText.hashCode()) return;
+
+        getWrappedArmorStand().setCustomName(newText);
+        getWrappedArmorStand().update();
+        oldText = newText;
     }
 }

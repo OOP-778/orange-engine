@@ -4,9 +4,11 @@ version 'v1'
 sourceCompatibility = 1.8
 
 dependencies {
-    compileOnly "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
+    compile "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
+    compile project(":Hologram")
     compile project(":Engine")
-    compile project(":Message")
+    compile project(":Item")
+    compile project(":File")
 }
 
 shadowJar {
@@ -14,7 +16,7 @@ shadowJar {
     archiveName = "OrangeEngine-TestingPlugin.jar"
 
     if (!project.hasProperty('mavenUsername'))
-        destinationDirectory = file('G:\\Serrvers\\OOP\\1.16\\plugins')
+        destinationDirectory = file('G:\\Serrvers\\OOP\\1.15\\plugins')
 
     else
         destinationDirectory = file('../target')

@@ -6,10 +6,7 @@ import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.Replaceable;
 import com.oop.orangeengine.message.impl.chat.addition.Addition;
 import com.oop.orangeengine.message.impl.chat.addition.Additionable;
-import com.oop.orangeengine.message.impl.chat.addition.impl.CommandAddition;
-import com.oop.orangeengine.message.impl.chat.addition.impl.HoverItemAddition;
-import com.oop.orangeengine.message.impl.chat.addition.impl.HoverTextAddition;
-import com.oop.orangeengine.message.impl.chat.addition.impl.SuggestionAddition;
+import com.oop.orangeengine.message.impl.chat.addition.impl.*;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -81,6 +78,11 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
     @Override
     public SuggestionAddition suggestion() {
         return addAddition(SuggestionAddition.class, () -> new SuggestionAddition(this));
+    }
+
+    @Override
+    public ChatAddition chat() {
+        return addAddition(ChatAddition.class, () -> new ChatAddition(this));
     }
 
     @Override

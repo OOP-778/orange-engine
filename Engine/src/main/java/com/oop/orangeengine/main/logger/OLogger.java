@@ -6,15 +6,22 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Getter
 public class OLogger {
+    @Setter
+    private String mainColor = "&e";
+
+    @Setter
+    private String secondaryColor = "&r";
+
     private String error_prefix = "&c[OLogger ERROR]: &r";
     private String warn_prefix = "&4[OLogger WARN]: &r";
-    private String normal_prefix = "&e[OLogger]: &r";
-    private String debug_prefix = "&e[OLogger DEBUG]: &r";
+    private String normal_prefix = "[OLogger]: ";
+    private String debug_prefix = "[OLogger DEBUG]: ";
     private String loggerName;
 
     @Setter
@@ -52,7 +59,7 @@ public class OLogger {
                     if (nextChar == '}') {
                         currentCharIndex += 2;
                         if (args.length > currentObjectIndex) {
-                            builder.append(args[currentObjectIndex]);
+                            builder.append(Optional.ofNullable(args[currentObjectIndex]).map(Object::toString).orElse("null"));
                             currentObjectIndex += 1;
                         }
                         continue;
@@ -73,7 +80,7 @@ public class OLogger {
     }
 
     public void print(Object object, Object ...args) {
-        send(normal_prefix + object.toString(), args);
+        send(mainColor + normal_prefix + secondaryColor + object.toString(), args);
     }
 
     public void printError(Object object, Object ...args) {
@@ -86,7 +93,7 @@ public class OLogger {
 
     public void printDebug(Object object, Object ...args) {
         if (debugMode)
-            send(debug_prefix + object, args);
+            send(mainColor + debug_prefix + secondaryColor + object, args);
     }
 
     public void error(Throwable exception) {
@@ -97,11 +104,17 @@ public class OLogger {
 
         send("");
         if (exception.getCause() != null) {
-            send("&4Caused By " + exception.getCause().getMessage());
-            for (StackTraceElement ste : exception.getCause().getStackTrace()) {
-                send("&c - " + ste.toString());
-            }
+            handleCause(exception.getCause());
         }
+    }
+
+    private void handleCause(Throwable exception) {
+        send("&4Caused By " + exception.getMessage());
+        for (StackTraceElement ste : exception.getStackTrace()) {
+            send("&c - " + ste.toString());
+        }
+        if (exception.getCause() != null)
+            handleCause(exception.getCause());
     }
 
     public void error(Throwable exception, String message) {

@@ -1,11 +1,11 @@
 package com.oop.orangeengine.item;
 
+import com.google.gson.internal.Primitives;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.item.custom.OPotion;
 import com.oop.orangeengine.item.custom.OSkull;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
-import com.oop.orangeengine.main.util.version.MCVersion;
 import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
@@ -27,11 +27,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
-    @Getter
     @Setter
     private ItemStack itemStack;
 
@@ -47,23 +47,21 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         this(new ItemStack(mat, amount));
     }
 
-    public ItemMeta getItemMeta() {
-        if (itemStack.hasItemMeta())
-            return itemStack.getItemMeta();
+    private ItemMeta meta;
 
-        else {
-            itemStack.setItemMeta(Bukkit.getItemFactory().getItemMeta(itemStack.getType()));
-            return itemStack.getItemMeta();
-        }
+    private NBTItem nbt;
+
+    public ItemMeta getItemMeta() {
+        if (meta == null)
+            if (itemStack.hasItemMeta())
+                meta = itemStack.getItemMeta();
+            else
+                meta = Bukkit.getItemFactory().getItemMeta(itemStack.getType());
+        return meta;
     }
 
     public <T extends ItemMeta> T getItemMeta(Class<T> type) {
         return type.cast(getItemMeta());
-    }
-
-    public T itemMeta(ItemMeta meta) {
-        itemStack.setItemMeta(meta);
-        return _returnThis();
     }
 
     public T removeLoreLine(int index) {
@@ -74,8 +72,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
         lore.remove(index);
         meta.setLore(lore);
-
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -88,7 +84,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         lore.replaceAll(string -> string.replace(key, value));
         meta.setLore(lore);
 
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -98,10 +93,21 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public T addNBTTag(String key, Object value) {
-        NBTItem nbt = new NBTItem(itemStack);
-        nbt.setObject(key, value);
+        if (value instanceof String)
+            getNbt().setString(key, (String) value);
 
-        itemStack = nbt.getItem();
+        else if (Primitives.wrap(value.getClass()) == Integer.class)
+            getNbt().setInteger(key, (Integer) value);
+
+        else if (Primitives.wrap(value.getClass()) == Double.class)
+            getNbt().setDouble(key, (Double) value);
+
+        else if (Primitives.wrap(value.getClass()) == Long.class)
+            getNbt().setLong(key, (Long) value);
+
+        else
+            getNbt().setObject(key, value);
+
         return _returnThis();
     }
 
@@ -115,7 +121,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         lore.set(index, Helper.color(text));
         meta.setLore(lore);
 
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -126,7 +131,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         lore.add(Helper.color(text));
         meta.setLore(lore);
 
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -135,7 +139,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         if (meta != null)
             meta.setDisplayName(Helper.color(displayName));
 
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -148,7 +151,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
                             .collect(Collectors.toList())
             );
 
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -156,15 +158,12 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         ItemMeta meta = getItemMeta();
         meta.addItemFlags(flags);
 
-        itemMeta(meta);
         return _returnThis();
     }
 
     public T removeItemFlag(ItemFlag... flags) {
         ItemMeta meta = getItemMeta();
         meta.removeItemFlags(flags);
-
-        itemMeta(meta);
         return _returnThis();
     }
 
@@ -223,8 +222,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public boolean isGlow() {
-        NBTItem nbt = new NBTItem(itemStack);
-        return nbt.hasKey("ench");
+        return getNbt().hasKey("ench");
     }
 
     public T setMaterial(Material material) {
@@ -243,7 +241,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public OMaterial getOMaterial() {
-        return OMaterial.matchMaterial(getItemStack());
+        return OMaterial.matchMaterial(itemStack);
     }
 
     @Deprecated
@@ -252,24 +250,24 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public T setAmount(int amount) {
-        getItemStack().setAmount(amount);
+        itemStack.setAmount(amount);
         return _returnThis();
     }
 
     public int getAmount() {
-        return getItemStack().getAmount();
+        return itemStack.getAmount();
     }
 
     public boolean hasNBTTag(String key) {
-        return new NBTItem(getItemStack()).hasKey(key);
+        return getNbt().hasKey(key);
     }
 
     public Object getNBTTag(String key) {
-        return new NBTItem(getItemStack()).getObject(key, Object.class);
+        return getNbt().getObject(key, Object.class);
     }
 
     public <T> T getNBTTag(String key, Class<T> type) {
-        return new NBTItem(getItemStack()).getObject(key, type);
+        return getNbt().getObject(key, type);
     }
 
     public T mergeLore(List<String> secondLore) {
@@ -282,6 +280,22 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     public T mergeLore(ItemStack itemStack) {
         if (itemStack == null || !itemStack.hasItemMeta() || !itemStack.getItemMeta().hasLore()) return _returnThis();
         return mergeLore(itemStack.getItemMeta().getLore());
+    }
+
+    public ItemStack getItemStack() {
+        if (meta != null)
+            itemStack.setItemMeta(meta);
+
+        if (nbt != null) {
+            NBTItem newNbt = nbt;
+            NBTItem oldNbt = new NBTItem(itemStack);
+
+            newNbt.removeKey("ench");
+            newNbt.removeKey("display");
+            oldNbt.mergeCompound(newNbt);
+            itemStack = oldNbt.getItem();
+        }
+        return itemStack;
     }
 
     public T load(ConfigSection section) {
@@ -323,7 +337,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
                 if (split.length <= 1) continue;
 
                 addEnchant(Enchantment.getByName(split[0].toUpperCase()), Integer.parseInt(split[1]));
-
             }
         }));
 
@@ -394,7 +407,9 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public T clone() {
         try {
-            return (T) getClass().getConstructor(ItemStack.class).newInstance(itemStack.clone());
+            T clone = (T) getClass().getDeclaredConstructor(getClass()).newInstance(_returnThis());
+            clone.onClone(this);
+            return clone;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
@@ -412,7 +427,27 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public ItemBuilder<T> setItemMeta(ItemMeta meta) {
-        getItemStack().setItemMeta(meta);
+        this.meta = meta;
         return this;
+    }
+
+    public ItemBuilder<T> removeLoreLineIf(Predicate<String> filter) {
+        List<String> lore = getLore();
+        lore.removeIf(filter);
+        setLore(lore);
+        return _returnThis();
+    }
+
+    public void onClone(T from) {
+    }
+
+    public short getDurability() {
+        return itemStack.getDurability();
+    }
+
+    protected NBTItem getNbt() {
+        if (nbt == null)
+            nbt = new NBTItem(itemStack);
+        return nbt;
     }
 }

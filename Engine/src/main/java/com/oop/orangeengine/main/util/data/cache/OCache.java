@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -86,6 +87,7 @@ public class OCache<K, V> {
         // Level 0 = Sync Use Only, level 1 = Full Multi Thread support
         @Setter
         private int concurrencyLevel = 0;
+
         @Setter
         private boolean resetExpireAfterAccess = false;
 
@@ -106,4 +108,8 @@ public class OCache<K, V> {
         }
     }
 
+    public Set<K> keySet() {
+        checkForInvalids();
+        return data.keySet();
+    }
 }

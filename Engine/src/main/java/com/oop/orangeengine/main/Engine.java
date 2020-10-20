@@ -7,15 +7,17 @@ import com.oop.orangeengine.main.plugin.EnginePlugin;
 import com.oop.orangeengine.main.task.TaskController;
 import com.oop.orangeengine.main.task.StaticTask;
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Getter
 public class Engine {
-
     public static boolean obfuscatorMode = false;
     private static Engine instance;
     private EnginePlugin owning;
@@ -31,15 +33,18 @@ public class Engine {
         owning.onDisable(() -> {
             components.forEach(IEngineComponent::onDisable);
             instance = null;
+
+            for (BukkitTask pendingTask : new HashSet<>(Bukkit.getScheduler().getPendingTasks())) {
+                if (pendingTask.getOwner().getName().equalsIgnoreCase(owning.getName())) {
+                    pendingTask.cancel();
+                }
+            }
         });
 
         new StaticTask();
-
         taskController = plugin.provideTaskController();
-        taskController.loadTask();
 
         logger = new OLogger(owning);
-
         Logger.getLogger("NBTAPI").setLevel(Level.OFF);
     }
 
@@ -69,10 +74,5 @@ public class Engine {
                 filter(component -> component.getName().equalsIgnoreCase(name)).
                 findFirst().
                 orElse(null);
-
-    }
-
-    public void onDisable() {
-        instance = null;
     }
 }

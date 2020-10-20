@@ -8,6 +8,8 @@ public enum MCVersion {
     V12(12),
     V13(13),
     V14(14),
+    V15(15),
+    V16(16),
     UNKNOWN(-1);
 
     private int intVersion;

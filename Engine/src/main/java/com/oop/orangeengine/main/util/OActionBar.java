@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
+import java.util.UUID;
 
 public class OActionBar {
     /**
@@ -46,8 +47,12 @@ public class OActionBar {
             Class<?> chatComponentTextClass = OSimpleReflection.findClass("{nms}.ChatComponentText");
             chatComp = lookup.findConstructor(chatComponentTextClass, MethodType.methodType(void.class, String.class));
 
-            // Packet Constructor
-            packet = lookup.findConstructor(packetPlayOutChatClass, MethodType.methodType(void.class, iChatBaseComponentClass, chatMessageTypeClass));
+            try {
+                // Packet Constructor
+                packet = lookup.findConstructor(packetPlayOutChatClass, MethodType.methodType(void.class, iChatBaseComponentClass, chatMessageTypeClass));
+            } catch (Exception ex) {
+                packet = lookup.findConstructor(packetPlayOutChatClass, MethodType.methodType(void.class, iChatBaseComponentClass, chatMessageTypeClass, UUID.class));
+            }
         } catch (Throwable ignored) {
             try {
                 // Game Info Message Type
@@ -74,7 +79,11 @@ public class OActionBar {
 
         try {
             Object component = CHAT_COMPONENT_TEXT.invoke(Helper.color(message));
-            packet = PACKET.invoke(component, CHAT_MESSAGE_TYPE);
+            try {
+                packet = PACKET.invoke(component, CHAT_MESSAGE_TYPE);
+            } catch (Throwable throwable) {
+                packet = PACKET.invoke(component, CHAT_MESSAGE_TYPE, new UUID(0L, 0L));
+            }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }

@@ -50,8 +50,8 @@ public abstract class TinyProtocol {
 
 	// Used in order to lookup a channel
 	private static final Method getPlayerHandle = OSimpleReflection.getMethod(findClass("{cb}.entity.CraftPlayer"), "getHandle");
-	private static final Field getConnection = OSimpleReflection.getField(findClass("{nms}.EntityPlayer"), true,"playerConnection");
-	private static final Field getManager = OSimpleReflection.getField(findClass("{nms}.PlayerConnection"), true, "networkManager");
+	private static final Field getConnection = OSimpleReflection.getField(findClass("{nms}.EntityPlayer"), "playerConnection");
+	private static final Field getManager = OSimpleReflection.getField(findClass("{nms}.PlayerConnection"), "networkManager");
 	private static final Field getChannel = OSimpleReflection.getField(findClass("{nms}.NetworkManager"), Channel.class);
 
 	// Looking up ServerConnection

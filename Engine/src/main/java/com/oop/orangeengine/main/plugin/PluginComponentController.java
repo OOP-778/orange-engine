@@ -8,7 +8,6 @@ import java.util.LinkedHashSet;
 
 @Getter
 public class PluginComponentController {
-
     private LinkedHashSet<OComponent> reloadableComponents = Sets.newLinkedHashSet();
     private LinkedHashSet<OComponent> components = Sets.newLinkedHashSet();
 

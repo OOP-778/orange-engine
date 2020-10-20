@@ -78,48 +78,4 @@ public interface TaskController {
     default OTask scheduleNowSync(Consumer<OTask> consumer) {
         return scheduleNow(consumer, true);
     }
-
-    void trackTask(OTask task);
-
-    void untrackTask(OTask task);
-
-    Map<OTask, Long> getTrackingTasks();
-
-    default void checkTasks() {
-        getTrackingTasks().forEach((task, timeStarted) -> {
-            long seconds = Duration.between(Instant.ofEpochMilli(timeStarted), Instant.now()).getSeconds();
-            if (seconds > 20) {
-                getEngine().getLogger().printWarning("A thread {} been hung by a task for {} seconds.", task.getRunningThread().getName(), seconds);
-
-                getEngine().getLogger().printWarning("Creation Stack Trace...");
-                for (StackTraceElement stackTraceElement : task.getCreationStackTrace())
-                    getEngine().getLogger().printWarning("- " + stackTraceElement.getClassName() + "#" + stackTraceElement.getMethodName() + " at " + stackTraceElement.getLineNumber());
-
-                getEngine().getLogger().printWarning("Current thread Stack Trace...");
-                StackTraceElement[] stackTrace = task.getRunningThread().getStackTrace();
-                for (StackTraceElement stackTraceElement : stackTrace)
-                    getEngine().getLogger().printWarning("- " + stackTraceElement.getClassName() + "#" + stackTraceElement.getMethodName() + " at " + stackTraceElement.getLineNumber());
-
-                task.getRunningThread().interrupt();
-                getTrackingTasks().remove(task);
-            }
-        });
-    }
-
-    default void loadTask() {
-        AtomicBoolean shutdown = new AtomicBoolean(false);
-        Thread thread = new Thread("OrangeEngine-Task-Tracker") {
-            @SneakyThrows
-            @Override
-            public void run() {
-                while (!shutdown.get()) {
-                    checkTasks();
-                    sleep(100);
-                }
-            }
-        };
-
-        thread.start();
-        getEngine().getOwning().onDisable(() -> shutdown.set(true));
-    }
 }

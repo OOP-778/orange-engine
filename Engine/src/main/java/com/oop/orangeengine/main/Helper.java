@@ -1,5 +1,6 @@
 package com.oop.orangeengine.main;
 
+import com.google.gson.internal.Primitives;
 import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.OptionalConsumer;
 import com.oop.orangeengine.main.util.version.OVersion;
@@ -22,7 +23,6 @@ import java.util.stream.Collectors;
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class Helper {
-
     private static final Pattern HEX_PATTERN = Pattern.compile("#(?:[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})");
 
     @SneakyThrows
@@ -32,7 +32,9 @@ public class Helper {
             while (matcher.find()) {
                 String hex = matcher.group();
                 Method of = OSimpleReflection.getMethod(net.md_5.bungee.api.ChatColor.class, "of", String.class);
-                text = text.replace(hex, of.invoke(null, hex).toString());
+                try {
+                    text = text.replace(hex, of.invoke(null, hex).toString());
+                } catch (Exception ignored) {}
             }
         }
         text = ChatColor.translateAlternateColorCodes('&', text);

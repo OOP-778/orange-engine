@@ -112,8 +112,18 @@ public interface Valuable extends ConfigHolder, Sectionable {
             throw new IllegalStateException("Incorrect object type required: " + clazz.getSimpleName() + " found: " + parsed.getClass().getSimpleName());
     }
 
-    default <T> T getAs(String path, Class<T> type, Supplier<T> supplier) {
-        return getAs(path, supplier);
+    default <T> T getAs(String path, Class<T> type, Supplier<T> supplier, String ...comments) {
+        Optional<ConfigValue> ocv = get(path);
+        if (supplier == null && !ocv.isPresent())
+            throw new IllegalStateException("Failed to find value in " + getConfig().getFile().getFileName() + " path: " + (this instanceof ConfigSection ? ((ConfigSection) this).getPath() + "." : "") + path);
+
+        ConfigValue value = ocv.orElseGet(() -> {
+            ConfigValue set = set(path, supplier.get());
+            set.comments.addAll(Arrays.asList(comments));
+            return set;
+        });
+
+        return (T) value.getObject();
     }
 
     default <T> void ifValuePresent(String path, Consumer<T> ifPresent) {

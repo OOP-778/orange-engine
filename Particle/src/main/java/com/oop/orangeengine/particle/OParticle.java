@@ -1,9 +1,5 @@
 package com.oop.orangeengine.particle;
 
-import com.oop.orangeengine.main.util.version.OVersion;
-import com.oop.orangeengine.particle.versions.OParticle_V12;
-import com.oop.orangeengine.particle.versions.OParticle_V13;
-import com.oop.orangeengine.particle.versions.OParticle_V8;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -15,18 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class OParticle {
-
     public static OParticle getProvider() {
-        OParticle display;
-
-        if (OVersion.isAfter(12))
-            display = new OParticle_V13();
-        else if (OVersion.isAfter(8))
-            display = new OParticle_V12();
-        else
-            display = new OParticle_V8();
-
-        return display;
+        return ParticleProvider.getProvider();
     }
 
     public void display(String particle, Location center, int amount) {

@@ -21,7 +21,7 @@ public class HologramProtocol extends TinyProtocol {
     private static final Field vector3dZField = OSimpleReflection.getField(vector3DClass, null, double.class, 1);
     private static final Field vector3dYField = OSimpleReflection.getField(vector3DClass, null, double.class, 2);
     private static final Field idField = OSimpleReflection.getField(entityUsePacket, int.class);
-    private static final Field actionField = OSimpleReflection.getField(entityUsePacket, true, "action");
+    private static final Field actionField = OSimpleReflection.getField(entityUsePacket, "action");
     public HologramProtocol(JavaPlugin plugin) {
         super(plugin);
     }

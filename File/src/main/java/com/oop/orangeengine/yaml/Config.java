@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.Map;
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class Config implements Valuable, Sectionable, Commentable {
-
     private final Yaml yaml = new Yaml();
 
     @Getter
@@ -35,6 +35,10 @@ public class Config implements Valuable, Sectionable, Commentable {
 
     @Getter
     private OFile file;
+
+    public Config(@NonNull InputStreamReader reader) {
+        ConfigUtil.load(this, yaml, reader);
+    }
 
     public Config(@NonNull OFile file) {
         this.file = file;

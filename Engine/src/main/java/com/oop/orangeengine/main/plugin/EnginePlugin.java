@@ -39,10 +39,6 @@ public abstract class EnginePlugin extends JavaPlugin {
         enable();
     }
 
-    public ClassLoader loader() {
-        return getClassLoader();
-    }
-
     @Override
     public void onDisable() {
         setDisabling(true);

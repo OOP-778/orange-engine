@@ -11,21 +11,12 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 public class OTitle {
-    /**
-     * Used for the "stay" feature of titles.
-     */
     private static final Object TIMES;
     private static final Object TITLE;
     private static final Object SUBTITLE;
     private static final Object CLEAR;
 
-    /**
-     * PacketPlayOutTitle Types: TITLE, SUBTITLE, ACTIONBAR, TIMES, CLEAR, RESET;
-     */
     private static final MethodHandle PACKET;
-    /**
-     * ChatComponentText JSON message builder.
-     */
     private static final MethodHandle CHAT_COMPONENT_TEXT;
 
     static {
@@ -76,17 +67,6 @@ public class OTitle {
         CHAT_COMPONENT_TEXT = chatComp;
     }
 
-    /**
-     * Sends a title message with title and subtitle to a player.
-     *
-     * @param players   the players to send the title to.
-     * @param fadeIn   the amount of ticks for title to fade in.
-     * @param stay     the amount of ticks for the title to stay.
-     * @param fadeOut  the amount of ticks for the title to fade out.
-     * @param title    the title message.
-     * @param subtitle the subtitle message.
-     * @see #clearTitle(Player)
-     */
     @SneakyThrows
     public static void sendTitle(
             int fadeIn, int stay, int fadeOut,

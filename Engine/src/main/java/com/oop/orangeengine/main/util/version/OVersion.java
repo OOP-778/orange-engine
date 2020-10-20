@@ -10,12 +10,10 @@ public class OVersion {
     private static MCVersion mcVersion;
 
     static {
-
         String fullVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         stringVersion = StringUtils.replace(fullVersion, "_", " ");
         intVersion = Integer.parseInt(StringUtils.replace(fullVersion.split("_")[1].split("_R")[0], "v", ""));
         mcVersion = MCVersion.fromInt(intVersion);
-
     }
 
     public static boolean is(int version2) {

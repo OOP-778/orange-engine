@@ -22,6 +22,10 @@ public class OPotion extends ItemBuilder<OPotion> {
         super(mat, amount);
     }
 
+    public OPotion(OPotion from) {
+        super(from.getItemStack().clone());
+    }
+
     @Override
     protected OPotion _returnThis() {
         return this;
@@ -37,7 +41,6 @@ public class OPotion extends ItemBuilder<OPotion> {
         if (itemMeta.hasCustomEffect(effect.getType())) return _returnThis();
 
         itemMeta.addCustomEffect(effect, b);
-        itemMeta(itemMeta);
         return _returnThis();
     }
 }

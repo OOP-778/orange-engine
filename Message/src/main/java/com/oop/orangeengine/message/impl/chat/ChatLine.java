@@ -2,36 +2,29 @@ package com.oop.orangeengine.message.impl.chat;
 
 import com.google.common.base.Preconditions;
 import com.oop.orangeengine.main.Helper;
-import com.oop.orangeengine.main.util.OSimpleReflection;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.message.Replaceable;
 import com.oop.orangeengine.message.Sendable;
 import com.oop.orangeengine.message.impl.OChatMessage;
+import com.oop.orangeengine.message.impl.chat.color.ChatColor;
+import com.oop.orangeengine.message.impl.chat.color.OChatColor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.swing.plaf.synth.SynthUI;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.oop.orangeengine.message.ChatUtil.parseHexColor;
 
 @Accessors(chain = true, fluent = true)
 public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
@@ -76,20 +69,26 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return this;
     }
 
-    public ChatLine insert(int at, LineContent ...content) {
+    public ChatLine insert(int at, LineContent... content) {
         contentList.insert(at, content);
         return this;
     }
 
     public ChatLine replace(LineContent replace, LineContent to) {
         int i = contentList.indexOf(replace);
-        Preconditions.checkArgument(i != -1);
+        Preconditions.checkArgument(i != -1, "Index cannot be -1");
 
         contentList.set(i, to);
         return this;
     }
 
-    public ChatLine append(LineContent ...content) {
+    public ChatLine set(int index, LineContent content) {
+        Preconditions.checkArgument(contentList.size() > index, "Index is incorrect");
+        contentList.set(index, content);
+        return this;
+    }
+
+    public ChatLine append(LineContent... content) {
         contentList.addAll(Arrays.asList(content));
         return this;
     }
@@ -148,7 +147,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return this;
     }
 
-    private int insert(int indexOf, ChatLine ...lines) {
+    private int insert(int indexOf, ChatLine... lines) {
         for (ChatLine chatLine : lines) {
             for (LineContent lineContent : chatLine.contentList) {
                 contentList.add(indexOf += 1, lineContent);
@@ -220,7 +219,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     }
 
     @Override
-    public void send(CommandSender ...receivers) {
+    public void send(CommandSender... receivers) {
         if (Arrays.stream(receivers).noneMatch(receiver -> receiver instanceof Player)) {
             String raw = Helper.color(raw());
             for (CommandSender receiver : receivers)
@@ -299,26 +298,6 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
         return this;
     }
 
-    @SneakyThrows
-    private ChatColor colorOf(String color) {
-        if (OVersion.isOrAfter(16)) {
-            Method of = OSimpleReflection.getMethod(ChatColor.class, "of", String.class);
-            return (ChatColor) of.invoke(null, color);
-        } else {
-            Preconditions.checkArgument(color.length() > 1, "Invalid color by " + color);
-            return ChatColor.getByChar(color.toCharArray()[0]);
-        }
-    }
-
-    private boolean isFormat(ChatColor color) {
-        try {
-            org.bukkit.ChatColor chatColor = org.bukkit.ChatColor.valueOf(color.name());
-            return chatColor.isFormat();
-        } catch (Throwable throwable) {
-            return false;
-        }
-    }
-
     public List<BaseComponent> buildComponents() {
         StringBuilder builder = new StringBuilder();
         List<BaseComponent> components = new ArrayList<>();
@@ -337,7 +316,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                 if (character == '#' && OVersion.isOrAfter(16)) {
                     String hex = getNextOrNull(Arrays.copyOfRange(chars, i + 1, chars.length), 6);
                     if (hex != null) {
-                        ChatColor parsed = colorOf("#" + hex);
+                        ChatColor parsed = OChatColor.match("#" + hex);
 
                         if (i != 0) {
                             if (chars.length > i + 6 && chars[i + 6] == '&') {
@@ -358,9 +337,9 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                 }
 
                 // Check for bukkit colors
-                if (character == '&' || character == ChatColor.COLOR_CHAR) {
+                if (character == '&' || character == '\u00a7') {
                     char codeAfter = chars[i + 1];
-                    ChatColor color = ChatColor.getByChar(codeAfter);
+                    ChatColor color = OChatColor.match(String.valueOf(codeAfter));
                     if (color == null) {
                         i += 1;
                         continue;
@@ -377,7 +356,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                         contentComponents.add(component);
                     }
 
-                    if (isFormat(color))
+                    if (color.isFormat())
                         decoration.decorations().add(color);
 
                     else {
@@ -419,11 +398,11 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
 
     @Getter
     private class ComponentDecoration {
-        private ChatColor color = ChatColor.RESET;
+        private ChatColor color = OChatColor.match("RESET");
         private List<ChatColor> decorations = new ArrayList<>();
 
         public void applyColor(TextComponent component) {
-            component.setColor(color);
+            component.setColor((net.md_5.bungee.api.ChatColor) color.getColorObject());
         }
 
         public void apply(TextComponent component) {
@@ -433,13 +412,13 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
 
         public void applyDecor(TextComponent component) {
             for (ChatColor decoration : decorations) {
-                if (decoration == ChatColor.BOLD)
+                if (decoration.getName().contentEquals("BOLD"))
                     component.setBold(true);
-                else if (decoration == ChatColor.UNDERLINE)
+                else if (decoration.getName().contentEquals("UNDERLINE"))
                     component.setUnderlined(true);
-                else if (decoration == ChatColor.ITALIC)
+                else if (decoration.getName().contentEquals("ITALIC"))
                     component.setItalic(true);
-                else if (decoration == ChatColor.MAGIC)
+                else if (decoration.getName().contentEquals("MAGIC"))
                     component.setObfuscated(true);
             }
         }

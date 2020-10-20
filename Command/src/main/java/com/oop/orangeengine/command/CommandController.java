@@ -2,10 +2,10 @@ package com.oop.orangeengine.command;
 
 import com.google.common.collect.Lists;
 import com.oop.orangeengine.command.arg.CommandArgument;
+import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.command.scheme.DefaultScheme;
 import com.oop.orangeengine.command.scheme.Scheme;
 import com.oop.orangeengine.command.scheme.SchemeHolder;
-import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.impl.OChatMessage;
@@ -26,6 +26,7 @@ import org.bukkit.plugin.SimplePluginManager;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,6 @@ import static com.oop.orangeengine.main.Engine.getEngine;
 import static com.oop.orangeengine.main.Helper.color;
 
 public class CommandController {
-
-    private String[] CACHE_KEYS = {"proper usage", "sub list"};
 
     @Setter
     private SchemeHolder schemeHolder;
@@ -64,7 +63,6 @@ public class CommandController {
             throw new IllegalStateException("Failed to initialize CommandMap", thrw);
         }
     }
-
 
     public void register(OCommand command) {
         Command bukkitCommand = new Command(command.getLabel(), command.getDescription() == null ? "" : command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
@@ -125,6 +123,8 @@ public class CommandController {
         command.setRegisteredCommand(bukkitCommand);
         registeredCommands.put(command.getLabel().toLowerCase(), command);
         commandMap.register(getEngine().getOwning().getName(), bukkitCommand);
+
+
     }
 
     public Collection<String> getSubCommandsFor(OCommand command, CommandSender sender) {
@@ -173,8 +173,10 @@ public class CommandController {
                 completion.removeIf(name -> name == null || !name.toLowerCase().startsWith(args[0].toLowerCase()));
         }
 
+        completion.removeIf(Objects::isNull);
         return completion;
     }
+
 
     private void handleCommand(String[] args, CommandSender sender, OCommand command) {
         // Check for permission
@@ -191,10 +193,8 @@ public class CommandController {
             if (executerClass.isAssignableFrom(sender.getClass())) found++;
 
         if (found == 0) {
-
             sender.sendMessage(color(command.getNotAbleToExecuteMessage().replace("%sender%", sender instanceof Player ? "Console" : "Player")));
             return;
-
         }
 
         //Check for sender requirements
@@ -267,12 +267,36 @@ public class CommandController {
 
                     arguments.remove(arg.getIdentity());
                     arguments.put(arg.getIdentity(), current.toString());
-
                     break;
                 }
             }
 
             execCommand(new WrappedCommand(sender, arguments), command);
+        }
+    }
+
+    public void unregisterSimilar() {
+        unregisterAllSimilar(registeredCommands.values().toArray(new OCommand[0]));
+    }
+
+    public void unregisterAllSimilar(OCommand ...cmds) {
+        try {
+            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+            knownCommands.entrySet().removeIf(entry -> {
+                List<String> all = new ArrayList<>();
+                all.addAll(entry.getValue().getAliases());
+                all.add(entry.getValue().getLabel());
+                return all.stream().anyMatch(l -> Arrays.stream(cmds).anyMatch(l2 -> l2.getLabel().equalsIgnoreCase(l) || l2.getAliases().stream().anyMatch(l3 -> l3.equalsIgnoreCase(l))));
+            });
+
+            for (OCommand cmd : cmds)
+                register(cmd);
+
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not unregister commands", e);
         }
     }
 
@@ -335,52 +359,45 @@ public class CommandController {
         return placeholders;
     }
 
-    private List<TextComponent> getCache(OCommand command, String scheme, Supplier<List<TextComponent>> supplier) {
-        return command.getSchemeCache().computeIfAbsent(scheme, key -> supplier.get());
-    }
-
     private void handleProperUsage(OCommand command, CommandSender sender) {
         // Check if simple message is required
         if (command.getSubCommands().isEmpty()) {
-            List<TextComponent> components = getCache(command, CACHE_KEYS[0], () -> {
-                OChatMessage message = new OChatMessage();
-                Scheme scheme = schemeHolder.getScheme(command, CACHE_KEYS[0]);
+            OChatMessage message = new OChatMessage();
+            Scheme scheme = schemeHolder.getScheme(command, "proper usage");
 
-                for (String line : scheme.getScheme()) {
-                    if ((line.contains("{command_description}") && command.getDescription() == null) && (line.contains("{command_permission}") && command.getPermission() == null))
-                        continue;
-                    message.append(line);
-                }
+            for (String line : scheme.getScheme()) {
+                if ((line.contains("{command_description}") && command.getDescription() == null) && (line.contains("{command_permission}") && command.getPermission() == null))
+                    continue;
+                message.append(line);
+            }
 
-                scheme.getTemplates().forEach((key, value) -> message.replace("{" + key.replace(" ", "_") + "}", value));
-                message.replace(getPlaceholdersForCommand(command));
+            scheme.getTemplates().forEach((key, value) -> message.replace("{" + key.replace(" ", "_") + "}", value));
+            message.replace(getPlaceholdersForCommand(command));
 
-                boolean hasRequired = command.getArgumentMap().values()
-                        .stream()
-                        .anyMatch(CommandArgument::isRequired);
+            boolean hasRequired = command.getArgumentMap().values()
+                    .stream()
+                    .anyMatch(CommandArgument::isRequired);
 
-                boolean hasOptional = command.getArgumentMap().values()
-                        .stream()
-                        .anyMatch(argument -> !argument.isRequired());
+            boolean hasOptional = command.getArgumentMap().values()
+                    .stream()
+                    .anyMatch(argument -> !argument.isRequired());
 
-                if (!hasRequired)
-                    message.replace("{command_required_args}", "");
-                else
-                    buildArgs(message, "{command_required_args}", scheme.getTemplate("required arg").get(), command.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
+            if (!hasRequired)
+                message.replace("{command_required_args}", "");
+            else
+                buildArgs(message, "{command_required_args}", scheme.getTemplate("required arg").get(), command.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
 
-                if (!hasOptional)
-                    message.replace("{command_optional_args}", "");
-                else
-                    buildArgs(message, "{command_optional_args}", scheme.getTemplate("optional arg").get(), command.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
-
-                return message.crateTextComponents();
-            });
+            if (!hasOptional)
+                message.replace("{command_optional_args}", "");
+            else
+                buildArgs(message, "{command_optional_args}", scheme.getTemplate("optional arg").get(), command.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
+            List<TextComponent> components = message.crateTextComponents();
 
             for (TextComponent component : components)
                 if (sender instanceof Player)
                     ((Player) sender).spigot().sendMessage(component);
                 else
-                    sender.sendMessage(Helper.color(component.getText()));
+                    sender.sendMessage(Helper.color(component.toPlainText()));
 
         } else {
             boolean wholeHasRequired = command.getSubCommands().values().stream().
@@ -391,69 +408,72 @@ public class CommandController {
                     map(cmd -> (int) cmd.getArgumentMap().values().stream().filter(a -> !a.isRequired()).count()).
                     anyMatch(c -> c > 0);
 
-            List<TextComponent> components = getCache(command, CACHE_KEYS[1], () -> {
-                Scheme scheme = schemeHolder.getScheme(command, CACHE_KEYS[1]);
-                OChatMessage message = new OChatMessage();
+            Scheme scheme = schemeHolder.getScheme(command, "sub list");
+            OChatMessage message = new OChatMessage();
 
-                // Append scheme to the messsge
-                for (String text : scheme.getScheme())
-                    message.append(text);
+            // Append scheme to the messsge
+            for (String text : scheme.getScheme())
+                message.append(text);
 
-                message.replace(getPlaceholdersForCommand(command));
+            message.replace(getPlaceholdersForCommand(command));
 
-                // Replace {required}, {optional}
-                if (wholeHasRequired)
-                    scheme.getTemplate("required").ifPresent(rm -> message.replace("{required}", rm));
-                else
-                    message.replace("{required}", "");
+            // Replace {required}, {optional}
+            if (wholeHasRequired)
+                scheme.getTemplate("required").ifPresent(rm -> message.replace("{required}", rm));
+            else
+                message.replace("{required}", "");
 
-                if (wholeHasOptional)
-                    scheme.getTemplate("optional").ifPresent(rm -> message.replace("{optional}", rm));
-                else
-                    message.replace("{optional}", "");
+            if (wholeHasOptional)
+                scheme.getTemplate("optional").ifPresent(rm -> message.replace("{optional}", rm));
+            else
+                message.replace("{optional}", "");
 
-                // Construct sub commands message
-                scheme.getTemplate("sub command").ifPresent(sct -> {
-                    OChatMessage subCommandsMessage = new OChatMessage();
-                    for (OCommand sc : command.getSubCommands().values()) {
-                        if (sc.isSecret() || (sc.getPermission() != null && !sender.hasPermission(sc.getPermission())))
-                            continue;
+            // Construct sub commands message
+            scheme.getTemplate("sub command").ifPresent(sct -> {
+                OChatMessage subCommandsMessage = new OChatMessage();
+                for (OCommand sc : command.getSubCommands().values()) {
+                    if (sc.isSecret() || (sc.getPermission() != null && !sender.hasPermission(sc.getPermission())))
+                        continue;
 
-                        OChatMessage scm = sct.clone();
-                        boolean hasRequired = sc.getArgumentMap().values()
-                                .stream()
-                                .anyMatch(CommandArgument::isRequired);
+                    int found = 0;
+                    for (Class executerClass : command.getAbleToExecute())
+                        if (executerClass.isAssignableFrom(sender.getClass())) found++;
 
-                        boolean hasOptional = sc.getArgumentMap().values()
-                                .stream()
-                                .anyMatch(argument -> !argument.isRequired());
+                    if (found == 0)
+                        continue;
 
-                        if (!hasRequired)
-                            scm.replace("{command_required_args}", "");
-                        else
-                            buildArgs(scm, "{command_required_args}", scheme.getTemplate("required arg").get(), sc.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
+                    OChatMessage scm = sct.clone();
+                    boolean hasRequired = sc.getArgumentMap().values()
+                            .stream()
+                            .anyMatch(CommandArgument::isRequired);
 
-                        if (!hasOptional)
-                            scm.replace("{command_optional_args}", "");
-                        else
-                            buildArgs(scm, "{command_optional_args}", scheme.getTemplate("optional arg").get(), sc.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
+                    boolean hasOptional = sc.getArgumentMap().values()
+                            .stream()
+                            .anyMatch(argument -> !argument.isRequired());
 
-                        scm.replace(getPlaceholdersForCommand(sc));
-                        subCommandsMessage.append(scm);
-                    }
+                    if (!hasRequired)
+                        scm.replace("{command_required_args}", "");
+                    else
+                        buildArgs(scm, "{command_required_args}", scheme.getTemplate("required arg").get(), sc.getArgumentMap().values().stream().filter(CommandArgument::isRequired).collect(Collectors.toList()));
 
-                    int index = message.indexOf(line -> line.raw().contains("{sub_command_template}"));
-                    message.insert(index, subCommandsMessage, InsertableList.InsertMethod.REPLACE);
-                });
+                    if (!hasOptional)
+                        scm.replace("{command_optional_args}", "");
+                    else
+                        buildArgs(scm, "{command_optional_args}", scheme.getTemplate("optional arg").get(), sc.getArgumentMap().values().stream().filter(argument -> !argument.isRequired()).collect(Collectors.toList()));
 
-                return message.crateTextComponents();
+                    scm.replace(getPlaceholdersForCommand(sc));
+                    subCommandsMessage.append(scm);
+                }
+
+                int index = message.indexOf(line -> line.raw().contains("{sub_command_template}"));
+                message.insert(index, subCommandsMessage, InsertableList.InsertMethod.REPLACE);
             });
 
-            for (TextComponent component : components)
+            for (TextComponent component : message.crateTextComponents())
                 if (sender instanceof Player)
                     ((Player) sender).spigot().sendMessage(component);
                 else
-                    sender.sendMessage(Helper.color(component.getText()));
+                    sender.sendMessage(Helper.color(component.toPlainText()));
         }
     }
 

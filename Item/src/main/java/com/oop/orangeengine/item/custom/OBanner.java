@@ -8,7 +8,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
 public class OBanner extends ItemBuilder<OBanner> {
-
     public OBanner(@NonNull ItemStack item) {
         super(item);
         Helper.assertTrue(OMaterial.matchMaterial(item).name().contains("BANNER"), "Cannot initialize OBanner.class because given itemStack isn't a Banner!");
@@ -17,6 +16,10 @@ public class OBanner extends ItemBuilder<OBanner> {
     public OBanner(@NonNull OMaterial material) {
         super(material);
         Helper.assertTrue(material.name().contains("BANNER"), "Cannot initialize OBanner.class because given material isn't a Banner!");
+    }
+
+    public OBanner(OBanner from) {
+        super(from.getItemStack().clone());
     }
 
     @Override

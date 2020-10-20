@@ -1366,7 +1366,7 @@ public enum ParticleEffect {
 
                 packetConstructor = OSimpleReflection.getConstructor(packetClass);
                 getHandle = OSimpleReflection.getMethod("CraftPlayer", OSimpleReflection.Package.CB_ENTITY, "getHandle");
-                playerConnection = OSimpleReflection.getField("EntityPlayer", OSimpleReflection.Package.NMS, false, "playerConnection");
+                playerConnection = OSimpleReflection.getField("EntityPlayer", OSimpleReflection.Package.NMS, "playerConnection");
                 sendPacket = OSimpleReflection.getMethod(playerConnection.getType(), "sendPacket", OSimpleReflection.Package.NMS.getClass("Packet"));
             } catch (Exception exception) {
                 throw new VersionIncompatibleException("Your current bukkit version seems to be incompatible with this library", exception);
@@ -1413,24 +1413,24 @@ public enum ParticleEffect {
                     if (data != null) {
                         name += data.getPacketDataString();
                     }
-                    OSimpleReflection.setValue(packet, true, "a", name);
+                    OSimpleReflection.setValue(packet, "a", name);
                 } else {
-                    OSimpleReflection.setValue(packet, true, "a", enumParticle.getEnumConstants()[effect.getId()]);
-                    OSimpleReflection.setValue(packet, true, "j", longDistance);
+                    OSimpleReflection.setValue(packet, "a", enumParticle.getEnumConstants()[effect.getId()]);
+                    OSimpleReflection.setValue(packet, "j", longDistance);
                     if (data != null) {
                         int[] packetData = data.getPacketData();
-                        OSimpleReflection.setValue(packet, true, "k", effect == ParticleEffect.ITEM_CRACK ? packetData : new int[]{packetData[0] | (packetData[1] << 12)});
+                        OSimpleReflection.setValue(packet, "k", effect == ParticleEffect.ITEM_CRACK ? packetData : new int[]{packetData[0] | (packetData[1] << 12)});
                     }
                 }
 
-                OSimpleReflection.setValue(packet, true, "b", (float) center.getX());
-                OSimpleReflection.setValue(packet, true, "c", (float) center.getY());
-                OSimpleReflection.setValue(packet, true, "d", (float) center.getZ());
-                OSimpleReflection.setValue(packet, true, "e", offsetX);
-                OSimpleReflection.setValue(packet, true, "f", offsetY);
-                OSimpleReflection.setValue(packet, true, "g", offsetZ);
-                OSimpleReflection.setValue(packet, true, "h", speed);
-                OSimpleReflection.setValue(packet, true, "i", amount);
+                OSimpleReflection.setValue(packet, "b", (float) center.getX());
+                OSimpleReflection.setValue(packet, "c", (float) center.getY());
+                OSimpleReflection.setValue(packet, "d", (float) center.getZ());
+                OSimpleReflection.setValue(packet, "e", offsetX);
+                OSimpleReflection.setValue(packet, "f", offsetY);
+                OSimpleReflection.setValue(packet, "g", offsetZ);
+                OSimpleReflection.setValue(packet, "h", speed);
+                OSimpleReflection.setValue(packet, "i", amount);
             } catch (Exception exception) {
                 throw new PacketInstantiationException("Packet instantiation failed", exception);
             }

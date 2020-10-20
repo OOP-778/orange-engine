@@ -37,11 +37,6 @@ public class OTask extends Storegable {
     private boolean cancelled = false;
 
     private Thread runningThread;
-    private StackTraceElement[] creationStackTrace;
-
-    public OTask() {
-        creationStackTrace = Thread.currentThread().getStackTrace();
-    }
 
     protected Runnable run() {
         return () -> {
@@ -67,27 +62,19 @@ public class OTask extends Storegable {
                     whenFinished.accept(this);
 
                 return;
-
             }
 
             runningThread = Thread.currentThread();
-            if (!sync)
-                getEngine().getTaskController().trackTask(this);
 
             //Run
             try {
-                consumer.accept(this);
+                if (consumer != null)
+                    consumer.accept(this);
             } catch (Exception ex) {
                 Engine.getInstance().getLogger().printError("An error was caught in a task.");
-                Engine.getInstance().getLogger().printError("Task creation Stack Trace...");
-                for (StackTraceElement stackTraceElement : creationStackTrace)
-                    getEngine().getLogger().printWarning("- " + stackTraceElement.getClassName() + "#" + stackTraceElement.getMethodName() + " at " + stackTraceElement.getLineNumber());
-
-                Engine.getInstance().getLogger().printError("Error itself");
                 Engine.getInstance().getLogger().error(ex);
             }
 
-            getEngine().getTaskController().untrackTask(this);
             if (runTimes != -1)
                 storeIfPresentUpdate("runned", 1, Integer::sum);
         };

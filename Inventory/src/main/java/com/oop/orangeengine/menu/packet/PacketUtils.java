@@ -46,15 +46,15 @@ public class PacketUtils {
             Class<?> PACKET_OPEN_WINDOW_CLASS = OSimpleReflection.Package.NMS.getClass("PacketPlayOutOpenWindow");
             Class<?> ICHAT_BASE_COMPONENT_CLASS = OSimpleReflection.Package.NMS.getClass("IChatBaseComponent");
 
-            PLAYER_CONNECTION_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, true, "playerConnection");
-            PLAYER_ACTIVE_CONTAINER_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, false, "activeContainer");
+            PLAYER_CONNECTION_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, "playerConnection");
+            PLAYER_ACTIVE_CONTAINER_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, "activeContainer");
 
             PLAYER_GET_HANDLE_METHOD = OSimpleReflection.getMethod(CRAFT_PLAYER_CLASS, "getHandle");
             PLAYER_SEND_PACKET_METHOD = OSimpleReflection.getMethod(PLAYER_CONNECTION_CLASS, "sendPacket", PACKET_CLASS);
 
             PACKET_SET_SLOT_CONST = OSimpleReflection.getConstructor(PACKET_SET_SLOT_CLASS, int.class, int.class, ITEM_STACK_CLASS);
-            CONTAINER_WINDOWID_FIELD = OSimpleReflection.getField(CONTAINER_CLASS, true, "windowId");
-            PLAYER_DEFAULT_CONTAINER_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, false, "defaultContainer");
+            CONTAINER_WINDOWID_FIELD = OSimpleReflection.getField(CONTAINER_CLASS, "windowId");
+            PLAYER_DEFAULT_CONTAINER_FIELD = OSimpleReflection.getField(ENTITY_PLAYER_CLASS, "defaultContainer");
 
             ITEM_STACK_AS_NMS_COPY = OSimpleReflection.getMethod(CRAFT_ITEM_CLASS, "asNMSCopy", ItemStack.class);
 

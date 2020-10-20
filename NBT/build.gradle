@@ -18,7 +18,6 @@ dependencies {
 apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
-
     from fileTree(dir: "lib").collect {
         zipTree(it)
     }

@@ -17,13 +17,11 @@ public class SpigotTaskController implements TaskController {
 
     private EnginePlugin owning;
     private Set<OTask> tasks = new HashSet<>();
-    private Map<OTask, Long> trackingTasks = Maps.newConcurrentMap();
 
     public SpigotTaskController(EnginePlugin owning) {
         this.owning = owning;
         owning.onDisable(() -> tasks.forEach(OTask::cancel), DisablePriority.LAST);
     }
-
 
     @Override
     public OTask runTask(OTask task) {
@@ -41,16 +39,6 @@ public class SpigotTaskController implements TaskController {
         }
 
         return task;
-    }
-
-    @Override
-    public void trackTask(OTask task) {
-        trackingTasks.put(task, Instant.now().toEpochMilli());
-    }
-
-    @Override
-    public void untrackTask(OTask task) {
-        trackingTasks.remove(task);
     }
 
     private BukkitTask async(OTask task) {

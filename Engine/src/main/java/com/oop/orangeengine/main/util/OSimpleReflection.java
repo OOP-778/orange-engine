@@ -1,8 +1,13 @@
 package com.oop.orangeengine.main.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.internal.Primitives;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -10,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 
 public final class OSimpleReflection {
 
@@ -18,17 +24,16 @@ public final class OSimpleReflection {
     private static Map<String, Class<?>> CLASS_MAP = new HashMap<>();
     private static Map<Class<?>, Map<String, Field>> FIELD_MAP = new HashMap<>();
 
-    private OSimpleReflection() {
-    }
+    private OSimpleReflection() {}
 
     public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) throws Exception {
         if (CONSTRUCTOR_MAP.containsKey(clazz)) return CONSTRUCTOR_MAP.get(clazz);
 
-        Class<?>[] primitiveTypes = Data.getPrimitive(parameterTypes);
-        for (Constructor<?> constructor : clazz.getConstructors()) {
-            if (!Data.compare(Data.getPrimitive(constructor.getParameterTypes()), primitiveTypes)) {
+        for (Constructor<?> constructor : merge(clazz.getDeclaredConstructors(), clazz.getConstructors())) {
+            if (!compareClasses(parameterTypes, constructor.getParameterTypes()))
                 continue;
-            }
+
+            constructor.setAccessible(true);
             CONSTRUCTOR_MAP.put(clazz, constructor);
             return constructor;
         }
@@ -41,7 +46,7 @@ public final class OSimpleReflection {
     }
 
     public static Object initializeObject(Class<?> clazz, Object... arguments) throws Exception {
-        return getConstructor(clazz, Data.getPrimitive(arguments)).newInstance(arguments);
+        return getConstructor(clazz, Arrays.stream(arguments).filter(Objects::nonNull).map(Object::getClass).toArray(Class[]::new)).newInstance(arguments);
     }
 
     public static Object initializeObject(String className, Package packageType, Object... arguments) throws Exception {
@@ -52,12 +57,14 @@ public final class OSimpleReflection {
         if (METHOD_MAP.containsKey(clazz) && METHOD_MAP.get(clazz).containsKey(methodName))
             return METHOD_MAP.get(clazz).get(methodName);
 
-        Class<?>[] primitiveTypes = Data.getPrimitive(parameterTypes);
-        for (Method method : clazz.getMethods()) {
-            if (!method.getName().equals(methodName) || !Data.compare(Data.getPrimitive(method.getParameterTypes()), primitiveTypes)) {
+        for (Method method : merge(clazz.getMethods(), clazz.getDeclaredMethods())) {
+            if (!method.getName().equalsIgnoreCase(methodName) || !compareClasses(parameterTypes, method.getParameterTypes()))
                 continue;
-            }
-            if (METHOD_MAP.containsKey(clazz)) METHOD_MAP.get(clazz).put(methodName, method);
+
+            method.setAccessible(true);
+
+            if (METHOD_MAP.containsKey(clazz))
+                METHOD_MAP.get(clazz).put(methodName, method);
             else {
                 Map<String, Method> methodMap = new HashMap<>();
                 methodMap.put(methodName, method);
@@ -67,6 +74,16 @@ public final class OSimpleReflection {
         }
 
         return null;
+    }
+
+    private static boolean compareClasses(Class[] first, Class[] second) {
+        if (first.length != second.length) return false;
+        for (int i = 0; i < first.length; i++) {
+            Class c1 = Primitives.unwrap(first[i]);
+            Class c2 = Primitives.unwrap(second[i]);
+            if (c1 != c2 && !PrimitivesCaster.isCastable(c1, c2)) return false;
+        }
+        return true;
     }
 
     public static Class<?> findClass(String path) {
@@ -91,24 +108,26 @@ public final class OSimpleReflection {
     }
 
     public static Object invokeMethod(Object instance, String methodName, Object... arguments) throws Exception {
-        return getMethod(instance.getClass(), methodName, Data.getPrimitive(arguments)).invoke(instance, arguments);
+        return getMethod(instance.getClass(), methodName, Arrays.stream(arguments).filter(Objects::nonNull).map(Object::getClass).toArray(Class[]::new)).invoke(instance, arguments);
     }
 
     public static Object invokeMethod(Object instance, Class<?> clazz, String methodName, Object... arguments) throws Exception {
-        return getMethod(clazz, methodName, Data.getPrimitive(arguments)).invoke(instance, arguments);
+        return getMethod(clazz, methodName, Arrays.stream(arguments).filter(Objects::nonNull).map(Object::getClass).toArray(Class[]::new)).invoke(instance, arguments);
     }
 
     public static Object invokeMethod(Object instance, String className, Package packageType, String methodName, Object... arguments) throws Exception {
         return invokeMethod(instance, packageType.getClass(className), methodName, arguments);
     }
 
-    public static Field getField(Class<?> clazz, boolean declared, String fieldName){
+    public static Field getField(Class<?> clazz, String fieldName){
         Map<String, Field> stringFieldMap = FIELD_MAP.computeIfAbsent(clazz, clazz2 -> new HashMap<>());
         Field field = stringFieldMap.get(fieldName);
         if (field != null) return field;
 
         try {
-            field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
+            field = clazz.getDeclaredField(fieldName);
+            if (field == null)
+                field = clazz.getField(fieldName);
             field.setAccessible(true);
             stringFieldMap.put(fieldName, field);
         } catch (NoSuchFieldException e) {
@@ -134,9 +153,12 @@ public final class OSimpleReflection {
 
     public static Field getField(Class clazz, Class type) {
         try {
-            return merge(clazz.getDeclaredFields(), clazz.getFields())
+            return FieldUtils.getAllFieldsList(clazz)
                     .stream()
-                    .filter(field -> field.getType().isAssignableFrom(type))
+                    .filter(field -> {
+                        field.setAccessible(true);
+                        return field.getType().isAssignableFrom(type) || type == field.getType();
+                    })
                     .findFirst()
                     .orElse(null);
         } catch (Throwable thrw) {
@@ -153,20 +175,44 @@ public final class OSimpleReflection {
         return set;
     }
 
-    public static Field getField(String className, Package packageType, boolean declared, String fieldName) throws Exception {
-        return getField(packageType.getClass(className), declared, fieldName);
+    @SneakyThrows
+    public static Object executeMethod(Method method, Object ofWho, Object ...args) {
+        args = checkArgs(method.getParameterTypes(), args);
+        return method.invoke(ofWho, args);
     }
 
-    public static void setValue(Object instance, Class<?> clazz, boolean declared, String fieldName, Object value) throws Exception {
-        getField(clazz, declared, fieldName).set(instance, value);
+    @SneakyThrows
+    public static Object initializeObject(Constructor constructor, Object ...args) {
+        args = checkArgs(constructor.getParameterTypes(), args);
+        return constructor.newInstance(args);
     }
 
-    public static void setValue(Object instance, String className, Package packageType, boolean declared, String fieldName, Object value) throws Exception {
-        setValue(instance, packageType.getClass(className), declared, fieldName, value);
+    private static Object[] checkArgs(Class[] a1, Object[] a2) throws IllegalStateException {
+        Preconditions.checkArgument(a1.length == a2.length, "Failed to validate arguments cause lengths doesn't match");
+        int size = a1.length;
+        for (int i = 0; i < size; i++) {
+            Class c1 = Primitives.unwrap(a1[i]);
+            Object o1 = a2[i];
+            Class c2 = Primitives.unwrap(o1.getClass());
+
+            if (c1 != c2 && !PrimitivesCaster.isCastable(c1, c2))
+                throw new IllegalStateException("Argument miss match at " + i + " found " + c2.getSimpleName() + ", required: " + c1.getSimpleName());
+
+            else {
+                if (a1[i] == o1.getClass()) continue;
+                a2[i] = PrimitivesCaster.cast(c1, o1);
+            }
+        }
+        return a2;
     }
 
-    public static void setValue(Object instance, boolean declared, String fieldName, Object value) throws Exception {
-        setValue(instance, instance.getClass(), declared, fieldName, value);
+    @SneakyThrows
+    public static void setValue(Object object, String field, Object value) {
+        getField(object.getClass(), field).set(object, value);
+    }
+
+    public static Field getField(String className, Package packageType, String fieldName) throws Exception {
+        return getField(packageType.getClass(className),  fieldName);
     }
 
     public enum Package {
@@ -228,107 +274,6 @@ public final class OSimpleReflection {
         }
     }
 
-    public enum Data {
-        BYTE(byte.class, Byte.class),
-        SHORT(short.class, Short.class),
-        INTEGER(int.class, Integer.class),
-        LONG(long.class, Long.class),
-        CHARACTER(char.class, Character.class),
-        FLOAT(float.class, Float.class),
-        DOUBLE(double.class, Double.class),
-        BOOLEAN(boolean.class, Boolean.class);
-
-        private static final Map<Class<?>, Data> CLASS_MAP = new HashMap<>();
-
-        static {
-            for (Data type : values()) {
-                CLASS_MAP.put(type.primitive, type);
-                CLASS_MAP.put(type.reference, type);
-            }
-        }
-
-        private final Class<?> primitive;
-        private final Class<?> reference;
-
-        Data(Class<?> primitive, Class<?> reference) {
-            this.primitive = primitive;
-            this.reference = reference;
-        }
-
-        public static Data fromClass(Class<?> clazz) {
-            return CLASS_MAP.get(clazz);
-        }
-
-        public static Class<?> getPrimitive(Class<?> clazz) {
-            Data type = fromClass(clazz);
-            return type == null ? clazz : type.getPrimitive();
-        }
-
-        public static Class<?> getReference(Class<?> clazz) {
-            Data type = fromClass(clazz);
-            return type == null ? clazz : type.getReference();
-        }
-
-        public static Class<?>[] getPrimitive(Class<?>[] classes) {
-            int length = classes == null ? 0 : classes.length;
-            Class<?>[] types = new Class<?>[length];
-            for (int index = 0; index < length; index++) {
-                types[index] = getPrimitive(classes[index]);
-            }
-            return types;
-        }
-
-        public static Class<?>[] getReference(Class<?>[] classes) {
-            int length = classes == null ? 0 : classes.length;
-            Class<?>[] types = new Class<?>[length];
-            for (int index = 0; index < length; index++) {
-                types[index] = getReference(classes[index]);
-            }
-            return types;
-        }
-
-        public static Class<?>[] getPrimitive(Object[] objects) {
-            int length = objects == null ? 0 : objects.length;
-            Class<?>[] types = new Class<?>[length];
-            for (int index = 0; index < length; index++) {
-                types[index] = getPrimitive(objects[index].getClass());
-            }
-            return types;
-        }
-
-        public static Class<?>[] getReference(Object[] objects) {
-            int length = objects == null ? 0 : objects.length;
-            Class<?>[] types = new Class<?>[length];
-            for (int index = 0; index < length; index++) {
-                types[index] = getReference(objects[index].getClass());
-            }
-            return types;
-        }
-
-        public static boolean compare(Class<?>[] primary, Class<?>[] secondary) {
-            if (primary == null || secondary == null || primary.length != secondary.length) {
-                return false;
-            }
-            for (int index = 0; index < primary.length; index++) {
-                Class<?> primaryClass = primary[index];
-                Class<?> secondaryClass = secondary[index];
-                if (primaryClass.equals(secondaryClass) || primaryClass.isAssignableFrom(secondaryClass)) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
-        }
-
-        public Class<?> getPrimitive() {
-            return primitive;
-        }
-
-        public Class<?> getReference() {
-            return reference;
-        }
-    }
-
     public static class Player {
 
         private static Class<?>
@@ -352,7 +297,7 @@ public final class OSimpleReflection {
                 PLAYER_CONNECTION_CLASS = Package.NMS.getClass("PlayerConnection");
                 PACKET_CLASS = Package.NMS.getClass("Packet");
 
-                PLAYER_CONNECTION_FIELD = getField(ENTITY_PLAYER_CLASS, true,"playerConnection");
+                PLAYER_CONNECTION_FIELD = getField(ENTITY_PLAYER_CLASS, "playerConnection");
 
                 SEND_PACKET_METHOD = getMethod(PLAYER_CONNECTION_CLASS, "sendPacket", PACKET_CLASS);
                 GET_HANDLE_METHOD = getMethod(CRAFT_PLAYER_CLASS, "getHandle");
@@ -373,9 +318,46 @@ public final class OSimpleReflection {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
+    public static class PrimitivesCaster {
+        private static Map<Class, Function<String, Object>> casters = new HashMap<>();
+
+        static {
+            casters.put(int.class, in -> {
+                if (in.contains("."))
+                    return Math.round(Double.parseDouble(in));
+                else
+                    return Integer.parseInt(in);
+            });
+            casters.put(long.class, in -> {
+                if (in.contains("."))
+                    return Math.round(Double.parseDouble(in));
+                else
+                    return Long.parseLong(in);
+            });
+            casters.put(double.class, Double::parseDouble);
+            casters.put(short.class, in -> {
+                if (in.contains("."))
+                    return Math.round(Double.parseDouble(in));
+                else
+                    return Short.parseShort(in);
+            });
+            casters.put(float.class, Float::parseFloat);
+            casters.put(byte.class, Byte::parseByte);
+            casters.put(boolean.class, in -> Boolean.valueOf(in).booleanValue());
+        }
+
+        public static boolean isCastable(Class from, Class to) {
+            return casters.containsKey(from) && casters.containsKey(to);
+        }
+
+        public static Object cast(Class to, @NonNull Object what) {
+            Function<String, Object> stringObjectFunction = casters.get(Primitives.unwrap(to));
+            Preconditions.checkArgument(stringObjectFunction != null, "Failed to find caster for " + to.getSimpleName());
+
+            return stringObjectFunction.apply(what.toString());
+        }
+    }
 }

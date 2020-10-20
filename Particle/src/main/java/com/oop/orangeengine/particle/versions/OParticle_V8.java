@@ -39,7 +39,6 @@ public class OParticle_V8 extends OParticle {
 
     @Override
     protected void display(String particle, Location center, float offsetX, float offsetY, float offsetZ, float speed, int amount, Object data, double range, List<Player> targetPlayers) {
-
         try {
             if (targetPlayers == null) {
                 String worldName = center.getWorld().getName();
@@ -58,6 +57,5 @@ public class OParticle_V8 extends OParticle {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 }

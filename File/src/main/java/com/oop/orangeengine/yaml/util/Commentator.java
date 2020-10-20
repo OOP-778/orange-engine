@@ -75,6 +75,9 @@ public class Commentator {
                 }
             }
         }
+
+        valuesComments.forEach((p, c) -> config.get(p).ifPresent(configValue -> configValue.comments.addAll(c)));
+        sectionComments.forEach((p, c) -> config.ifSectionPresent(p, section -> section.comments.addAll(c)));
     }
 
     private String getPath(ConfigPath path, String key) {

@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,9 +18,11 @@ import java.util.stream.IntStream;
 public class ConfigUtil {
 
     @SneakyThrows
-    public static void load(Config config, Yaml yaml) {
-        Map<Object, Object> data = (Map<Object, Object>) yaml.load(new InputStreamReader(new FileInputStream(config.getFile().getFile()), "UTF-8"));
+    public static void load(Config config, Yaml yaml, InputStreamReader reader) {
+        Map<Object, Object> data = (Map<Object, Object>) yaml.load(reader);
+        reader.close();
         if (data == null) return;
+
         data.forEach((key, value) -> {
             if (value instanceof Map) {
                 ConfigSection section = config.createSection(key.toString());
@@ -32,6 +35,12 @@ public class ConfigUtil {
                 config.getValues().put(key.toString(), configValue);
             }
         });
+    }
+
+    @SneakyThrows
+    public static void load(Config config, Yaml yaml) {
+        InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(config.getFile().getFile()), StandardCharsets.UTF_8);
+        load(config, yaml, inputStreamReader);
     }
 
     public static void initializeSection(@NonNull ConfigSection section, Map<Object, Object> map) {

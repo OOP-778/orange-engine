@@ -21,9 +21,6 @@ public class ClassicTaskController implements TaskController {
     private ScheduledThreadPoolExecutor executor;
     private EnginePlugin plugin;
 
-    @Getter
-    private Map<OTask, Long> trackingTasks = Maps.newConcurrentMap();
-
     private int threadsCount = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
     public ClassicTaskController(EnginePlugin plugin) {
@@ -68,16 +65,6 @@ public class ClassicTaskController implements TaskController {
             task.setBukkitTask((BukkitTask) nativeTask);
 
         return task;
-    }
-
-    @Override
-    public void trackTask(OTask task) {
-        trackingTasks.put(task, Instant.now().toEpochMilli());
-    }
-
-    @Override
-    public void untrackTask(OTask task) {
-        trackingTasks.remove(task);
     }
 
     private Object async(OTask task) {

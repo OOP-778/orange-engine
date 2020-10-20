@@ -23,6 +23,10 @@ public class OItem extends ItemBuilder<OItem> implements Cloneable {
         super(item);
     }
 
+    public OItem(OItem from) {
+        super(from.getItemStack().clone());
+    }
+
     @Override
     protected OItem _returnThis() {
         return this;
