@@ -123,7 +123,7 @@ public interface Valuable extends ConfigHolder, Sectionable {
             return set;
         });
 
-        return (T) value.getObject();
+        return (T) doConversion(value.getObject(), type);
     }
 
     default <T> void ifValuePresent(String path, Consumer<T> ifPresent) {
@@ -135,7 +135,7 @@ public interface Valuable extends ConfigHolder, Sectionable {
     }
 
     default <T> void ifValuePresent(String path, Class<T> type, Consumer<T> ifPresent) {
-        get(path).map(ConfigValue::getObject).map(value -> (T) value).ifPresent(ifPresent);
+        get(path, type).ifPresent(ifPresent);
     }
 
     default Optional<ConfigValue> get(String path) {
@@ -146,6 +146,15 @@ public interface Valuable extends ConfigHolder, Sectionable {
             values = getValues();
 
         return Optional.ofNullable(values.get(path));
+    }
+
+    default <T> Optional<T> get(String path, Class<T> type) {
+        try {
+            T as = getAs(path, type);
+            return Optional.of(as);
+        } catch (Throwable throwable) {
+            return Optional.empty();
+        }
     }
 
     default void ensureHasValues(String... values) {

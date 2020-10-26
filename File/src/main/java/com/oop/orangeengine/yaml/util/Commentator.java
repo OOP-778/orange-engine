@@ -78,6 +78,8 @@ public class Commentator {
 
         valuesComments.forEach((p, c) -> config.get(p).ifPresent(configValue -> configValue.comments.addAll(c)));
         sectionComments.forEach((p, c) -> config.ifSectionPresent(p, section -> section.comments.addAll(c)));
+
+        iterator.close();
     }
 
     private String getPath(ConfigPath path, String key) {
@@ -112,9 +114,11 @@ public class Commentator {
         private String[] lines;
         private int index = -1;
 
+        private BufferedReader reader;
+
         @SneakyThrows
         public LineIterator(File file) {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            reader = new BufferedReader(new FileReader(file));
             lines = reader.lines().toArray(String[]::new);
         }
 
@@ -136,6 +140,11 @@ public class Commentator {
                 next.add(lines[cloneIndex]);
             }
             return next.toArray(new String[0]);
+        }
+
+        @SneakyThrows
+        public void close() {
+            reader.close();
         }
     }
 

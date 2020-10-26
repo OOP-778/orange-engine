@@ -13,7 +13,10 @@ import lombok.SneakyThrows;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,7 +76,7 @@ public class Config implements Valuable, Sectionable, Commentable {
 
     @SneakyThrows
     public void save() {
-        Writer writer = new Writer(file.getFile());
+        Writer writer = new Writer(new OutputStreamWriter(new FileOutputStream(file.getFile()), StandardCharsets.UTF_8));
 
         // Write header
         if (!comments.isEmpty()) {

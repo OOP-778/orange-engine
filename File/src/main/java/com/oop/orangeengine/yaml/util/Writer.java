@@ -12,8 +12,8 @@ public class Writer extends BufferedWriter {
     private final String lineSeparator = AccessController.doPrivileged(new GetPropertyAction("line.separator"));
     private String lastWritten = null;
 
-    public Writer(@NonNull File file) throws IOException {
-        super(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
+    public Writer(@NonNull OutputStreamWriter stream) {
+        super(stream);
     }
 
     @SneakyThrows
