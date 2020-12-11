@@ -1,9 +1,6 @@
 package com.oop.orangeengine.yaml;
 
-import com.oop.orangeengine.yaml.interfaces.ConfigHolder;
-import com.oop.orangeengine.yaml.interfaces.Pathable;
-import com.oop.orangeengine.yaml.interfaces.Spaceable;
-import com.oop.orangeengine.yaml.interfaces.Writeable;
+import com.oop.orangeengine.yaml.interfaces.*;
 import com.oop.orangeengine.yaml.util.ConfigUtil;
 import com.oop.orangeengine.yaml.util.Writer;
 import lombok.Getter;
@@ -11,6 +8,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ConfigValue implements ConfigHolder, Spaceable, Pathable, Writeable {
@@ -62,12 +60,12 @@ public class ConfigValue implements ConfigHolder, Spaceable, Pathable, Writeable
             }
         }
 
-        if (object instanceof List) {
-            if (((List) object).isEmpty()) {
+        if (object instanceof Collection) {
+            if (((Collection) object).isEmpty()) {
                 writer.write(start + key + ": []");
             } else {
                 writer.write(start + key + ":");
-                for (Object object : (List<Object>) object) {
+                for (Object object : (Collection<Object>) object) {
                     writer.write(start + "- \"" + object.toString() + "\"");
                 }
             }
@@ -87,6 +85,6 @@ public class ConfigValue implements ConfigHolder, Spaceable, Pathable, Writeable
     }
 
     public <T> T getAs(Class<T> clazz) {
-        return (T) object;
+        return (T) Valuable.doConversion(object, clazz);
     }
 }

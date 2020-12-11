@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group 'com.oop.orangeengine'
+version '4.9'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile(fileTree("lib"))
+    compile 'org.javassist:javassist:3.27.0-GA'
+}

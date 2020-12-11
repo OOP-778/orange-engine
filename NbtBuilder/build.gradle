@@ -1,0 +1,56 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'java'
+}
+
+group 'com.oop.orangeengine'
+version '4.9'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile(fileTree("lib"))
+}
+
+task fatJar(type: ShadowJar) {
+    destinationDirectory = new File("fat")
+    archiveFileName = "test.jar"
+
+    from fileTree(dir: "lib").collect {
+        zipTree(it)
+    }
+
+    relocate("de.tr7zw.changeme.nbtapi", "com.oop.orangeengine.nbt")
+    relocate("de.tr7zw.nbtinjector", "com.oop.orangeengine.nbtinjector")
+}
+
+task onlyInjector(type: ShadowJar) {
+    destinationDirectory = new File("D:\\Work\\orangeengine\\NbtInjector\\lib")
+    archiveFileName = "injector.jar"
+
+    from fileTree(dir: "fat").collect {
+        zipTree(it)
+    }
+
+    exclude 'com/oop/orangeengine/nbt/**'
+}
+
+task onlyApi(type: ShadowJar) {
+    from fileTree(dir: "fat").collect {
+        zipTree(it)
+    }
+
+    destinationDirectory = new File("D:\\Work\\orangeengine\\Engine\\lib")
+    archiveFileName = "nbtapi.jar"
+
+    exclude 'com/oop/orangeengine/nbtinjector/**'
+}
+
+build {
+    dependsOn fatJar
+    dependsOn onlyInjector
+    dependsOn onlyApi
+}

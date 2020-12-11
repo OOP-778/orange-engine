@@ -206,7 +206,8 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     public TextComponent createComponent() {
         StringBuilder appendStart = new StringBuilder(), appendEnd = new StringBuilder();
         if (centered) {
-            String content = Centered.getCenteredMessage(raw());
+            String content = Helper.color(raw());
+            content = Centered.getCenteredMessage(content);
             IntStream.range(1, findSpaces(content, false)).forEach(i -> appendStart.append(" "));
             IntStream.range(1, findSpaces(content, true)).forEach(i -> appendEnd.append(" "));
         }
@@ -282,7 +283,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     }
 
     public String raw() {
-        return contentList.stream().map(LineContent::text).collect(Collectors.joining(" "));
+        return contentList.stream().map(LineContent::text).filter(s -> s.trim().length() > 0).collect(Collectors.joining(""));
     }
 
     public LineContent findContent(Predicate<LineContent> filter) {
@@ -420,6 +421,8 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                     component.setItalic(true);
                 else if (decoration.getName().contentEquals("MAGIC"))
                     component.setObfuscated(true);
+                else if (decoration.getName().contentEquals("STRIKETHROUGH"))
+                    component.setStrikethrough(true);
             }
         }
 

@@ -64,64 +64,61 @@ allprojects {
         annotationProcessor 'org.projectlombok:lombok:1.18.8'
     }
 
-    jar {
-
+    build {
         dependsOn shadowJar
-        //if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword'))
         dependsOn publish
-
     }
 
     publish.shouldRunAfter shadowJar
+    shadowJar.shouldRunAfter build
 
     shadowJar {
         relocate("org.nustaq", "com.oop.orangeengine.libs.nustaq")
-        relocate("de.tr7zw.oop", "com.oop.orangeengine.libs.nbt")
 
         archiveName = "OrangeEngine-${project.name}.jar"
         destinationDirectory = file('../target')
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifact source: file("../target/OrangeEngine-${project.name}.jar"), extension: 'jar'
+    if (!project.name.equalsIgnoreCase("testingplugin") && !project.name.equalsIgnoreCase("nbtbuilder")) {
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    artifact source: file("../target/OrangeEngine-${project.name}.jar"), extension: 'jar'
 
-                groupId = project.group
-                artifactId = project.name.toLowerCase()
-                version = project.version
+                    groupId = project.group
+                    artifactId = project.name.toLowerCase()
+                    version = project.version
 
-                pom {
-                    url = 'oopdevelopment.com'
-                    developers {
-                        developer {
-                            id = 'OOP-778'
-                            email = 'oskardhavel@gmail.com'
+                    pom {
+                        url = 'oopdevelopment.com'
+                        developers {
+                            developer {
+                                id = 'OOP-778'
+                                email = 'oskardhavel@gmail.com'
+                            }
                         }
-                    }
 
+                    }
+                }
+            }
+            repositories {
+                mavenLocal()
+                if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+                    maven {
+                        credentials {
+                            username project.mavenUsername
+                            password project.mavenPassword
+                        }
+
+                        def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
+                        def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
+                        url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+                    }
                 }
             }
         }
-        repositories {
-            mavenLocal()
-            if (project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
-                maven {
-                    credentials {
-                        username project.mavenUsername
-                        password project.mavenPassword
-                    }
-
-                    def releasesRepoUrl = 'https://repo.codemc.org/repository/maven-releases/'
-                    def snapshotsRepoUrl = 'https://repo.codemc.org/repository/maven-snapshots/'
-                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-                }
-            }
-        }
-
     }
-
 }
 
 boolean equalsString(String string, List<String> list) {

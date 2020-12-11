@@ -27,20 +27,15 @@ public class OPotion extends ItemBuilder<OPotion> {
     }
 
     @Override
-    protected OPotion _returnThis() {
-        return this;
-    }
-
-    @Override
     public PotionMeta getItemMeta() {
         return (PotionMeta) super.getItemMeta();
     }
 
     public OPotion addEffect(PotionEffect effect, boolean b) {
         PotionMeta itemMeta = getItemMeta();
-        if (itemMeta.hasCustomEffect(effect.getType())) return _returnThis();
+        if (itemMeta.hasCustomEffect(effect.getType())) return this;
 
         itemMeta.addCustomEffect(effect, b);
-        return _returnThis();
+        return this;
     }
 }

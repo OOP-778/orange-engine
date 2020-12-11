@@ -29,7 +29,7 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
     }
 
     public HoverTextAddition add(@NonNull String... text) {
-        hoverText.addAll(Arrays.asList(text));
+        hoverText.addAll(new ArrayList<>(Arrays.asList(text)));
         return this;
     }
 
@@ -76,7 +76,7 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
             placeholders.forEach((key, value) -> hoverArray[finalI] = hoverArray[finalI].replace(makeSureNonNull(key), makeSureNonNull(value)));
         }
 
-        this.hoverText = Arrays.asList(hoverArray);
+        this.hoverText = new ArrayList<>(Arrays.asList(hoverArray));
         return returnThis();
     }
 
@@ -88,7 +88,7 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
             placeholders.forEach(pair -> hoverArray[finalI] = hoverArray[finalI].replace(makeSureNonNull(pair.getFirst()), makeSureNonNull(pair.getSecond().apply(object))));
         }
 
-        this.hoverText = Arrays.asList(hoverArray);
+        this.hoverText = new ArrayList<>(Arrays.asList(hoverArray));
         return returnThis();
     }
 
@@ -98,7 +98,7 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
         for (int i = 0; i < hoverArray.length; i++)
             hoverArray[i] = function.apply(hoverArray[i]);
 
-        this.hoverText = Arrays.asList(hoverArray);
+        this.hoverText = new ArrayList<>(Arrays.asList(hoverArray));
         return returnThis();
     }
 

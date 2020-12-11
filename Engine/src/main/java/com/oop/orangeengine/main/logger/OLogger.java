@@ -103,9 +103,8 @@ public class OLogger {
         }
 
         send("");
-        if (exception.getCause() != null) {
+        if (exception.getCause() != null)
             handleCause(exception.getCause());
-        }
     }
 
     private void handleCause(Throwable exception) {
@@ -113,18 +112,20 @@ public class OLogger {
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());
         }
+
         if (exception.getCause() != null)
             handleCause(exception.getCause());
     }
 
     public void error(Throwable exception, String message) {
-        printError("Exception was caught in " + getLoggerName() + ": " + message);
+        printError(exception.getClass().getSimpleName() + " was caught in " + getLoggerName() + ": " + message + " cause: " + exception.getMessage());
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());
         }
 
         send("");
-
+        if (exception.getCause() != null)
+            handleCause(exception.getCause());
     }
 
     public void throwError(String message) {

@@ -4,13 +4,13 @@ import com.google.gson.internal.Primitives;
 import com.oop.orangeengine.item.custom.OItem;
 import com.oop.orangeengine.item.custom.OPotion;
 import com.oop.orangeengine.item.custom.OSkull;
+import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.yaml.ConfigSection;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -20,17 +20,45 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
+    private static GlowEnchant glowEnchant;
+
+    static {
+        if (OVersion.is(8)) {
+            glowEnchant = new GlowEnchant(69);
+            try {
+                Field byIdField = Enchantment.class.getDeclaredField("byId");
+                byIdField.setAccessible(true);
+
+                Field acceptingNew = Enchantment.class.getDeclaredField("acceptingNew");
+                acceptingNew.setAccessible(true);
+                acceptingNew.setBoolean(null, true);
+
+                Field byNameField = Enchantment.class.getDeclaredField("byName");
+                byNameField.setAccessible(true);
+
+                HashMap<Integer, Enchantment> o = (HashMap<Integer, Enchantment>) byIdField.get(null);
+                HashMap<String, Enchantment> o2 = (HashMap<String, Enchantment>) byNameField.get(null);
+
+                o.remove(glowEnchant.getId());
+                o2.remove(glowEnchant.getName());
+
+            } catch (Exception ex) {
+                Engine.getEngine().getOwning().getOLogger().printWarning("Failed to unregister glow enchant!");
+            }
+            GlowEnchant.registerEnchantment(glowEnchant);
+        } else {
+            glowEnchant = null;
+        }
+    }
 
     @Setter
     private ItemStack itemStack;
@@ -68,28 +96,28 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
-        if (lore.size() == 0 || (lore.size() - 1 < index)) return _returnThis();
+        if (lore.size() == 0 || (lore.size() - 1 < index)) return (T) this;
 
         lore.remove(index);
         meta.setLore(lore);
-        return _returnThis();
+        return (T) this;
     }
 
     public T replaceInLore(String key, String value) {
         ItemMeta meta = getItemMeta();
 
         List<String> lore = getLore();
-        if (lore.isEmpty()) return _returnThis();
+        if (lore.isEmpty()) return (T) this;
 
         lore.replaceAll(string -> string.replace(key, value));
         meta.setLore(lore);
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T makeUnstackable() {
         addNBTTag("_randomness_" + ThreadLocalRandom.current().nextInt(999999), "_randomness_" + ThreadLocalRandom.current().nextInt(999999));
-        return _returnThis();
+        return (T) this;
     }
 
     public T addNBTTag(String key, Object value) {
@@ -108,7 +136,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         else
             getNbt().setObject(key, value);
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T setLoreLine(int index, String text) {
@@ -121,7 +149,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         lore.set(index, Helper.color(text));
         meta.setLore(lore);
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T appendLore(String text) {
@@ -131,7 +159,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         lore.add(Helper.color(text));
         meta.setLore(lore);
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T setDisplayName(String displayName) {
@@ -139,7 +167,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         if (meta != null)
             meta.setDisplayName(Helper.color(displayName));
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T setLore(List<String> lore) {
@@ -151,25 +179,27 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
                             .collect(Collectors.toList())
             );
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T addItemFlag(ItemFlag... flags) {
         ItemMeta meta = getItemMeta();
+        if (meta == null) return (T) this;
+
         meta.addItemFlags(flags);
 
-        return _returnThis();
+        return (T) this;
     }
 
     public T removeItemFlag(ItemFlag... flags) {
         ItemMeta meta = getItemMeta();
         meta.removeItemFlags(flags);
-        return _returnThis();
+        return (T) this;
     }
 
     public T addEnchant(Enchantment enchant, int level) {
-        itemStack.addUnsafeEnchantment(enchant, level);
-        return _returnThis();
+        getItemMeta().addEnchant(enchant, level, true);
+        return (T) this;
     }
 
     public T setDurability(int durability) {
@@ -178,29 +208,29 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public T setDurability(byte durability) {
         itemStack.setDurability(durability);
-        return _returnThis();
+        return (T) this;
     }
 
     public T makeGlow() {
-        if (!getEnchants().isEmpty()) return _returnThis();
+        if (!getEnchants().isEmpty()) return (T) this;
         if (OVersion.isAfter(8)) {
             addItemFlag(ItemFlag.HIDE_ENCHANTS);
             addEnchant(Enchantment.DAMAGE_ALL, 1);
 
         } else
-            addNBTTag("ench", "OrangeEngine");
-        return _returnThis();
+            addEnchant(glowEnchant, 1);
+        return (T) this;
     }
 
     public T replaceDisplayName(String key, String value) {
         setDisplayName(getDisplayName().replace(key, value));
-        return _returnThis();
+        return (T) this;
     }
 
     public T replace(String key, Object value) {
         replaceDisplayName(key, value.toString());
         replaceInLore(key, value.toString());
-        return _returnThis();
+        return (T) this;
     }
 
     public String getDisplayName() {
@@ -227,13 +257,13 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public T setMaterial(Material material) {
         itemStack.setType(material);
-        return _returnThis();
+        return (T) this;
     }
 
     public T setMaterial(OMaterial material) {
         itemStack.setType(material.parseMaterial());
         itemStack.setDurability(material.getData());
-        return _returnThis();
+        return (T) this;
     }
 
     public Material getMaterial() {
@@ -251,7 +281,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public T setAmount(int amount) {
         itemStack.setAmount(amount);
-        return _returnThis();
+        return (T) this;
     }
 
     public int getAmount() {
@@ -274,11 +304,11 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         List<String> lore = getLore();
         lore.addAll(secondLore);
         setLore(lore);
-        return _returnThis();
+        return (T) this;
     }
 
     public T mergeLore(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasItemMeta() || !itemStack.getItemMeta().hasLore()) return _returnThis();
+        if (itemStack == null || !itemStack.hasItemMeta() || !itemStack.getItemMeta().hasLore()) return (T) this;
         return mergeLore(itemStack.getItemMeta().getLore());
     }
 
@@ -340,7 +370,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
             }
         }));
 
-        return _returnThis();
+        return (T) this;
     }
 
     public void save(ConfigSection section, OItem object) {
@@ -378,8 +408,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         consumer.accept(list);
     }
 
-    protected abstract T _returnThis();
-
     public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigSection section) {
         OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class));
         Objects.requireNonNull(material, "Failed to find material by " + section.getAs("material", String.class));
@@ -407,7 +435,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
 
     public T clone() {
         try {
-            T clone = (T) getClass().getDeclaredConstructor(getClass()).newInstance(_returnThis());
+            T clone = (T) getClass().getDeclaredConstructor(getClass()).newInstance(this);
             clone.onClone(this);
             return clone;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -435,7 +463,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         List<String> lore = getLore();
         lore.removeIf(filter);
         setLore(lore);
-        return _returnThis();
+        return (T) this;
     }
 
     public void onClone(T from) {
@@ -449,5 +477,12 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
         if (nbt == null)
             nbt = new NBTItem(itemStack);
         return nbt;
+    }
+
+    public T clearFlags() {
+        if (meta == null) return (T) this;
+
+        addItemFlag(ItemFlag.values());
+        return (T) this;
     }
 }

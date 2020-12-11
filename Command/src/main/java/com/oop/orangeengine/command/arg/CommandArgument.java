@@ -1,7 +1,9 @@
 package com.oop.orangeengine.command.arg;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.oop.orangeengine.command.OCommand;
+import com.oop.orangeengine.command.ResultCache;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +21,7 @@ import java.util.function.Consumer;
 public abstract class CommandArgument<T> {
 
     //Argument parser / Will return as String if not defined
-    private ArgumentMapper mapper;
+    private ArgumentMapper<T> mapper;
 
     //Will be used on when list of the commands are sent / On proper command usage / When getting the arguments
     private String identity = "";
@@ -33,25 +35,27 @@ public abstract class CommandArgument<T> {
     // It it will grab all the remaining args
     private boolean grabAllNextArgs = false;
 
-    // Allows for other arguments to depend on this
-    private AtomicReference<T> reference = new AtomicReference<>(null);
-
     public void onAdd(OCommand command) {}
 
+    public OPair<T, String> map(String in, ResultCache cache) {
+        Preconditions.checkArgument(mapper != null, "Mapper cannot be null!");
+        if (mapper instanceof AdvancedArgumentMapper)
+            return ((AdvancedArgumentMapper<T>) mapper).product(in, cache);
+        else
+            return mapper.product(in);
+    }
+
     public interface ArgumentMapper<T> {
-        default OPair<T, String> requestProduct(CommandArgument<T> argument, String input) {
-            OPair<T, String> product = product(input);
-            if (product.getFirst() != null)
-                argument.reference.set(product.getFirst());
-
-            return product;
-        }
-
-        //Returns Parsed value and if failed to parse value error message.
+        // Returns Parsed value and if failed to parse value error message.
         OPair<T, String> product(String input);
     }
 
-    public <T> AtomicReference<T> getReference(Class<T> type) {
-        return (AtomicReference<T>) reference;
+    public interface AdvancedArgumentMapper<T> extends ArgumentMapper<T> {
+        @Override
+        default OPair<T, String> product(String input) {
+            return null;
+        }
+
+        OPair<T, String> product(String input, ResultCache cache);
     }
 }

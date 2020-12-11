@@ -86,4 +86,6 @@ public interface Sectionable {
     default boolean isSectionPresent(String path) {
         return getSection(path).isPresent();
     }
+
+    Map<String, ConfigSection> getHierarchySections();
 }

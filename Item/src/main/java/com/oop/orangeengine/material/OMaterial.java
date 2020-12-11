@@ -141,7 +141,7 @@ public enum OMaterial {
     BLACK_CARPET(15, "CARPET"),
     BLACK_CONCRETE(15, "CONCRETE"),
     BLACK_CONCRETE_POWDER(15, "CONCRETE_POWDER"),
-    BLACK_DYE( "INK_SAC"),
+    BLACK_DYE( "INK_SACK"),
     BLACK_GLAZED_TERRACOTTA(15, "STAINED_CLAY", "BLACK_TERRACOTTA"),
     BLACK_SHULKER_BOX,
     BLACK_STAINED_GLASS(15, "STAINED_GLASS"),
@@ -158,7 +158,7 @@ public enum OMaterial {
     BLUE_CARPET(11, "CARPET"),
     BLUE_CONCRETE(11, "CONCRETE"),
     BLUE_CONCRETE_POWDER(11, "CONCRETE_POWDER"),
-    BLUE_DYE(4, "INK_SAC", "LAPIS_LAZULI"),
+    BLUE_DYE(4, "INK_SACK", "LAPIS_LAZULI"),
     BLUE_GLAZED_TERRACOTTA(11, "STAINED_CLAY", "BLUE_TERRACOTTA"),
     BLUE_ICE("PACKED_ICE"),
     BLUE_ORCHID(1, "RED_ROSE"),
@@ -170,7 +170,7 @@ public enum OMaterial {
     BLUE_WOOL(11, "WOOL"),
     BONE,
     BONE_BLOCK,
-    BONE_MEAL(15, "INK_SAC"),
+    BONE_MEAL(15, "INK_SACK"),
     BOOK,
     BOOKSHELF,
     BOW,
@@ -191,7 +191,7 @@ public enum OMaterial {
     BROWN_CARPET(12, "CARPET"),
     BROWN_CONCRETE(12, "CONCRETE"),
     BROWN_CONCRETE_POWDER(12, "CONCRETE_POWDER"),
-    BROWN_DYE(3, "INK_SAC", "COCOA", "COCOA_BEANS"),
+    BROWN_DYE(3, "INK_SACK", "COCOA", "COCOA_BEANS"),
     BROWN_GLAZED_TERRACOTTA(12, "STAINED_CLAY", "BROWN_TERRACOTTA"),
     BROWN_MUSHROOM,
     BROWN_MUSHROOM_BLOCK("BROWN_MUSHROOM", "HUGE_MUSHROOM_1"),
@@ -255,7 +255,7 @@ public enum OMaterial {
     COBBLESTONE_WALL("COBBLE_WALL"),
     COBWEB("WEB"),
     COCOA(),
-    COCOA_BEANS(3, "INK_SAC", "COCOA"),
+    COCOA_BEANS(3, "INK_SACK", "COCOA"),
     COD("RAW_FISH"),
     COD_BUCKET("BUCKET", "WATER_BUCKET"),
     COD_SPAWN_EGG("MONSTER_EGG"),
@@ -291,7 +291,7 @@ public enum OMaterial {
     CYAN_CARPET(9, "CARPET"),
     CYAN_CONCRETE(9, "CONCRETE"),
     CYAN_CONCRETE_POWDER(9, "CONCRETE_POWDER"),
-    CYAN_DYE(6, "INK_SAC"),
+    CYAN_DYE(6, "INK_SACK"),
     CYAN_GLAZED_TERRACOTTA(9, "STAINED_CLAY", "CYAN_TERRACOTTA"),
     CYAN_SHULKER_BOX,
     CYAN_STAINED_GLASS(9, "STAINED_GLASS"),
@@ -461,10 +461,10 @@ public enum OMaterial {
     GRAY_CARPET(7, "CARPET"),
     GRAY_CONCRETE(7, "CONCRETE"),
     GRAY_CONCRETE_POWDER(7, "CONCRETE_POWDER"),
-    GRAY_DYE(8, "INK_SAC"),
+    GRAY_DYE(8, "INK_SACK"),
     GRAY_GLAZED_TERRACOTTA(7, "STAINED_CLAY", "GRAY_TERRACOTTA"),
     GRAY_SHULKER_BOX,
-    GRAY_STAINED_GLASS(8, "STAINED_GLASS"),
+    GRAY_STAINED_GLASS(7, "STAINED_GLASS"),
     GRAY_STAINED_GLASS_PANE(7,  "STAINED_GLASS_PANE"),
     GRAY_TERRACOTTA(7,  "STAINED_CLAY"),
     GRAY_WALL_BANNER(8, "WALL_BANNER"),
@@ -474,7 +474,7 @@ public enum OMaterial {
     GREEN_CARPET(13, "CARPET"),
     GREEN_CONCRETE(13, "CONCRETE"),
     GREEN_CONCRETE_POWDER(13, "CONCRETE_POWDER"),
-    GREEN_DYE(2, "INK_SAC", "CACTUS_GREEN"),
+    GREEN_DYE(2, "INK_SACK", "CACTUS_GREEN"),
     GREEN_GLAZED_TERRACOTTA(13, "STAINED_CLAY", "GREEN_TERRACOTTA"),
     GREEN_SHULKER_BOX,
     GREEN_STAINED_GLASS(13, "STAINED_GLASS"),
@@ -507,7 +507,7 @@ public enum OMaterial {
     INFESTED_MOSSY_STONE_BRICKS(3, "MONSTER_EGGS"),
     INFESTED_STONE("MONSTER_EGGS"),
     INFESTED_STONE_BRICKS(2, "MONSTER_EGGS", "SMOOTH_BRICK"),
-    INK_SAC("INK_SACK"),
+    INK_SACK("INK_SACK"),
     IRON_AXE,
     IRON_BARS("IRON_FENCE"),
     IRON_BLOCK,
@@ -527,7 +527,7 @@ public enum OMaterial {
     IRON_TRAPDOOR,
     ITEM_FRAME,
     JACK_O_LANTERN,
-    JIGSAW("COMMAND_BLOCK", "STRUCTURE_BLOCK"),
+    JIGSAW("COMMAND_BLOCK", "STRUCTURE_BLOCK", "COMMAND"),
     JUKEBOX,
     JUNGLE_BOAT("BOAT_JUNGLE"),
     JUNGLE_BUTTON("WOOD_BUTTON"),
@@ -551,7 +551,7 @@ public enum OMaterial {
     LADDER,
     LANTERN("SEA_LANTERN"),
     LAPIS_BLOCK,
-    LAPIS_LAZULI(4, "INK_SAC"),
+    LAPIS_LAZULI(4, "INK_SACK"),
     LAPIS_ORE,
     LARGE_FERN(3, "DOUBLE_PLANT"),
     LAVA("STATIONARY_LAVA"),
@@ -570,7 +570,7 @@ public enum OMaterial {
     LIGHT_BLUE_CARPET(3, "CARPET"),
     LIGHT_BLUE_CONCRETE(3, "CONCRETE"),
     LIGHT_BLUE_CONCRETE_POWDER(3, "CONCRETE_POWDER"),
-    LIGHT_BLUE_DYE(12, "INK_SAC"),
+    LIGHT_BLUE_DYE(12, "INK_SACK"),
     LIGHT_BLUE_GLAZED_TERRACOTTA(3, "STAINED_CLAY", "LIGHT_BLUE_TERRACOTTA"),
     LIGHT_BLUE_SHULKER_BOX,
     LIGHT_BLUE_STAINED_GLASS(3, "STAINED_GLASS"),
@@ -583,7 +583,7 @@ public enum OMaterial {
     LIGHT_GRAY_CARPET(8, "CARPET"),
     LIGHT_GRAY_CONCRETE(8, "CONCRETE"),
     LIGHT_GRAY_CONCRETE_POWDER(8, "CONCRETE_POWDER"),
-    LIGHT_GRAY_DYE(7, "INK_SAC"),
+    LIGHT_GRAY_DYE(7, "INK_SACK"),
     LIGHT_GRAY_GLAZED_TERRACOTTA(8, "STAINED_CLAY", "LIGHT_GRAY_TERRACOTTA", "SILVER_GLAZED_TERRACOTTA/1.13"),
     LIGHT_GRAY_SHULKER_BOX("SILVER_SHULKER_BOX"),
     LIGHT_GRAY_STAINED_GLASS(8, "STAINED_GLASS"),
@@ -600,7 +600,7 @@ public enum OMaterial {
     LIME_CARPET(5, "CARPET"),
     LIME_CONCRETE(5, "CONCRETE"),
     LIME_CONCRETE_POWDER(5, "CONCRETE_POWDER"),
-    LIME_DYE(10, "INK_SAC"),
+    LIME_DYE(10, "INK_SACK"),
     LIME_GLAZED_TERRACOTTA(5, "STAINED_CLAY", "LIME_TERRACOTTA"),
     LIME_SHULKER_BOX,
     LIME_STAINED_GLASS(5, "STAINED_GLASS"),
@@ -616,7 +616,7 @@ public enum OMaterial {
     MAGENTA_CARPET(2, "CARPET"),
     MAGENTA_CONCRETE(2, "CONCRETE"),
     MAGENTA_CONCRETE_POWDER(2, "CONCRETE_POWDER"),
-    MAGENTA_DYE(13, "INK_SAC"),
+    MAGENTA_DYE(13, "INK_SACK"),
     MAGENTA_GLAZED_TERRACOTTA(2, "STAINED_CLAY", "MAGENTA_TERRACOTTA"),
     MAGENTA_SHULKER_BOX,
     MAGENTA_STAINED_GLASS(2, "STAINED_GLASS"),
@@ -701,7 +701,7 @@ public enum OMaterial {
     ORANGE_CARPET(1, "CARPET"),
     ORANGE_CONCRETE(1, "CONCRETE"),
     ORANGE_CONCRETE_POWDER(1, "CONCRETE_POWDER"),
-    ORANGE_DYE(14, "INK_SAC"),
+    ORANGE_DYE(14, "INK_SACK"),
     ORANGE_GLAZED_TERRACOTTA(1, "STAINED_CLAY", "ORANGE_TERRACOTTA"),
     ORANGE_SHULKER_BOX,
     ORANGE_STAINED_GLASS(1, "STAINED_GLASS"),
@@ -727,7 +727,7 @@ public enum OMaterial {
     PINK_CARPET(6, "CARPET"),
     PINK_CONCRETE(6, "CONCRETE"),
     PINK_CONCRETE_POWDER(6, "CONCRETE_POWDER"),
-    PINK_DYE(9, "INK_SAC"),
+    PINK_DYE(9, "INK_SACK"),
     PINK_GLAZED_TERRACOTTA(6, "STAINED_CLAY", "PINK_TERRACOTTA"),
     PINK_SHULKER_BOX,
     PINK_STAINED_GLASS(6, "STAINED_GLASS"),
@@ -744,8 +744,8 @@ public enum OMaterial {
     POISONOUS_POTATO,
     POLAR_BEAR_SPAWN_EGG(102, "MONSTER_EGG"),
     POLISHED_ANDESITE(6, "STONE"),
-    POLISHED_ANDESITE_SLAB,
-    POLISHED_ANDESITE_STAIRS,
+    POLISHED_ANDESITE_SLAB("STEP"),
+    POLISHED_ANDESITE_STAIRS(""),
     POLISHED_DIORITE(4, "STONE"),
     POLISHED_DIORITE_SLAB,
     POLISHED_DIORITE_STAIRS,
@@ -805,7 +805,7 @@ public enum OMaterial {
     PURPLE_CARPET(10, "CARPET"),
     PURPLE_CONCRETE(10, "CONCRETE"),
     PURPLE_CONCRETE_POWDER(10, "CONCRETE_POWDER"),
-    PURPLE_DYE(5, "INK_SAC"),
+    PURPLE_DYE(5, "INK_SACK"),
     PURPLE_GLAZED_TERRACOTTA(10,"STAINED_CLAY", "PURPLE_TERRACOTTA"),
     PURPLE_SHULKER_BOX,
     PURPLE_STAINED_GLASS(10, "STAINED_GLASS"),
@@ -1029,7 +1029,7 @@ public enum OMaterial {
     WHITE_CARPET("CARPET"),
     WHITE_CONCRETE("CONCRETE"),
     WHITE_CONCRETE_POWDER("CONCRETE_POWDER"),
-    WHITE_DYE(15, "INK_SAC", "BONE_MEAL"),
+    WHITE_DYE(15, "INK_SACK", "BONE_MEAL"),
     WHITE_GLAZED_TERRACOTTA("STAINED_CLAY", "WHITE_TERRACOTTA"),
     WHITE_SHULKER_BOX,
     WHITE_STAINED_GLASS("STAINED_GLASS"),
@@ -1056,7 +1056,7 @@ public enum OMaterial {
     YELLOW_CARPET(4, "CARPET"),
     YELLOW_CONCRETE(4, "CONCRETE"),
     YELLOW_CONCRETE_POWDER(4, "CONCRETE_POWDER"),
-    YELLOW_DYE(11, "INK_SAC", "DANDELION_YELLOW"),
+    YELLOW_DYE(11, "INK_SACK", "DANDELION_YELLOW"),
     YELLOW_GLAZED_TERRACOTTA(4,  "STAINED_CLAY", "YELLOW_TERRACOTTA"),
     YELLOW_SHULKER_BOX,
     YELLOW_STAINED_GLASS(4, "STAINED_GLASS"),
@@ -1106,7 +1106,7 @@ public enum OMaterial {
     HOGLIN_SPAWN_EGG( "MONSTER_EGG"),
     LODESTONE( "COBBLESTONE"),
     MUSIC_DISC_PIGSTEP( "COBBLESTONE"),
-    NETHERITE_AXE( "WOODEN_AXE"),
+    NETHERITE_AXE( "WOOD_AXE"),
     NETHERITE_BLOCK( "COBBLESTONE"),
     NETHERITE_BOOTS( "LEATER_BOOTS"),
     NETHERITE_CHESTPLATE( "LEATER_CHESTPLATE"),
@@ -1191,19 +1191,33 @@ public enum OMaterial {
     private static ImmutableMap<Integer, OMaterial> LEGACY_VALUES;
 
     static {
-        HashMap<Integer, OMaterial> legacyMaterials = new HashMap<>();
-        VALUES
-                .stream()
-                .map(material -> {
-                    Set<OPair<Integer, OMaterial>> materials = new HashSet<>();
-                    for (String s : material.legacy)
-                        materials.add(new OPair<>(Objects.hash(format(s), material.data), material));
-                    return materials;
-                })
-                .flatMap(Set::stream)
-                .forEach(pair -> legacyMaterials.put(pair.getKey(), pair.getValue()));
+        if (!ISFLAT) {
+            HashMap<Integer, OMaterial> legacyMaterials = new HashMap<>();
+            VALUES
+                    .stream()
+                    .map(material -> {
+                        Set<OPair<Integer, OMaterial>> materials = new HashSet<>();
+                        for (String s : material.legacy)
+                            materials.add(new OPair<>(Objects.hash(format(s), material.data), material));
+                        return materials;
+                    })
+                    .flatMap(Set::stream)
+                    .forEach(pair -> legacyMaterials.put(pair.getKey(), pair.getValue()));
 
-        LEGACY_VALUES = ImmutableMap.copyOf(legacyMaterials);
+            LEGACY_VALUES = ImmutableMap.copyOf(legacyMaterials);
+        } else
+            LEGACY_VALUES = ImmutableMap.of();
+
+        // For all
+//        for (OMaterial value : VALUES) {
+//            if (value.legacy.length == 0) continue;
+//
+//            Map<Byte, OMaterial> byteOMaterialMap = new HashMap<>();
+//            byteOMaterialMap.put(value.data, value);
+//
+//            STONE <0 = STONE, 1 = ANDESTI
+//
+//        }
     }
 
     private static final OCache<OMaterial, Material> PARSED_CACHE = OCache.builder()
@@ -1251,6 +1265,7 @@ public enum OMaterial {
         this(0, legacy);
     }
 
+    // Map<Name, Map<Data, OMaterial>
     private static Optional<OMaterial> _matchMaterial(String name, byte data) {
         // Make sure name is upper case
         name = format(name);
@@ -1262,10 +1277,16 @@ public enum OMaterial {
         OMaterial material = PARSED_OMATERIAL_CACHE.get(hash);
         if (material != null) return Optional.of(material);
 
-        material = Enums.getIfPresent(OMaterial.class, name).orNull();
+        if (data == 0 && !ISFLAT) {
+            material = Enums.getIfPresent(OMaterial.class, name).orNull();
+            if (material == null)
+                material = LEGACY_VALUES.get(hash);
 
-        if (material == null)
+        } else {
             material = LEGACY_VALUES.get(hash);
+            if (material == null)
+                material = Enums.getIfPresent(OMaterial.class, name).orNull();
+        }
 
         if (material != null)
             PARSED_OMATERIAL_CACHE.put(hash, material);
@@ -1297,28 +1318,8 @@ public enum OMaterial {
     @Nonnull
     public static OMaterial matchMaterial(@Nonnull ItemStack item) {
         Objects.requireNonNull(item, "Cannot match null ItemStack");
-        return _matchMaterial(item.getType().name().toUpperCase(), ISFLAT ? 0 : (byte) item.getDurability())
+        return _matchMaterial(item.getType().name().toUpperCase(), ISFLAT ? 0 : item.getData().getData())
                 .orElseThrow(() -> new IllegalStateException("Failed to match material by itemstack type " + item.getType().name()));
-    }
-
-    /**
-     * Gets the XMaterial based on the material's ID (Magic Value) and data value.<br>
-     * You should avoid using this for performance issues.
-     *
-     * @param id   the ID (Magic value) of the material.
-     * @param data the data value of the material.
-     * @return a parsed XMaterial with the same ID and data value.
-     * @see #matchMaterial(ItemStack)
-     * @since 2.0.0
-     */
-    @Nonnull
-    public static Optional<OMaterial> matchMaterial(int id, byte data) {
-        if (id < 0 || data < 0) return Optional.empty();
-
-        // Looping through Material.values() will take longer.
-        for (OMaterial materials : VALUES)
-            if (materials.data == data && materials.getId() == id) return Optional.of(materials);
-        return Optional.empty();
     }
 
     /**
@@ -1397,16 +1398,27 @@ public enum OMaterial {
     }
 
     public int getId() {
+        if (ISFLAT) return -1;
         if (id == Integer.MIN_VALUE) {
-            Material material = parseMaterial();
-            id = ISFLAT ? material.name().hashCode() : material == null ? -1 : material.getId();
+            try {
+                Material material = parseMaterial();
+                id = material.getId();
+            } catch (Throwable throwable) {
+                id = Integer.MAX_VALUE;
+            }
         }
         return id;
     }
 
     public int getCombinedData() {
-        if (combinedData == Integer.MIN_VALUE)
-            combinedData = getId() + (data << 12);
+        if (ISFLAT) return -1;
+
+        if (combinedData == Integer.MIN_VALUE) {
+            if (getId() == Integer.MAX_VALUE)
+                combinedData = Integer.MAX_VALUE;
+            else
+                combinedData = getId() + (data << 12);
+        }
 
         return combinedData;
     }
@@ -1488,6 +1500,7 @@ public enum OMaterial {
 
         cache = VALUES
                 .parallelStream()
+                .filter(m -> m.getCombinedData() != -1 || m.getCombinedData() == Integer.MAX_VALUE)
                 .filter(m -> m.getCombinedData() == combinedData)
                 .findFirst().orElse(null);
         COMBINED_ID_TO_OMATERIAL_CACHE.put(combinedData, cache);

@@ -79,7 +79,11 @@ public interface Valuable extends ConfigHolder, Sectionable {
         return (T) object;
     }
 
-    default  <T> Object doConversion(Object parsed, Class<T> clazz) {
+    static <T> Object doConversion(Object parsed, Class<T> clazz) {
+        clazz = Primitives.wrap(clazz);
+        if (Primitives.wrap(parsed.getClass()) == clazz || clazz.isAssignableFrom(parsed.getClass()))
+            return parsed;
+
         String value = parsed.toString();
         if (clazz == String.class) return value;
 
@@ -112,7 +116,7 @@ public interface Valuable extends ConfigHolder, Sectionable {
             throw new IllegalStateException("Incorrect object type required: " + clazz.getSimpleName() + " found: " + parsed.getClass().getSimpleName());
     }
 
-    default <T> T getAs(String path, Class<T> type, Supplier<T> supplier, String ...comments) {
+    default <T> T getAs(String path, Class<T> type, Supplier<T> supplier, String... comments) {
         Optional<ConfigValue> ocv = get(path);
         if (supplier == null && !ocv.isPresent())
             throw new IllegalStateException("Failed to find value in " + getConfig().getFile().getFileName() + " path: " + (this instanceof ConfigSection ? ((ConfigSection) this).getPath() + "." : "") + path);

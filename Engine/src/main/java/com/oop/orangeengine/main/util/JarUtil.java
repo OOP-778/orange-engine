@@ -10,7 +10,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class JarUtil {
-
     public static final char JAR_SEPARATOR = '/';
 
     public static void copyFolderFromJar(String folderName, File destFolder, CopyOption option, Class source) {
@@ -58,7 +57,7 @@ public class JarUtil {
             zis.closeEntry();
             zis.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new IllegalStateException("Failed to copy folder with name " + folderName, ex);
         }
     }
 
@@ -91,7 +90,7 @@ public class JarUtil {
         try {
             outputStream = new FileOutputStream(out);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to open output stream " + fileName, e);
         }
 
         try {
@@ -102,7 +101,7 @@ public class JarUtil {
             outputStream.close();
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new IllegalStateException("Failed to copy file with name " + fileName, ex);
         }
 
     }

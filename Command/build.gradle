@@ -15,4 +15,5 @@ repositories {
 dependencies {
     compileOnly project(":Message")
     compileOnly project(":File")
+    compileOnly "org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT"
 }

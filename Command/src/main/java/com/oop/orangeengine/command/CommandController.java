@@ -1,6 +1,5 @@
 package com.oop.orangeengine.command;
 
-import com.google.common.collect.Lists;
 import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import com.oop.orangeengine.command.scheme.DefaultScheme;
@@ -26,8 +25,6 @@ import org.bukkit.plugin.SimplePluginManager;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.oop.orangeengine.main.Engine.getEngine;
@@ -65,7 +62,7 @@ public class CommandController {
     }
 
     public void register(OCommand command) {
-        Command bukkitCommand = new Command(command.getLabel(), command.getDescription() == null ? "" : command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
+        Command bukkitCommand = new WrappedBukkitCommand(command.getLabel(), command.getDescription() == null ? "" : command.getDescription(), "none", new ArrayList<>(command.getAliases())) {
             @Override
             public boolean execute(CommandSender sender, String cmdName, String[] args) {
                 try {
@@ -123,8 +120,6 @@ public class CommandController {
         command.setRegisteredCommand(bukkitCommand);
         registeredCommands.put(command.getLabel().toLowerCase(), command);
         commandMap.register(getEngine().getOwning().getName(), bukkitCommand);
-
-
     }
 
     public Collection<String> getSubCommandsFor(OCommand command, CommandSender sender) {
@@ -149,28 +144,28 @@ public class CommandController {
         if (!command.getSubCommands().isEmpty())
             completion.addAll(getSubCommandsFor(command, sender));
 
+        ResultCache cache = new ResultCache();
         if (completion.isEmpty()) {
-            List<Object> objects = Lists.newArrayList();
             List<CommandArgument> arguments = new ArrayList<>(command.getArgumentMap().values());
             for (int i = 0; i < args.length - 1; i++) {
                 if ((arguments.size() - 1) <= i)
                     break;
 
                 CommandArgument commandArgument = arguments.get(i);
-                Object value = commandArgument.getMapper().product(args[i]).getKey();
-                if (value != null)
-                    objects.add(value);
+                OPair<Object, String> value = commandArgument.map(args[i], cache);
+                if (value.getKey() != null)
+                    cache.getObjects().add(value.getKey());
             }
 
             TabCompletion tabCompletion = command.getTabComplete().get(args.length);
             if (tabCompletion != null)
-                completion.addAll(tabCompletion.handleTabCompletion(new CompletionResult(objects), args));
+                completion.addAll(tabCompletion.handleTabCompletion(cache, args));
         }
 
         if (args.length >= 1) {
-            String lastArg = args[args.length - 1];
+            String lastArg = args[args.length - 1].toLowerCase(Locale.ROOT);
             if (lastArg.trim().length() > 0)
-                completion.removeIf(name -> name == null || !name.toLowerCase().startsWith(args[0].toLowerCase()));
+                completion.removeIf(name -> name == null || !name.toLowerCase().startsWith(lastArg));
         }
 
         completion.removeIf(Objects::isNull);
@@ -226,6 +221,7 @@ public class CommandController {
             String[] argsCopy = args.clone();
             List<CommandArgument> commandArguments = new ArrayList<>(command.getArgumentMap().values());
 
+            ResultCache cache = new ResultCache();
             for (CommandArgument arg : commandArguments) {
                 if (argsCopy.length == 0) {
                     if (!arg.isRequired()) continue;
@@ -237,7 +233,7 @@ public class CommandController {
                 try {
                     if (arg.getMapper() != null) {
 
-                        OPair<Object, String> value = arg.getMapper().product(stringValue);
+                        OPair<Object, String> value = arg.map(stringValue, cache);
                         if (value.getFirst() == null) {
                             Scheme error = schemeHolder.getScheme(command, "error");
                             OChatMessage message = new OChatMessage(error.getScheme());
@@ -248,6 +244,7 @@ public class CommandController {
 
                         } else {
                             arguments.put(arg.getIdentity(), value.getFirst());
+                            cache.getObjects().add(value.getFirst());
                             argsCopy = cutArray(argsCopy, 1);
                         }
                     }
@@ -279,15 +276,14 @@ public class CommandController {
         unregisterAllSimilar(registeredCommands.values().toArray(new OCommand[0]));
     }
 
-    public void unregisterAllSimilar(OCommand ...cmds) {
+    public void unregisterAllSimilar(OCommand... cmds) {
         try {
             Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
             knownCommandsField.setAccessible(true);
 
             Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
             knownCommands.entrySet().removeIf(entry -> {
-                List<String> all = new ArrayList<>();
-                all.addAll(entry.getValue().getAliases());
+                List<String> all = new ArrayList<>(entry.getValue().getAliases());
                 all.add(entry.getValue().getLabel());
                 return all.stream().anyMatch(l -> Arrays.stream(cmds).anyMatch(l2 -> l2.getLabel().equalsIgnoreCase(l) || l2.getAliases().stream().anyMatch(l3 -> l3.equalsIgnoreCase(l))));
             });
@@ -306,32 +302,10 @@ public class CommandController {
             knownCommandsField.setAccessible(true);
 
             Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
-            for (OCommand command : registeredCommands.values()) {
-                if (command.getRegisteredCommand() == null) continue;
-
-                knownCommands.remove(command.getLabel());
-                command.getRegisteredCommand().unregister(commandMap);
-            }
+            knownCommands.entrySet().removeIf(entry -> entry.getValue() instanceof WrappedBukkitCommand);
         } catch (Exception e) {
             throw new IllegalStateException("Could not unregister commands", e);
         }
-    }
-
-    private String reverseLabel(String labelWithParents) {
-        List<String> strings;
-        if (labelWithParents.contains(" "))
-            strings = new ArrayList<>(Arrays.asList(labelWithParents.split(" ")));
-        else
-            return labelWithParents;
-
-        Collections.reverse(strings);
-
-        StringBuilder builder = new StringBuilder();
-        for (String append : strings) {
-            builder.append(append).append(" ");
-        }
-
-        return builder.toString();
     }
 
     private void execCommand(WrappedCommand command, OCommand oopCommand) {
@@ -352,7 +326,7 @@ public class CommandController {
     private Map<String, Object> getPlaceholdersForCommand(OCommand command) {
         Map<String, Object> placeholders = new HashMap<>();
         placeholders.put("{command_label}", command.getLabel());
-        placeholders.put("{command_full_label}", reverseLabel(command.getLabelWithParents()));
+        placeholders.put("{command_full_label}", command.getLabelWithParents());
         placeholders.put("{command_description}", command.getDescription() == null ? "none" : command.getDescription());
         placeholders.put("{command_permission}", command.getPermission() == null ? "none" : command.getPermission());
 

@@ -1,7 +1,6 @@
 package com.oop.orangeengine.message.impl.chat.color;
 
 public class ChatColor_8 implements ChatColor {
-
     private Object colorObject;
 
     public ChatColor_8(String color) {

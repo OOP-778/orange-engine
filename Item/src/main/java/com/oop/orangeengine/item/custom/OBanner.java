@@ -26,9 +26,4 @@ public class OBanner extends ItemBuilder<OBanner> {
     public BannerMeta getItemMeta() {
         return (BannerMeta) super.getItemMeta();
     }
-
-    @Override
-    protected OBanner _returnThis() {
-        return this;
-    }
 }

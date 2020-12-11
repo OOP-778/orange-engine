@@ -360,4 +360,21 @@ public final class OSimpleReflection {
             return stringObjectFunction.apply(what.toString());
         }
     }
+
+    public static Method getTypedMethod(Class<?> clazz, String methodName, Class<?> returnType, Class<?>... params) {
+        for (final Method method : clazz.getDeclaredMethods()) {
+            if ((methodName == null || method.getName().equals(methodName))
+                    && (returnType == null || method.getReturnType().equals(returnType))
+                    && Arrays.equals(method.getParameterTypes(), params)) {
+                method.setAccessible(true);
+                return method;
+            }
+        }
+
+        // Search in every superclass
+        if (clazz.getSuperclass() != null)
+            return getMethod(clazz.getSuperclass(), methodName, params);
+
+        throw new IllegalStateException(String.format("Unable to find method %s (%s).", methodName, Arrays.asList(params)));
+    }
 }

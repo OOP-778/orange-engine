@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 @Getter
 public class OCommand {
@@ -100,6 +101,7 @@ public class OCommand {
 
     public OCommand argument(CommandArgument argument) {
         argumentMap.put(argument.getIdentity(), argument);
+        currentTabComplete++;
         argument.onAdd(this);
         return this;
     }
@@ -116,7 +118,6 @@ public class OCommand {
     }
 
     public OCommand nextTabComplete(TabCompletion completion) {
-        currentTabComplete++;
         this.tabComplete.put(currentTabComplete, completion);
         return this;
     }
@@ -148,15 +149,27 @@ public class OCommand {
     }
 
     public String getLabelWithParents() {
-        return getLabelWithParents("");
+        return getLabelWithParents(" ");
     }
 
-    private String getLabelWithParents(String current) {
-        if (getParent() == null)
-            return current + getLabel() + " ";
-        else
-            return getParent().getLabelWithParents(current + getLabel() + " ");
+    public String getLabelWithParents(String connector) {
+        String labelWithParents = getLabelWithParents("", connector);
 
+        List<String> labels;
+        if (labelWithParents.contains(connector))
+            labels = new ArrayList<>(Arrays.asList(labelWithParents.split(Pattern.quote(connector))));
+        else
+            return labelWithParents;
+
+        Collections.reverse(labels);
+        return String.join(connector, labels);
+    }
+
+    private String getLabelWithParents(String current, String connector) {
+        if (getParent() == null)
+            return current + getLabel() + connector;
+        else
+            return getParent().getLabelWithParents(current + getLabel() + connector, connector);
     }
 
     public OCommand onCommand(Consumer<WrappedCommand> consumer) {

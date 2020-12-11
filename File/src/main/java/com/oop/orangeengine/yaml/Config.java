@@ -70,6 +70,15 @@ public class Config implements Valuable, Sectionable, Commentable {
     }
 
     @Override
+    public Map<String, ConfigSection> getHierarchySections() {
+        Map<String, ConfigSection> hierarchySections = new LinkedHashMap<>();
+        for (ConfigSection section : sections.values())
+            hierarchySections.putAll(section.getHierarchySections());
+
+        return hierarchySections;
+    }
+
+    @Override
     public Config getConfig() {
         return this;
     }

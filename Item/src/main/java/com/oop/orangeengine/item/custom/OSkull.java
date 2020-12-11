@@ -1,7 +1,6 @@
 package com.oop.orangeengine.item.custom;
 
 import com.oop.orangeengine.item.ItemBuilder;
-import com.oop.orangeengine.main.Engine;
 import com.oop.orangeengine.main.util.version.OVersion;
 import com.oop.orangeengine.material.OMaterial;
 import com.oop.orangeengine.nbt.NBTCompound;
@@ -9,11 +8,9 @@ import com.oop.orangeengine.nbt.NBTCompoundList;
 import com.oop.orangeengine.nbt.NBTItem;
 import com.oop.orangeengine.nbt.NBTListCompound;
 import com.oop.orangeengine.yaml.ConfigSection;
-import com.oop.orangeengine.yaml.ConfigValue;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -54,7 +51,7 @@ public class OSkull extends ItemBuilder<OSkull> {
     public OSkull texture(Player player) {
         SkullMeta itemMeta = getItemMeta();
         itemMeta.setOwner(player.getName());
-        return _returnThis();
+        return this;
     }
 
     public OSkull texture(String texture) {
@@ -75,7 +72,7 @@ public class OSkull extends ItemBuilder<OSkull> {
 
         NBTListCompound textures = compoundList.addCompound();
         textures.setString("Value", texture);
-        return _returnThis();
+        return this;
     }
 
     @Override
@@ -84,11 +81,6 @@ public class OSkull extends ItemBuilder<OSkull> {
 
         // Load texture
         section.ifValuePresent("texture", String.class, this::texture);
-        return _returnThis();
-    }
-
-    @Override
-    protected OSkull _returnThis() {
         return this;
     }
 

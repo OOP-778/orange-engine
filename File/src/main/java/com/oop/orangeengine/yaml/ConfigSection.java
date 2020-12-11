@@ -6,10 +6,7 @@ import com.oop.orangeengine.yaml.util.Writer;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConfigSection implements Valuable, ConfigHolder, Spaceable, Pathable, Commentable, Writeable {
@@ -83,7 +80,9 @@ public class ConfigSection implements Valuable, ConfigHolder, Spaceable, Pathabl
 
     @Override
     public String getPath() {
-        return getParents().isEmpty() ? key : getParents().stream().map(ConfigSection::getKey).collect(Collectors.joining(".")) + "." + key;
+        List<ConfigSection> parents = getParents();
+        Collections.reverse(parents);
+        return parents.isEmpty() ? key : parents.stream().map(ConfigSection::getKey).collect(Collectors.joining(".")) + "." + key;
     }
 
     @Override
@@ -108,12 +107,23 @@ public class ConfigSection implements Valuable, ConfigHolder, Spaceable, Pathabl
         ConfigSection[] sections = this.sections.values().toArray(new ConfigSection[0]);
         for (int i = 0; i < sections.length; i++) {
             ConfigSection section = sections[i];
-            if (i == 1)
+            if (i == 1) {
                 section.write(writer);
-            else {
-                section.write(writer);
-                writer.newLine();
+                continue;
             }
+
+            section.write(writer);
         }
+    }
+
+    @Override
+    public Map<String, ConfigSection> getHierarchySections() {
+        Map<String, ConfigSection> hierarchySections = new LinkedHashMap<>();
+        hierarchySections.put(getPath(), this);
+
+        for (ConfigSection section : sections.values())
+            hierarchySections.putAll(section.getHierarchySections());
+
+        return hierarchySections;
     }
 }
