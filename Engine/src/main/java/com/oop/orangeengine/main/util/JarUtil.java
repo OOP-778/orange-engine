@@ -10,7 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class JarUtil {
-    public static final char JAR_SEPARATOR = '/';
+    public static final char JAR_SEPARATOR = File.separatorChar;
 
     public static void copyFolderFromJar(String folderName, File destFolder, CopyOption option, Class source) {
         try {
@@ -132,25 +132,10 @@ public class JarUtil {
             JarEntry entry = entries.nextElement();
             if (entry.getName().startsWith(name))
                 return jar.getInputStream(entry);
-
         }
 
         jar.close();
         return null;
-
-    }
-
-    public static JarFile getJarFile(Class klass) {
-
-        File actualFile = getFullPath(klass);
-        try {
-            return new JarFile(actualFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
     }
 
     public static void copyFileFromJar(String fileName, File destFolder, CopyOption copyOption, Class<?> source) {
@@ -160,5 +145,4 @@ public class JarUtil {
     public static void copyFileFromJar(String fileName, File destFolder, Class<?> source) {
         copyFileFromJar(fileName, destFolder, CopyOption.COPY_IF_NOT_EXIST, null, source);
     }
-
 }

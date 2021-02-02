@@ -108,7 +108,7 @@ public class OLogger {
     }
 
     private void handleCause(Throwable exception) {
-        send("&4Caused By " + exception.getMessage());
+        send("&4Caused By " + exception.getClass().getSimpleName() + ": " + exception.getMessage());
         for (StackTraceElement ste : exception.getStackTrace()) {
             send("&c - " + ste.toString());
         }

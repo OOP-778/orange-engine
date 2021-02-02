@@ -3,6 +3,7 @@ package com.oop.orangeengine.message.impl.chat;
 import com.google.common.collect.Maps;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.message.ChatUtil;
 import com.oop.orangeengine.message.Replaceable;
 import com.oop.orangeengine.message.impl.chat.addition.Addition;
 import com.oop.orangeengine.message.impl.chat.addition.Additionable;
@@ -13,10 +14,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.TextComponent;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -47,7 +45,7 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
         LineContent clone = new LineContent();
         clone.text = text;
         additions.forEach((clazz, addition) -> clone.additions.put(clazz, addition.clone()));
-        additions.values().forEach(addition -> addition.parent(this));
+        clone.additions.values().forEach(addition -> addition.parent(clone));
         return clone;
     }
 
@@ -124,5 +122,13 @@ public class LineContent implements Cloneable, Additionable, Replaceable<LineCon
     @Override
     public LineContent returnThis() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "LineContent{" +
+                "additions=" + ChatUtil.listToString(additions.values()) +
+                ", text='" + text + '\'' +
+                '}';
     }
 }

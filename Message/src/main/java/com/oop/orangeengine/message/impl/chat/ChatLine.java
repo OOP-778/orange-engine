@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.main.util.version.OVersion;
+import com.oop.orangeengine.message.ChatUtil;
 import com.oop.orangeengine.message.Replaceable;
 import com.oop.orangeengine.message.Sendable;
 import com.oop.orangeengine.message.impl.OChatMessage;
@@ -20,6 +21,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -300,7 +302,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
     }
 
     public List<BaseComponent> buildComponents() {
-        StringBuilder builder = new StringBuilder();
+        AtomicReference<StringBuilder> builder = new AtomicReference<>(new StringBuilder());
         List<BaseComponent> components = new ArrayList<>();
 
         ComponentDecoration decoration = new ComponentDecoration();
@@ -308,6 +310,13 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
             @NonNull String text = lineContent.text();
 
             List<TextComponent> contentComponents = new ArrayList<>();
+
+            Runnable createComponent = () -> {
+                TextComponent component = new TextComponent(builder.toString());
+                builder.set(new StringBuilder());
+                decoration.apply(component);
+                contentComponents.add(component);
+            };
 
             char[] chars = text.toCharArray();
             for (int i = 0; i < chars.length; i++) {
@@ -325,10 +334,7 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                                 continue;
                             }
 
-                            TextComponent component = new TextComponent(builder.toString());
-                            builder = new StringBuilder();
-                            decoration.apply(component);
-                            contentComponents.add(component);
+                            createComponent.run();
                         }
 
                         decoration.setColor(parsed);
@@ -346,35 +352,27 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
                         continue;
                     }
 
-                    if (i != 0) {
+                    if (i != 0 && builder.toString().trim().length() != 0) {
                         if (chars.length > i + 1 && chars[i + 1] == '&') {
                             i += 1;
                             continue;
                         }
-                        TextComponent component = new TextComponent(builder.toString());
-                        builder = new StringBuilder();
-                        decoration.apply(component);
-                        contentComponents.add(component);
+                        createComponent.run();
                     }
 
                     if (color.isFormat())
                         decoration.decorations().add(color);
-
-                    else {
+                    else
                         decoration.setColor(color);
-                    }
 
                     i += 1;
                     continue;
                 }
 
-                builder.append(character);
+                builder.get().append(character);
             }
 
-            TextComponent component = new TextComponent(builder.toString());
-            builder = new StringBuilder();
-            decoration.apply(component);
-            contentComponents.add(component);
+            createComponent.run();
 
             contentComponents.forEach(comp -> lineContent.additionList().forEach(addition -> addition.apply(comp)));
             components.addAll(contentComponents);
@@ -413,15 +411,15 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
 
         public void applyDecor(TextComponent component) {
             for (ChatColor decoration : decorations) {
-                if (decoration.getName().contentEquals("BOLD"))
+                if (decoration.getName().equalsIgnoreCase("BOLD"))
                     component.setBold(true);
-                else if (decoration.getName().contentEquals("UNDERLINE"))
+                else if (decoration.getName().equalsIgnoreCase("UNDERLINE"))
                     component.setUnderlined(true);
-                else if (decoration.getName().contentEquals("ITALIC"))
+                else if (decoration.getName().equalsIgnoreCase("ITALIC"))
                     component.setItalic(true);
-                else if (decoration.getName().contentEquals("MAGIC"))
+                else if (decoration.getName().equalsIgnoreCase("MAGIC"))
                     component.setObfuscated(true);
-                else if (decoration.getName().contentEquals("STRIKETHROUGH"))
+                else if (decoration.getName().equalsIgnoreCase("STRIKETHROUGH"))
                     component.setStrikethrough(true);
             }
         }
@@ -430,5 +428,13 @@ public class ChatLine implements Replaceable<ChatLine>, Cloneable, Sendable {
             decorations.clear();
             this.color = color;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ChatLine{" +
+                "contentList=" + ChatUtil.listToString(contentList) +
+                ", centered=" + centered +
+                '}';
     }
 }

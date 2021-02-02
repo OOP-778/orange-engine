@@ -6,6 +6,7 @@ import com.oop.orangeengine.yaml.util.Writer;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,25 +56,31 @@ public class ConfigValue implements ConfigHolder, Spaceable, Pathable, Writeable
 
         if (!comments.isEmpty()) {
             writer.newLine();
-            for (String comment : comments) {
+            for (String comment : comments)
                 writer.write(start + "# " + comment);
-            }
         }
 
         if (object instanceof Collection) {
             if (((Collection) object).isEmpty()) {
                 writer.write(start + key + ": []");
+
             } else {
                 writer.write(start + key + ":");
-                for (Object object : (Collection<Object>) object) {
-                    writer.write(start + "- \"" + object.toString() + "\"");
+                for (Object listObject : (Collection<Object>) object) {
+                    if (ConfigUtil.isPrimitive(listObject))
+                        writer.write(start + "- " + listObject);
+                    else
+                        writer.write(start + "- \"" + dumpObject(listObject) + "\"");
                 }
             }
-        } else
-            if (ConfigUtil.isPrimitive(object))
-                writer.write(start + key + ": " + object.toString());
-            else
-                writer.write(start + key + ": \"" + object.toString() + "\"");
+        } else if (ConfigUtil.isPrimitive(object))
+            writer.write(start + key + ": " + object);
+        else
+            writer.write(start + key + ": \"" + dumpObject(object) + "\"");
+    }
+
+    public String dumpObject(Object value) {
+        return StringEscapeUtils.escapeJava(value.toString());
     }
 
     public boolean isList() {

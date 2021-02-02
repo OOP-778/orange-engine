@@ -119,4 +119,15 @@ public class OTitleMessage implements OMessage<OTitleMessage> {
     public OTitleMessage returnThis() {
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "OTitleMessage{" +
+                "title='" + title + '\'' +
+                ", subTitle='" + subTitle + '\'' +
+                ", fadeIn=" + fadeIn +
+                ", stay=" + stay +
+                ", fadeOut=" + fadeOut +
+                '}';
+    }
 }

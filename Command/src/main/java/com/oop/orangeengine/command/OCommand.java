@@ -4,6 +4,7 @@ import com.oop.orangeengine.command.arg.CommandArgument;
 import com.oop.orangeengine.command.req.RequirementMapper;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -15,8 +16,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @Getter
-public class OCommand {
-
+public class OCommand implements Cloneable {
     private Class[] ableToExecute = new Class[]{Player.class, ConsoleCommandSender.class};
 
     private String notAbleToExecuteMessage = "&c&l(!)&7 Command can only be executed by %sender%";
@@ -189,4 +189,17 @@ public class OCommand {
                 .orElse(null);
     }
 
+    @SneakyThrows
+    public OCommand clone() {
+        OCommand command = (OCommand) super.clone();
+        command.aliases = new HashSet<>(command.aliases);
+
+        command.subCommands = new HashMap<>();
+        for (OCommand value : getSubCommands().values()) {
+            OCommand clone = value.clone();
+            command.subCommand(clone);
+        }
+
+        return command;
+    }
 }

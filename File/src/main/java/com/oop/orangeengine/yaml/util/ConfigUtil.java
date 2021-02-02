@@ -8,10 +8,13 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,8 +22,12 @@ public class ConfigUtil {
 
     @SneakyThrows
     public static void load(Config config, Yaml yaml, InputStreamReader reader) {
-        Map<Object, Object> data = (Map<Object, Object>) yaml.load(reader);
+        String[] lines = new BufferedReader(reader)
+                .lines()
+                .toArray(String[]::new);
         reader.close();
+
+        Map<Object, Object> data = (Map<Object, Object>) yaml.load(String.join("\n", lines));
         if (data == null) return;
 
         data.forEach((key, value) -> {
@@ -33,6 +40,22 @@ public class ConfigUtil {
                 ConfigValue configValue = new ConfigValue(key.toString(), config);
                 configValue.setObject(value);
                 config.getValues().put(key.toString(), configValue);
+            }
+        });
+
+        Map<String, List<String>> comments = Commentator.comments(lines);
+        comments.forEach((path, pathComments) -> {
+            if (path.equalsIgnoreCase("#"))
+                config.getComments().addAll(pathComments);
+
+            else {
+                Optional<ConfigValue> configValue = config.get(path);
+                if (!configValue.isPresent()) {
+                    config.getSection(path).ifPresent(section -> section.getComments().addAll(pathComments));
+                    return;
+                }
+
+                configValue.get().getComments().addAll(pathComments);
             }
         });
     }

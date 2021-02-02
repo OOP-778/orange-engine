@@ -1,177 +1,165 @@
 package com.oop.orangeengine.yaml.util;
 
 import com.oop.orangeengine.main.util.data.pair.OPair;
-import com.oop.orangeengine.yaml.Config;
-import lombok.SneakyThrows;
+import com.oop.orangeengine.main.util.data.pair.OTriplePair;
+import org.apache.commons.lang.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Commentator {
+    public static Map<String, List<String>> comments(String[] array) {
+        array = Arrays
+                .stream(array)
+                .filter(line -> line.trim().length() != 0)
+                .toArray(String[]::new);
 
-    @SneakyThrows
-    public Commentator(Config config) {
-        LineIterator iterator = new LineIterator(config.getFile().getFile());
+        Map<String, List<String>> comments = new LinkedHashMap<>();
+        OTriplePair<String[], Integer, Integer> headerScrap = scrapLinesFromTill(
+                array,
+                line -> StringUtils.trim(line).contains("<--------------->"),
+                line -> StringUtils.trim(line).contains("<--------------->")
+        );
 
-        Map<String, List<String>> valuesComments = new LinkedHashMap<>();
-        Map<String, List<String>> sectionComments = new LinkedHashMap<>();
+        if (headerScrap.getThird() == -1)
+            headerScrap.setThird(0);
 
-        List<String> comments = new ArrayList<>();
-        boolean header = false;
+        else {
+            headerScrap.setThird(headerScrap.getThird() + 1);
+            comments.put("#", transformDescription(headerScrap.getFirst()));
+        }
 
-        ConfigPath path = new ConfigPath();
-        while (iterator.next()) {
-            OPair<String, Integer> trim = trim(iterator.get());
-            String trimLine = trim.getFirst();
+        LinkedList<String> currentPath = new LinkedList<>();
+        int currentPathSpace = 0;
 
-            if (trimLine.contentEquals("#head")) {
-                header = true;
+        List<String> nextComments = new LinkedList<>();
+        for (int i = headerScrap.getThird(); i < array.length; i++) {
+            String line = array[i];
+
+            // If line is a comment
+            if (isComment(line)) {
+                OPair<String[], Integer> pair = scrapLinesTill(i, array, l -> !isComment(l));
+                nextComments.addAll(transformDescription(pair.getKey()));
+
+                i += pair.getValue();
                 continue;
             }
 
-            if (header && trimLine.equalsIgnoreCase("#/head")) {
-                config.getComments().addAll(new ArrayList<>(comments));
-                comments.clear();
-                header = false;
-                continue;
-            }
+            if (startsWithIdentifier(line)) {
+                String[] split = line.split(":");
 
-            if (trimLine.startsWith("#"))
-                comments.add(trim(trimLine.substring(1)).getFirst());
+                // Check for list
+                boolean isList = (array.length - 1) != i && array[i + 1].trim().startsWith("-");
 
-            if (trimLine.contains(":")) {
-                // We have found a section
-                String[] trimSplit = trimLine.split(":");
-                if (trimSplit.length == 1 || trimSplit[1].trim().length() == 0) {
-                    String[] next = iterator.getNext(1);
+                // We got a section
+                int spaces = spacesTillChar(split[0]);
+                if ((split.length == 1 || split[1].trim().length() == 0) && !isList) {
 
-                    // We have found a list
-                    if (next.length > 0 && next[0].trim().startsWith("-")) {
-                        path.setValue(trim);
-                        if (!comments.isEmpty()) {
-                            valuesComments.put(getPath(path, trimSplit[0]), new ArrayList<>(comments));
-                            comments.clear();
+                    if (spaces + 2 == currentPathSpace) {
+                        if (!currentPath.isEmpty())
+                            currentPath.removeLast();
+                        currentPath.offer(split[0].trim());
+
+                    } else {
+                        if (currentPathSpace > spaces) {
+                            int times = currentPathSpace / 2;
+                            for (int i2 = 0; i2 < times; i2++)
+                                if (!currentPath.isEmpty())
+                                    currentPath.removeLast();
                         }
-                        continue;
+
+                        currentPath.offer(split[0].trim());
+                        currentPathSpace = spaces + 2;
                     }
 
-                    path.setSection(trimSplit[0], trim);
-                    if (!comments.isEmpty()) {
-                        sectionComments.put(path.getPath(), new ArrayList<>(comments));
-                        comments.clear();
+                    if (!nextComments.isEmpty()) {
+                        comments.put(String.join(".", currentPath), new ArrayList<>(nextComments));
+                        nextComments.clear();
                     }
-                    continue;
+                } else {
+                    if (currentPathSpace - 2 == spaces) {
+                        currentPath.removeLast();
+                        currentPathSpace -= 2;
+                    }
+
+                    if (spaces == 0 && !currentPath.isEmpty())
+                        currentPath.clear();
                 }
-
-                path.setValue(trim);
-
-                // Is a value
-                if (!comments.isEmpty()) {
-                    valuesComments.put(getPath(path, trimSplit[0]), new ArrayList<>(comments));
-                    comments.clear();
+                if (!nextComments.isEmpty()) {
+                    List<String> path = new ArrayList<>(currentPath);
+                    path.add(split[0].trim());
+                    comments.put(String.join(".", path), new ArrayList<>(nextComments));
+                    nextComments.clear();
                 }
             }
         }
-
-        valuesComments.forEach((p, c) -> config.get(p).ifPresent(configValue -> configValue.comments.addAll(c)));
-        sectionComments.forEach((p, c) -> config.ifSectionPresent(p, section -> section.comments.addAll(c)));
-
-        iterator.close();
+        return comments;
     }
 
-    private String getPath(ConfigPath path, String key) {
-        String stringPath = path.getPath();
-        if (stringPath.trim().length() == 0)
-            return key;
-
-        else
-            return stringPath + "." + key;
+    private static List<String> transformDescription(String[] desc) {
+        return Arrays
+                .stream(desc)
+                .map(d -> d.trim().substring(1).trim())
+                .collect(Collectors.toList());
     }
 
-    private OPair<String, Integer> trim(String line) {
-        StringBuilder builder = new StringBuilder();
+    private static int spacesTillChar(String line) {
+        int count = 0;
+        char[] chars = line.toCharArray();
+        for (char aChar : chars) {
+            if (aChar == ' ')
+                count++;
+            else
+                break;
+        }
 
-        boolean foundChar = false;
-        int spaces = 0;
+        return count;
+    }
 
-        for (char c : line.toCharArray()) {
-            if (c == ' ' && !foundChar) {
-                spaces++;
+    private static boolean isComment(String line) {
+        return line.trim().startsWith("#");
+    }
 
-            } else {
-                foundChar = true;
-                builder.append(c);
+    private static boolean startsWithIdentifier(String line) {
+        return !line.trim().startsWith("#") && StringUtils.contains(line, ":");
+    }
+
+    private static OTriplePair<String[], Integer, Integer> scrapLinesFromTill(String[] array, Predicate<String> startPredicate, Predicate<String> endPredicate) {
+        List<String> linesScrapped = new ArrayList<>();
+        int start = -1;
+        int end = -1;
+
+        for (int i = 0; i < array.length; i++) {
+            if (start == -1 && startPredicate.test(array[i])) {
+                start = i;
+                continue;
             }
+
+            if (start != -1 && endPredicate.test(array[i])) {
+                end = i;
+                break;
+            }
+
+            if (start != -1)
+                linesScrapped.add(array[i]);
         }
 
-        return new OPair<>(builder.toString(), spaces);
+        return new OTriplePair<>(linesScrapped.toArray(new String[0]), start, end);
     }
 
-    private static class LineIterator {
-        private String[] lines;
-        private int index = -1;
+    private static OPair<String[], Integer> scrapLinesTill(int start, String[] array, Predicate<String> predicate) {
+        List<String> linesScrapped = new ArrayList<>();
+        int count = 0;
 
-        private BufferedReader reader;
+        for (int i = start; i < array.length; i++) {
+            if (predicate.test(array[i]))
+                break;
 
-        @SneakyThrows
-        public LineIterator(File file) {
-            reader = new BufferedReader(new FileReader(file));
-            lines = reader.lines().toArray(String[]::new);
+            count++;
+            linesScrapped.add(array[i]);
         }
 
-        public boolean next() {
-            index++;
-            return lines.length - 1 >= index;
-        }
-
-        public String get() {
-            return lines[index];
-        }
-
-        public String[] getNext(int amount) {
-            List<String> next = new ArrayList<>();
-            int cloneIndex = index;
-            for (int i = 0; i < amount; i++) {
-                cloneIndex++;
-                if (lines.length - 1 < cloneIndex) break;
-                next.add(lines[cloneIndex]);
-            }
-            return next.toArray(new String[0]);
-        }
-
-        @SneakyThrows
-        public void close() {
-            reader.close();
-        }
-    }
-
-    public static class ConfigPath {
-        private Map<Integer, String> parents = new HashMap<>();
-
-        public String getPath() {
-            List<Integer> spaces = new ArrayList<>(parents.keySet());
-            spaces.sort(Integer::compareTo);
-            return spaces.stream().map(key -> parents.get(key)).collect(Collectors.joining("."));
-        }
-
-        public void setValue(OPair<String, Integer> keyPair) {
-            new LinkedHashSet<>(parents.keySet()).stream().filter(integer -> integer >= keyPair.getSecond()).forEach(integer -> parents.remove(integer));
-        }
-
-        public void setSection(String sectionName, OPair<String, Integer> line) {
-            String section = parents.get(line.getSecond());
-            new LinkedHashSet<>(parents.keySet()).stream().filter(integer -> integer >= line.getSecond()).forEach(integer -> parents.remove(integer));
-
-            if (section == null)
-                parents.put(line.getSecond(), sectionName);
-
-            else {
-                parents.remove(line.getSecond());
-                parents.put(line.getSecond(), sectionName);
-            }
-        }
+        return new OPair<>(linesScrapped.toArray(new String[0]), count - 1);
     }
 }

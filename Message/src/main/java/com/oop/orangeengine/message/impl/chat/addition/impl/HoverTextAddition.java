@@ -2,10 +2,12 @@ package com.oop.orangeengine.message.impl.chat.addition.impl;
 
 import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.message.ChatUtil;
 import com.oop.orangeengine.message.impl.chat.LineContent;
 import com.oop.orangeengine.message.impl.chat.addition.Addition;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -23,9 +25,12 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
     @Getter
     private List<String> hoverText = new ArrayList<>();
 
-    private LineContent content;
-    public HoverTextAddition(LineContent content) {
-        this.content = content;
+    @Getter
+    private LineContent parent;
+
+    public HoverTextAddition() {}
+    public HoverTextAddition(LineContent parent) {
+        this.parent = parent;
     }
 
     public HoverTextAddition add(@NonNull String... text) {
@@ -50,22 +55,14 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
     @Override
     @SneakyThrows
     public HoverTextAddition clone() {
-        return (HoverTextAddition) super.clone();
+        HoverTextAddition addition = new HoverTextAddition();
+        addition.hoverText = new ArrayList<>(hoverText);
+        return addition;
     }
 
     @Override
     public void apply(TextComponent textComponent) {
         textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Helper.color(String.join("\n", hoverText))).create()));
-    }
-
-    @Override
-    public LineContent parent() {
-        return content;
-    }
-
-    @Override
-    public void parent(LineContent parent) {
-        this.content = parent;
     }
 
     @Override
@@ -105,5 +102,17 @@ public class HoverTextAddition implements Addition<HoverTextAddition> {
     @Override
     public HoverTextAddition returnThis() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "HoverTextAddition{" +
+                "hoverText=" + ChatUtil.listToString(hoverText) +
+                '}';
+    }
+
+    @Override
+    public void parent(LineContent parent) {
+        this.parent = parent;
     }
 }

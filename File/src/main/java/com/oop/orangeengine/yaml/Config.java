@@ -10,6 +10,7 @@ import com.oop.orangeengine.yaml.util.Writer;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -25,7 +26,7 @@ import java.util.Map;
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class Config implements Valuable, Sectionable, Commentable {
-    private final Yaml yaml = new Yaml();
+    public static final Yaml yaml = new Yaml();
 
     @Getter
     public List<String> comments = new ArrayList<>();
@@ -50,11 +51,8 @@ public class Config implements Valuable, Sectionable, Commentable {
         try {
             ConfigUtil.load(this, yaml);
         } catch (Throwable throwable) {
-            getEngine().getLogger().printError(new IllegalStateException("Failed to load yaml for file: " + file.getFileName(), throwable));
+            getEngine().getLogger().error(new IllegalStateException("Failed to load yaml for file: " + file.getFileName(), throwable));
         }
-
-        // Load comments
-        new Commentator(this);
     }
 
     public Config(@NonNull File file) {
@@ -89,11 +87,11 @@ public class Config implements Valuable, Sectionable, Commentable {
 
         // Write header
         if (!comments.isEmpty()) {
-            writer.write("#head");
+            writer.write("#<--------------->");
             for (String comment : comments) {
                 writer.write("# " + comment);
             }
-            writer.write("#/head");
+            writer.write("#<--------------->");
         }
 
         // Write values

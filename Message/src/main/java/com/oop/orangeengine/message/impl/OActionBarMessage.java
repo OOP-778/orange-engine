@@ -79,4 +79,11 @@ public class OActionBarMessage implements OMessage<OActionBarMessage> {
         clone.replace(placeholders);
         clone.send(receivers);
     }
+
+    @Override
+    public String toString() {
+        return "OActionBarMessage{" +
+                "text='" + text + '\'' +
+                '}';
+    }
 }

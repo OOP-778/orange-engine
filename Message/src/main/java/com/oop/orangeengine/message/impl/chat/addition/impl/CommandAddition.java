@@ -24,10 +24,7 @@ public class CommandAddition implements Addition<CommandAddition> {
 
     private @NonNull LineContent content;
 
-    public CommandAddition set(String command) {
-        this.command = command;
-        return this;
-    }
+    public CommandAddition() {}
 
     public CommandAddition(LineContent lineContent) {
         this.content = lineContent;
@@ -36,7 +33,9 @@ public class CommandAddition implements Addition<CommandAddition> {
     @SneakyThrows
     @Override
     public CommandAddition clone() {
-        return (CommandAddition) super.clone();
+        CommandAddition addition = new CommandAddition();
+        addition.command = command;
+        return addition;
     }
 
     @Override
@@ -81,5 +80,12 @@ public class CommandAddition implements Addition<CommandAddition> {
     @Override
     public CommandAddition returnThis() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "CommandAddition{" +
+                "command='" + command + '\'' +
+                '}';
     }
 }

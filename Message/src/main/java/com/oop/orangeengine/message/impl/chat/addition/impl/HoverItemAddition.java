@@ -28,6 +28,8 @@ public class HoverItemAddition implements Addition<HoverItemAddition> {
     private @NonNull ItemStack item;
 
     private LineContent content;
+
+    public HoverItemAddition() {}
     public HoverItemAddition(LineContent content) {
         this.content = content;
     }
@@ -35,7 +37,9 @@ public class HoverItemAddition implements Addition<HoverItemAddition> {
     @SneakyThrows
     @Override
     public HoverItemAddition clone() {
-        return (HoverItemAddition) super.clone();
+        HoverItemAddition addition = new HoverItemAddition();
+        addition.item = item.clone();
+        return addition;
     }
 
     @Override
@@ -112,5 +116,12 @@ public class HoverItemAddition implements Addition<HoverItemAddition> {
     @Override
     public HoverItemAddition returnThis() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "HoverItemAddition{" +
+                "item=" + item +
+                '}';
     }
 }

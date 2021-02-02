@@ -70,10 +70,11 @@ public interface Valuable extends ConfigHolder, Sectionable {
             return (T) object;
 
         type = Primitives.wrap(type);
-        if (type.isAssignableFrom(Primitives.unwrap(object.getClass())))
+        Class objectType = Primitives.wrap(object.getClass());
+        if (type.isAssignableFrom(objectType))
             return (T) object;
 
-        if (type != Primitives.unwrap(object.getClass()))
+        if (type != Primitives.wrap(object.getClass()))
             return (T) doConversion(object, type);
 
         return (T) object;
@@ -81,6 +82,7 @@ public interface Valuable extends ConfigHolder, Sectionable {
 
     static <T> Object doConversion(Object parsed, Class<T> clazz) {
         clazz = Primitives.wrap(clazz);
+        Class objectType = Primitives.wrap(parsed.getClass());
         if (Primitives.wrap(parsed.getClass()) == clazz || clazz.isAssignableFrom(parsed.getClass()))
             return parsed;
 

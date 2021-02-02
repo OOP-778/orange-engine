@@ -17,37 +17,32 @@ import java.util.function.Function;
 
 import static com.oop.orangeengine.message.ChatUtil.makeSureNonNull;
 
-@Setter
-@Getter
+
 @Accessors(chain = true, fluent = true)
 public class SuggestionAddition implements Addition<SuggestionAddition> {
+    @Getter
+    @Setter
     private @NonNull String suggestion;
 
-    private LineContent content;
+    @Getter
+    private LineContent parent;
 
-    public SuggestionAddition(LineContent content) {
-        this.content = content;
+    public SuggestionAddition() {}
+    public SuggestionAddition(LineContent parent) {
+        this.parent = parent;
     }
 
     @Override
     @SneakyThrows
     public SuggestionAddition clone() {
-        return (SuggestionAddition) super.clone();
+        SuggestionAddition addition = new SuggestionAddition();
+        addition.suggestion = suggestion;
+        return addition;
     }
 
     @Override
     public void apply(TextComponent textComponent) {
         textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestion));
-    }
-
-    @Override
-    public LineContent parent() {
-        return content;
-    }
-
-    @Override
-    public void parent(LineContent parent) {
-        this.content = parent;
     }
 
     @Override
@@ -75,5 +70,17 @@ public class SuggestionAddition implements Addition<SuggestionAddition> {
     @Override
     public SuggestionAddition returnThis() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "SuggestionAddition{" +
+                "suggestion='" + suggestion + '\'' +
+                '}';
+    }
+
+    @Override
+    public void parent(LineContent parent) {
+        this.parent = parent;
     }
 }

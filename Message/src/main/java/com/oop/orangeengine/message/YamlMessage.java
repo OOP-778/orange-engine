@@ -1,5 +1,7 @@
 package com.oop.orangeengine.message;
 
+import com.oop.orangeengine.main.util.OActionBar;
+import com.oop.orangeengine.main.util.OTitle;
 import com.oop.orangeengine.message.impl.OActionBarMessage;
 import com.oop.orangeengine.message.impl.OChatMessage;
 import com.oop.orangeengine.message.impl.OTitleMessage;
@@ -13,6 +15,7 @@ import com.oop.orangeengine.message.impl.chat.addition.impl.SuggestionAddition;
 import com.oop.orangeengine.yaml.Config;
 import com.oop.orangeengine.yaml.ConfigSection;
 import com.oop.orangeengine.yaml.ConfigValue;
+import com.oop.orangeengine.yaml.interfaces.Valuable;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.HashMap;
@@ -22,15 +25,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class YamlMessage {
-    public static void save(OMessage message, String path, Config config) {
+    public static void save(OMessage message, String path, Valuable valuable) {
         if (message instanceof OChatMessage)
-            Chat.save((OChatMessage) message, path, config);
+            Chat.save((OChatMessage) message, path, valuable);
 
         else if (message instanceof OActionBarMessage)
-            save(((OActionBarMessage) message), path, config);
+            save((OActionBarMessage) message, path, valuable);
 
         else if (message instanceof OTitleMessage)
-            save(((OTitleMessage) message), path, config);
+            save((OTitleMessage) message, path, valuable);
     }
 
     public static OMessage load(ConfigSection section) {
@@ -52,13 +55,13 @@ public class YamlMessage {
         return Chat.load(section);
     }
 
-    public static OMessage load(String path, Config config) {
-        Optional<ConfigSection> optionalSection = config.getSection(path);
+    public static OMessage load(String path, Valuable valuable) {
+        Optional<ConfigSection> optionalSection = valuable.getSection(path);
         if (optionalSection.isPresent()) {
             return load(optionalSection.get());
 
         } else {
-            Optional<ConfigValue> optionalValue = config.get(path);
+            Optional<ConfigValue> optionalValue = valuable.get(path);
             if (optionalValue.isPresent())
                 return Chat.load(optionalValue.get());
         }
@@ -84,13 +87,13 @@ public class YamlMessage {
         return actionBarMessage;
     }
 
-    public static void save(OActionBarMessage message, String path, Config config) {
+    public static void save(OActionBarMessage message, String path, Valuable config) {
         ConfigSection section = config.createSection(path);
         section.set("type", "actionbar");
         section.set("text", message.text());
     }
 
-    public static void save(OTitleMessage message, String path, Config config) {
+    public static void save(OTitleMessage message, String path, Valuable config) {
         ConfigSection section = config.createSection(path);
         section.set("type", "title");
         if (message.title() != null)
@@ -105,30 +108,30 @@ public class YamlMessage {
     }
 
     public static class Chat {
-        public static void save(OChatMessage message, String path, Config config) {
+        public static void save(OChatMessage message, String path, Valuable valuable) {
             /*
             If message doesn't have any attributes like center and it's one lined.
             */
             if (!requiresSection(message)) {
                 if (requiresSection(message.lineList().element())) {
                     ChatLine line = message.lineList().element();
-                    ConfigSection section = config.createSection(path);
+                    ConfigSection section = valuable.createSection(path);
                     section.set("type", "chat");
 
                     save(line, section);
 
                 } else
-                    config.set(path, message.lineList().element().contentList().element().text());
+                    valuable.set(path, message.lineList().element().contentList().element().text());
 
             } else {
                 if (!message.centered() && allOneLined(message)) {
-                    config.set(path, message.lineList()
+                    valuable.set(path, message.lineList()
                             .stream()
                             .map(ChatLine::raw)
                             .collect(Collectors.toList()));
 
                 } else {
-                    ConfigSection section = config.createSection(path);
+                    ConfigSection section = valuable.createSection(path);
                     section.set("type", "chat");
                     if (message.centered())
                         section.set("center", true);

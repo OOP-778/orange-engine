@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
     }
 }
 
@@ -87,7 +87,7 @@ allprojects {
 
                     groupId = project.group
                     artifactId = project.name.toLowerCase()
-                    version = project.version
+                    version = version
 
                     pom {
                         url = 'oopdevelopment.com'

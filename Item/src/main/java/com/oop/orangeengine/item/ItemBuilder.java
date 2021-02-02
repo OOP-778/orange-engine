@@ -76,7 +76,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     private ItemMeta meta;
-
     private NBTItem nbt;
 
     public ItemMeta getItemMeta() {
@@ -323,6 +322,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
             newNbt.removeKey("ench");
             newNbt.removeKey("display");
             oldNbt.mergeCompound(newNbt);
+
             itemStack = oldNbt.getItem();
         }
         return itemStack;

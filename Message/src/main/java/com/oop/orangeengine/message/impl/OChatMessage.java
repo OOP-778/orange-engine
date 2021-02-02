@@ -1,6 +1,7 @@
 package com.oop.orangeengine.message.impl;
 
 import com.oop.orangeengine.main.util.data.pair.OPair;
+import com.oop.orangeengine.message.ChatUtil;
 import com.oop.orangeengine.message.MessageType;
 import com.oop.orangeengine.message.OMessage;
 import com.oop.orangeengine.message.impl.chat.ChatLine;
@@ -183,4 +184,11 @@ public class OChatMessage implements OMessage<OChatMessage> {
         return lineList.getLast().contentList().getLast();
     }
 
+    @Override
+    public String toString() {
+        return "OChatMessage{" +
+                "lineList=" + ChatUtil.listToString(lineList) +
+                ", centered=" + centered +
+                '}';
+    }
 }

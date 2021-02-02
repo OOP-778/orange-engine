@@ -28,11 +28,13 @@ public class ChatAddition implements Addition<ChatAddition> {
         this.parent = parent;
     }
 
+    public ChatAddition() {}
+
     @Override
     public ChatAddition clone() {
-        ChatAddition addition = new ChatAddition(parent);
+        ChatAddition addition = new ChatAddition();
         addition.message = message;
-        return this;
+        return addition;
     }
 
     @Override
@@ -76,5 +78,12 @@ public class ChatAddition implements Addition<ChatAddition> {
     @Override
     public void parent(LineContent parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public String toString() {
+        return "ChatAddition{" +
+                "message='" + message + '\'' +
+                '}';
     }
 }
