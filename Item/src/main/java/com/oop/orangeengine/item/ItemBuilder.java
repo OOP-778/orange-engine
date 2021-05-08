@@ -353,13 +353,13 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
                 makeUnstackable();
         });
 
-        //Load glow
+        // Load glow
         section.ifValuePresent("glow", boolean.class, bool -> {
             if (bool)
                 makeGlow();
         });
 
-        //Load Enchants
+        // Load Enchants
         section.ifValuePresent("enchants", List.class, list -> asListString(list, stringList -> {
             for (String enchant : stringList) {
 
@@ -374,7 +374,6 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public void save(ConfigSection section, OItem object) {
-
         // Set material
         section.set("material", object.getMaterial().name());
 

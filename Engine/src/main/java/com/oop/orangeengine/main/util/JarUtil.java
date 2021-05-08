@@ -4,13 +4,14 @@ import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Enumeration;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class JarUtil {
-    public static final char JAR_SEPARATOR = File.separatorChar;
+    public static final String JAR_SEPARATOR = "/";
 
     public static void copyFolderFromJar(String folderName, File destFolder, CopyOption option, Class source) {
         try {
@@ -27,8 +28,8 @@ public class JarUtil {
 
                 String fileName = entry.getName();
 
-                if (fileName.charAt(fileName.length() - 1) == JAR_SEPARATOR) {
-                    File file = new File(destFolder + File.separator + fileName);
+                if (fileName.charAt(fileName.length() - 1) == JAR_SEPARATOR.toCharArray()[0]) {
+                    File file = new File(destFolder + JAR_SEPARATOR + fileName);
                     if (file.isFile()) {
                         file.delete();
                     }
@@ -36,7 +37,8 @@ public class JarUtil {
                     continue;
                 }
 
-                File file = new File(destFolder + File.separator + fileName);
+                File file = new File(destFolder + JAR_SEPARATOR + fileName);
+
                 if (option == CopyOption.COPY_IF_NOT_EXIST && file.exists())
                     continue;
 

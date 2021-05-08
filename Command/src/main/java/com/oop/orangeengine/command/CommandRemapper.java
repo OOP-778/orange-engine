@@ -67,8 +67,6 @@ public class CommandRemapper {
             Consumer<OCommand> oCommandConsumer = remappers.get(path);
             if (oCommandConsumer != null)
                 oCommandConsumer.accept(command);
-            else
-                System.out.println("Command is not specified inside config for " + path);
         });
     }
 

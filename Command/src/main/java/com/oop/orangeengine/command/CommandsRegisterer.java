@@ -2,6 +2,7 @@ package com.oop.orangeengine.command;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class CommandsRegisterer {
     private Set<OCommand> commands = new HashSet<>();
@@ -13,6 +14,11 @@ public class CommandsRegisterer {
 
     public CommandsRegisterer add(OCommand command) {
         commands.add(command);
+        return this;
+    }
+
+    public CommandsRegisterer use(Consumer<Set<OCommand>> useCmds) {
+        useCmds.accept(commands);
         return this;
     }
 

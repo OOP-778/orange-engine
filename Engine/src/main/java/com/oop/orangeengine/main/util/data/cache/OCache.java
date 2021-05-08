@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class OCache<K, V> {
@@ -58,8 +59,6 @@ public class OCache<K, V> {
     }
 
     public void put(K key, V value) {
-        checkForInvalids();
-
         data.remove(key);
         data.put(key, new OPair<>(value, System.currentTimeMillis() + expireAfter));
     }
@@ -72,6 +71,22 @@ public class OCache<K, V> {
         }
 
         return value;
+    }
+
+    public V merge(K key, V value, BiFunction<V, V, V> merger) {
+        checkForInvalids();
+
+        OPair<V, Long> valuePair = data.get(key);
+        if (valuePair != null && resetExpireAfterAccess)
+            valuePair.setSecond(System.currentTimeMillis() + expireAfter);
+
+        if (valuePair == null) {
+            put(key, value);
+            return value;
+        }
+
+        valuePair.setFirst(merger.apply(valuePair.getFirst(), value));
+        return valuePair.getFirst();
     }
 
     private void checkForInvalids() {

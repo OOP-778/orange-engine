@@ -42,7 +42,7 @@ public class StaticTask {
                 callback.run();
         };
 
-        if (Thread.currentThread().getName().equalsIgnoreCase("Server Thread"))
+        if (Bukkit.isPrimaryThread())
             runnable.run();
 
         else
@@ -50,8 +50,10 @@ public class StaticTask {
     }
 
     public void ensureAsync(Runnable runnable) {
-        if (Bukkit.isPrimaryThread())
+        if (Bukkit.isPrimaryThread()) {
             async(() -> ensureAsync(runnable));
+            return;
+        }
 
         runnable.run();
     }
