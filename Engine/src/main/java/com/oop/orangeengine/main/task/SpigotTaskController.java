@@ -1,24 +1,21 @@
 package com.oop.orangeengine.main.task;
 
-import com.google.common.collect.Maps;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.EngineBootstrap;
 import com.oop.orangeengine.main.util.DisablePriority;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.time.Instant;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Getter
 public class SpigotTaskController implements TaskController {
 
-    private EnginePlugin owning;
+    private EngineBootstrap owning;
     private Set<OTask> tasks = new HashSet<>();
 
-    public SpigotTaskController(EnginePlugin owning) {
+    public SpigotTaskController(EngineBootstrap owning) {
         this.owning = owning;
         owning.onDisable(() -> tasks.forEach(OTask::cancel), DisablePriority.LAST);
     }
@@ -43,13 +40,13 @@ public class SpigotTaskController implements TaskController {
 
     private BukkitTask async(OTask task) {
         if (task.isRepeat())
-            return Bukkit.getScheduler().runTaskTimerAsynchronously(owning, task.run(), 0, task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskTimerAsynchronously(owning.getStarter(), task.run(), 0, task.getDelayAsTicks());
 
         else if (task.getDelay() != -1)
-            return Bukkit.getScheduler().runTaskLaterAsynchronously(owning, task.run(), task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskLaterAsynchronously(owning.getStarter(), task.run(), task.getDelayAsTicks());
 
         else if (!isAsyncThread())
-            return Bukkit.getScheduler().runTaskAsynchronously(owning, task.run());
+            return Bukkit.getScheduler().runTaskAsynchronously(owning.getStarter(), task.run());
 
         else {
             task.run().run();
@@ -60,13 +57,13 @@ public class SpigotTaskController implements TaskController {
 
     private BukkitTask sync(OTask task) {
         if (task.isRepeat())
-            return Bukkit.getScheduler().runTaskTimer(owning, task.run(), 0, task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskTimer(owning.getStarter(), task.run(), 0, task.getDelayAsTicks());
 
         else if (task.getDelay() != -1)
-            return Bukkit.getScheduler().runTaskLater(owning, task.run(), task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskLater(owning.getStarter(), task.run(), task.getDelayAsTicks());
 
         else if (isAsyncThread())
-            return Bukkit.getScheduler().runTask(owning, task.run());
+            return Bukkit.getScheduler().runTask(owning.getStarter(), task.run());
 
         else {
             task.run().run();

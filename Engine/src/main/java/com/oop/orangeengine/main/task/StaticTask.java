@@ -11,11 +11,7 @@ import java.util.function.Supplier;
 import static com.oop.orangeengine.main.Engine.getEngine;
 
 public class StaticTask {
-    private static StaticTask INSTANCE;
-
-    public StaticTask() {
-        INSTANCE = this;
-    }
+    private static final StaticTask INSTANCE = new StaticTask();
 
     public static StaticTask getInstance() {
         return INSTANCE;
@@ -83,7 +79,7 @@ public class StaticTask {
             runnable.run();
 
         else
-            return Bukkit.getScheduler().runTask(getEngine().getOwning(), runnable);
+            return Bukkit.getScheduler().runTask(getEngine().getOwning().getStarter(), runnable);
 
         return null;
     }

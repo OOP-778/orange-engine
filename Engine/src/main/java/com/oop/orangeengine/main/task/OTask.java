@@ -86,7 +86,7 @@ public class OTask extends Storegable {
     }
 
     public Plugin getOwner() {
-        return getEngine().getOwning();
+        return getEngine().getOwning().getStarter();
     }
 
     public boolean isSync() {

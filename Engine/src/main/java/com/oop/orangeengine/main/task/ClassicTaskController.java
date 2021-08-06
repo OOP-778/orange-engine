@@ -1,15 +1,11 @@
 package com.oop.orangeengine.main.task;
 
-import com.google.common.collect.Maps;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.EngineBootstrap;
 import com.oop.orangeengine.main.util.DisablePriority;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.time.Instant;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -19,11 +15,11 @@ public class ClassicTaskController implements TaskController {
 
     private Set<OTask> asyncTasks = new HashSet<>();
     private ScheduledThreadPoolExecutor executor;
-    private EnginePlugin plugin;
+    private EngineBootstrap plugin;
 
     private int threadsCount = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
-    public ClassicTaskController(EnginePlugin plugin) {
+    public ClassicTaskController(EngineBootstrap plugin) {
         this.plugin = plugin;
         plugin.onDisable(() -> {
             for (OTask asyncTask : asyncTasks)
@@ -75,20 +71,20 @@ public class ClassicTaskController implements TaskController {
 
         if (threadsCount <= executor.getQueue().size() && !getEngine().getOwning().isDisabling()) {
             if (task.isRepeat())
-                return Bukkit.getScheduler().runTaskTimerAsynchronously(getEngine().getOwning(), task.run(), 0, task.getDelayAsTicks());
+                return Bukkit.getScheduler().runTaskTimerAsynchronously(getEngine().getOwning().getStarter(), task.run(), 0, task.getDelayAsTicks());
 
             else if (task.getDelay() != -1)
-                return Bukkit.getScheduler().runTaskLater(getEngine().getOwning(), task.run(), task.getDelayAsTicks());
+                return Bukkit.getScheduler().runTaskLater(getEngine().getOwning().getStarter(), task.run(), task.getDelayAsTicks());
 
             else
-                return Bukkit.getScheduler().runTaskAsynchronously(getEngine().getOwning(), task.run());
+                return Bukkit.getScheduler().runTaskAsynchronously(getEngine().getOwning().getStarter(), task.run());
         }
 
         if (task.isRepeat())
             return executor.scheduleAtFixedRate(task.run(), 0, task.getDelay(), TimeUnit.MILLISECONDS);
 
         else if (task.getDelay() != -1)
-            return executor.scheduleWithFixedDelay(task.run(), task.getDelay(), task.getDelay(), TimeUnit.MILLISECONDS);
+            return executor.schedule(task.run(), task.getDelay(), TimeUnit.MILLISECONDS);
 
         else
             executor.execute(task.run());
@@ -103,16 +99,16 @@ public class ClassicTaskController implements TaskController {
         }
 
         if (task.isRepeat())
-            return Bukkit.getScheduler().runTaskTimer(plugin, task.run(), 0, task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskTimer(plugin.getStarter(), task.run(), 0, task.getDelayAsTicks());
 
         else if (task.getDelay() != -1)
-            return Bukkit.getScheduler().runTaskLater(plugin, task.run(), task.getDelayAsTicks());
+            return Bukkit.getScheduler().runTaskLater(plugin.getStarter(), task.run(), task.getDelayAsTicks());
 
         else {
             if (Thread.currentThread().getName().equalsIgnoreCase("Server Thread"))
                 task.run();
             else
-               return Bukkit.getScheduler().runTask(plugin, task.run());
+               return Bukkit.getScheduler().runTask(plugin.getStarter(), task.run());
         }
         return null;
     }

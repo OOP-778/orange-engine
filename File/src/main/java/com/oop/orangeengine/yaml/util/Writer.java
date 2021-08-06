@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 
 public class Writer extends BufferedWriter {
-    private final String lineSeparator = AccessController.doPrivileged(new GetPropertyAction("line.separator"));
+    private final String lineSeparator = System.lineSeparator();
     private String lastWritten = null;
 
     public Writer(@NonNull OutputStreamWriter stream) {
@@ -31,7 +31,7 @@ public class Writer extends BufferedWriter {
 
     @SneakyThrows
     public void newLine() {
-        super.newLine();
+        super.write(lineSeparator);
     }
 
     @SneakyThrows

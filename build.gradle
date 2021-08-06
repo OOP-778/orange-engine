@@ -55,8 +55,10 @@ allprojects {
             compileOnly project(":Engine")
         }
 
-        if (!blacklistedProjects_SPIGOT.contains(project.name))
+        if (!blacklistedProjects_SPIGOT.contains(project.name)) {
+            //compileOnly files("${rootDir.absolutePath}/spigots/spigot.jar")
             compileOnly "org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT"
+        }
 
         compileOnly "net.md-5:bungeecord-chat:1.16-R0.1"
 

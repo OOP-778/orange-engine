@@ -1,14 +1,12 @@
 package com.oop.orangeengine.main.logger;
 
 import com.oop.orangeengine.main.Helper;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.EngineBootstrap;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Getter
 public class OLogger {
@@ -27,7 +25,7 @@ public class OLogger {
     @Setter
     private boolean debugMode = false;
 
-    public OLogger(EnginePlugin plugin) {
+    public OLogger(EngineBootstrap plugin) {
         name(plugin);
     }
 
@@ -40,7 +38,7 @@ public class OLogger {
         return this;
     }
 
-    public OLogger name(EnginePlugin plugin) {
+    public OLogger name(EngineBootstrap plugin) {
         return name(plugin.getName());
     }
 

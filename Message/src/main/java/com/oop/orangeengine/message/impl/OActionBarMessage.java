@@ -1,5 +1,6 @@
 package com.oop.orangeengine.message.impl;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OActionBar;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.MessageType;
@@ -40,7 +41,7 @@ public class OActionBarMessage implements OMessage<OActionBarMessage> {
 
     @Override
     public void send(CommandSender ...senders) {
-        OActionBar.sendActionBar(text, Arrays.stream(senders)
+        OActionBar.PROVIDER.sendActionBar(Helper.color(text), Arrays.stream(senders)
                 .filter(sender -> sender instanceof Player)
                 .map(sender -> (Player) sender)
                 .toArray(Player[]::new));

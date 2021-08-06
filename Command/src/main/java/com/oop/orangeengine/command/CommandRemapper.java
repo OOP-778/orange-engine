@@ -1,7 +1,7 @@
 package com.oop.orangeengine.command;
 
 import com.oop.orangeengine.file.OFile;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.EngineBootstrap;
 import com.oop.orangeengine.yaml.Config;
 import com.oop.orangeengine.yaml.ConfigSection;
 
@@ -15,7 +15,7 @@ public class CommandRemapper {
     private Config config;
 
     public CommandRemapper() {
-        EnginePlugin owning = getEngine().getOwning();
+        EngineBootstrap owning = getEngine().getOwning();
         if (!owning.getDataFolder().exists())
             owning.getDataFolder().mkdirs();
 

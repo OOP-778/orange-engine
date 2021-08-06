@@ -40,7 +40,7 @@ public interface AsyncEvents extends Listener, EventExecutor {
 
         };
 
-        Bukkit.getPluginManager().registerEvent(type, events, priority, events, Engine.getInstance().getOwning());
+        Bukkit.getPluginManager().registerEvent(type, events, priority, events, Engine.getInstance().getOwning().getStarter());
         registeredEvents.add(events);
 
         return events;
@@ -59,7 +59,7 @@ public interface AsyncEvents extends Listener, EventExecutor {
             }
         };
 
-        Bukkit.getPluginManager().registerEvent(type, events, EventPriority.NORMAL, events, Engine.getInstance().getOwning());
+        Bukkit.getPluginManager().registerEvent(type, events, EventPriority.NORMAL, events, Engine.getInstance().getOwning().getStarter());
         registeredEvents.add(events);
 
         return events;
@@ -93,10 +93,10 @@ public interface AsyncEvents extends Listener, EventExecutor {
         };
 
         if (asyncEvent.priority() != null)
-            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning());
+            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning().getStarter());
 
         else
-            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning());
+            Bukkit.getPluginManager().registerEvent(asyncEvent.classType(), events, asyncEvent.priority(), events, Engine.getInstance().getOwning().getStarter());
 
         registeredEvents.add(events);
         return events;

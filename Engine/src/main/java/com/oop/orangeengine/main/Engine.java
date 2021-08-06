@@ -3,29 +3,32 @@ package com.oop.orangeengine.main;
 import com.oop.orangeengine.main.component.AEngineComponent;
 import com.oop.orangeengine.main.component.IEngineComponent;
 import com.oop.orangeengine.main.logger.OLogger;
-import com.oop.orangeengine.main.plugin.EnginePlugin;
+import com.oop.orangeengine.main.plugin.EngineBootstrap;
+import com.oop.orangeengine.main.plugin.PluginComponentController;
 import com.oop.orangeengine.main.task.TaskController;
-import com.oop.orangeengine.main.task.StaticTask;
+import com.oop.orangeengine.main.util.DisablePriority;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Getter
 public class Engine {
-    public static boolean obfuscatorMode = false;
     private static Engine instance;
-    private EnginePlugin owning;
+    private final PluginComponentController pluginComponentController = new PluginComponentController();
     private List<AEngineComponent> components = new ArrayList<>();
     private TaskController taskController;
     private OLogger logger;
+    private final Map<DisablePriority, Runnable> onDisableRun = new HashMap<>();
+    private EngineBootstrap owning;
+    @Setter
+    private boolean disabling = false;
 
-    public Engine(EnginePlugin plugin) {
+    public Engine(EngineBootstrap plugin) {
         instance = this;
 
         // Initialize plugin disable action
@@ -41,7 +44,6 @@ public class Engine {
             }
         });
 
-        new StaticTask();
         taskController = plugin.provideTaskController();
 
         logger = new OLogger(owning);

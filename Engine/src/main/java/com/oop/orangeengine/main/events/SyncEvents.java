@@ -26,7 +26,7 @@ public interface SyncEvents extends Listener, EventExecutor {
             }
         };
 
-        Bukkit.getPluginManager().registerEvent(type, events, EventPriority.NORMAL, events, Engine.getInstance().getOwning());
+        Bukkit.getPluginManager().registerEvent(type, events, EventPriority.NORMAL, events, Engine.getInstance().getOwning().getStarter());
         registeredEvents.add(events);
         return events;
     }
@@ -42,7 +42,7 @@ public interface SyncEvents extends Listener, EventExecutor {
             }
         };
 
-        Bukkit.getPluginManager().registerEvent(type, events, priority, events, Engine.getInstance().getOwning());
+        Bukkit.getPluginManager().registerEvent(type, events, priority, events, Engine.getInstance().getOwning().getStarter());
         registeredEvents.add(events);
         return events;
     }
@@ -54,7 +54,7 @@ public interface SyncEvents extends Listener, EventExecutor {
             }
         };
 
-        RegisteredListener registeredListener = new RegisteredListener(events, events, EventPriority.NORMAL, Engine.getEngine().getOwning(), false);
+        RegisteredListener registeredListener = new RegisteredListener(events, events, EventPriority.NORMAL, Engine.getEngine().getOwning().getStarter(), false);
         for (HandlerList handler : HandlerList.getHandlerLists())
             handler.register(registeredListener);
 

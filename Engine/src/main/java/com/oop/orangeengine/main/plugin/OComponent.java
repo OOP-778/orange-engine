@@ -2,7 +2,7 @@ package com.oop.orangeengine.main.plugin;
 
 import com.oop.orangeengine.main.Engine;
 
-public interface OComponent<O extends EnginePlugin> {
+public interface OComponent<O extends EngineBootstrap> {
 
     default Engine getEngine() {
         return Engine.getEngine();

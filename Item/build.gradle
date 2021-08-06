@@ -11,4 +11,6 @@ dependencies {
 
     compileOnly project(":File")
     compileOnly project(":Message")
+
+    compileOnly fileTree("${rootDir.absolutePath}/spigots")
 }

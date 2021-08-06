@@ -1,5 +1,6 @@
 package com.oop.orangeengine.message.impl;
 
+import com.oop.orangeengine.main.Helper;
 import com.oop.orangeengine.main.util.OTitle;
 import com.oop.orangeengine.main.util.data.pair.OPair;
 import com.oop.orangeengine.message.MessageType;
@@ -48,7 +49,7 @@ public class OTitleMessage implements OMessage<OTitleMessage> {
 
     @Override
     public void send(CommandSender... senders) {
-        OTitle.sendTitle(fadeIn, stay, fadeOut, title, subTitle, Arrays.stream(senders)
+        OTitle.PROVIDER.sendTitle(fadeIn, stay, fadeOut, Helper.color(title), subTitle == null ? null : Helper.color(subTitle), Arrays.stream(senders)
                 .filter(sender -> sender instanceof Player)
                 .map(sender -> (Player) sender)
                 .toArray(Player[]::new));

@@ -329,7 +329,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public T load(ConfigSection section) {
-        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class));
+        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class)).get();
         Objects.requireNonNull(material, "Failed to find material by " + section.getAs("material", String.class));
 
         setItemStack(material.parseItem());
@@ -408,7 +408,7 @@ public abstract class ItemBuilder<T extends ItemBuilder> implements Cloneable {
     }
 
     public static <T extends ItemBuilder> ItemBuilder<T> fromConfiguration(ConfigSection section) {
-        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class));
+        OMaterial material = OMaterial.matchMaterial(section.getAs("material", String.class)).get();
         Objects.requireNonNull(material, "Failed to find material by " + section.getAs("material", String.class));
 
         if (material.name().contains("HEAD"))

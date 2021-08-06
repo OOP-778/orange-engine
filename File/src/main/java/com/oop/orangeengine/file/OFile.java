@@ -62,7 +62,7 @@ public class OFile {
 
             if (!file.exists()) {
                 if (importFromResources)
-                    Engine.getInstance().getOwning().saveResource(fileName, true);
+                    Engine.getInstance().getOwning().getStarter().saveResource(fileName, true);
 
                 else
                     file.createNewFile();

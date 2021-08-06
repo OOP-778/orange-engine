@@ -4,7 +4,7 @@ package com.oop.orangeengine.material;
  * The MIT License (MIT)
  *
  * Copyright (c) 2018 Hex_27
- * Copyright (c) 2020 Crypto Morin
+ * Copyright (c) 2021 Crypto Morin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import sun.reflect.Reflection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,7 +47,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * <b>XMaterial</b> - Data Values/Pre-flattening<br>
+ * <b>OMaterial</b> - Data Values/Pre-flattening<br>
  * 1.13 and above as priority.
  * <p>
  * This class is mainly designed to support {@link ItemStack}. If you want to use it on blocks, you'll have to use
@@ -57,7 +58,7 @@ import java.util.regex.PatternSyntaxException;
  * Materials (1.12): https://helpch.at/docs/1.12.2/index.html?org/bukkit/Material.html
  * Material IDs: https://minecraft-ids.grahamedgecombe.com/
  * Material Source Code: https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/src/main/java/org/bukkit/Material.java
- * XMaterial v1: https://www.spigotmc.org/threads/329630/
+ * OMaterial v1: https://www.spigotmc.org/threads/329630/
  * <p>
  * This class will throw a "unsupported material" error if someone tries to use an item with an invalid data value which can only happen in 1.12 servers and below or when the
  * utility is missing a new material in that specific version.
@@ -96,6 +97,9 @@ public enum OMaterial {
      */
     AIR,
     ALLIUM(2, "RED_ROSE"),
+    AMETHYST_BLOCK,
+    AMETHYST_CLUSTER,
+    AMETHYST_SHARD,
     ANCIENT_DEBRIS(16),
     ANDESITE(5, "STONE"),
     ANDESITE_SLAB,
@@ -107,6 +111,10 @@ public enum OMaterial {
     ARROW,
     ATTACHED_MELON_STEM(7, "MELON_STEM"),
     ATTACHED_PUMPKIN_STEM(7, "PUMPKIN_STEM"),
+    AXOLOTL_BUCKET,
+    AXOLOTL_SPAWN_EGG,
+    AZALEA,
+    AZALEA_LEAVES,
     AZURE_BLUET(3, "RED_ROSE"),
     BAKED_POTATO,
     BAMBOO(0, 14),
@@ -129,6 +137,8 @@ public enum OMaterial {
     BEE_NEST(15),
     BEE_SPAWN_EGG(15),
     BELL(14),
+    BIG_DRIPLEAF,
+    BIG_DRIPLEAF_STEM,
     BIRCH_BOAT("BOAT_BIRCH"),
     BIRCH_BUTTON("WOOD_BUTTON"),
     BIRCH_DOOR("BIRCH_DOOR", "BIRCH_DOOR_ITEM"),
@@ -151,6 +161,8 @@ public enum OMaterial {
     BLACKSTONE_WALL(16),
     BLACK_BANNER("STANDING_BANNER", "BANNER"),
     BLACK_BED(15, "BED_BLOCK", "BED"),
+    BLACK_CANDLE,
+    BLACK_CANDLE_CAKE,
     BLACK_CARPET(15, "CARPET"),
     BLACK_CONCRETE(15, "CONCRETE"),
     BLACK_CONCRETE_POWDER(15, "CONCRETE_POWDER"),
@@ -168,6 +180,8 @@ public enum OMaterial {
     BLAZE_SPAWN_EGG(61, "MONSTER_EGG"),
     BLUE_BANNER(4, "STANDING_BANNER", "BANNER"),
     BLUE_BED(11, "BED_BLOCK", "BED"),
+    BLUE_CANDLE,
+    BLUE_CANDLE_CAKE,
     BLUE_CARPET(11, "CARPET"),
     BLUE_CONCRETE(11, "CONCRETE"),
     BLUE_CONCRETE_POWDER(11, "CONCRETE_POWDER"),
@@ -201,6 +215,8 @@ public enum OMaterial {
     BRICK_WALL,
     BROWN_BANNER(3, "STANDING_BANNER", "BANNER"),
     BROWN_BED(12, "BED_BLOCK", "BED"),
+    BROWN_CANDLE,
+    BROWN_CANDLE_CAKE,
     BROWN_CARPET(12, "CARPET"),
     BROWN_CONCRETE(12, "CONCRETE"),
     BROWN_CONCRETE_POWDER(12, "CONCRETE_POWDER"),
@@ -220,9 +236,14 @@ public enum OMaterial {
     BUBBLE_CORAL_FAN(13),
     BUBBLE_CORAL_WALL_FAN,
     BUCKET,
+    BUDDING_AMETHYST,
+    BUNDLE,
     CACTUS,
     CAKE("CAKE_BLOCK"),
+    CALCITE,
     CAMPFIRE(14),
+    CANDLE,
+    CANDLE_CAKE,
     CARROT("CARROT_ITEM"),
     CARROTS("CARROT"),
     CARROT_ON_A_STICK("CARROT_STICK"),
@@ -237,6 +258,8 @@ public enum OMaterial {
      */
     CAVE_AIR("AIR"),
     CAVE_SPIDER_SPAWN_EGG(59, "MONSTER_EGG"),
+    CAVE_VINES,
+    CAVE_VINES_PLANT,
     CHAIN(16),
     CHAINMAIL_BOOTS,
     CHAINMAIL_CHESTPLATE,
@@ -249,6 +272,7 @@ public enum OMaterial {
     CHICKEN("RAW_CHICKEN"),
     CHICKEN_SPAWN_EGG(93, "MONSTER_EGG"),
     CHIPPED_ANVIL(1, "ANVIL"),
+    CHISELED_DEEPSLATE,
     CHISELED_NETHER_BRICKS(1, "NETHER_BRICKS"),
     CHISELED_POLISHED_BLACKSTONE(0, 16, "POLISHED_BLACKSTONE"),
     CHISELED_QUARTZ_BLOCK(1, "QUARTZ_BLOCK"),
@@ -265,6 +289,10 @@ public enum OMaterial {
     COAL_BLOCK,
     COAL_ORE,
     COARSE_DIRT(1, "DIRT"),
+    COBBLED_DEEPSLATE,
+    COBBLED_DEEPSLATE_SLAB,
+    COBBLED_DEEPSLATE_STAIRS,
+    COBBLED_DEEPSLATE_WALL,
     COBBLESTONE,
     COBBLESTONE_SLAB(3, "STEP"),
     COBBLESTONE_STAIRS,
@@ -296,8 +324,13 @@ public enum OMaterial {
     COOKED_RABBIT,
     COOKED_SALMON(1, "COOKED_FISH"),
     COOKIE,
+    COPPER_BLOCK,
+    COPPER_INGOT,
+    COPPER_ORE,
     CORNFLOWER(4, 14),
     COW_SPAWN_EGG(92, "MONSTER_EGG"),
+    CRACKED_DEEPSLATE_BRICKS,
+    CRACKED_DEEPSLATE_TILES,
     CRACKED_NETHER_BRICKS(2, "NETHER_BRICKS"),
     CRACKED_POLISHED_BLACKSTONE_BRICKS(0, 16, "POLISHED_BLACKSTONE_BRICKS"),
     CRACKED_STONE_BRICKS(2, "SMOOTH_BRICK"),
@@ -324,12 +357,17 @@ public enum OMaterial {
     CRIMSON_WALL_SIGN(0, 16, "WALL_SIGN"),
     CROSSBOW,
     CRYING_OBSIDIAN(16),
+    CUT_COPPER,
+    CUT_COPPER_SLAB,
+    CUT_COPPER_STAIRS,
     CUT_RED_SANDSTONE(13),
     CUT_RED_SANDSTONE_SLAB("STONE_SLAB2"),
     CUT_SANDSTONE(13),
     CUT_SANDSTONE_SLAB("STEP"),
     CYAN_BANNER(6, "STANDING_BANNER", "BANNER"),
     CYAN_BED(9, "BED_BLOCK", "BED"),
+    CYAN_CANDLE,
+    CYAN_CANDLE_CAKE,
     CYAN_CARPET(9, "CARPET"),
     CYAN_CONCRETE(9, "CONCRETE"),
     CYAN_CONCRETE_POWDER(9, "CONCRETE_POWDER"),
@@ -349,7 +387,7 @@ public enum OMaterial {
     DARK_OAK_FENCE,
     DARK_OAK_FENCE_GATE,
     DARK_OAK_LEAVES(4, "LEAVES", "LEAVES_2"),
-    DARK_OAK_LOG(1, "LOG", "LOG_2"),
+    DARK_OAK_LOG(1, "LOG_2"),
     DARK_OAK_PLANKS(5, "WOOD"),
     DARK_OAK_PRESSURE_PLATE("WOOD_PLATE"),
     DARK_OAK_SAPLING(5, "SAPLING"),
@@ -358,7 +396,7 @@ public enum OMaterial {
     DARK_OAK_STAIRS,
     DARK_OAK_TRAPDOOR("TRAP_DOOR"),
     DARK_OAK_WALL_SIGN("WALL_SIGN"),
-    DARK_OAK_WOOD(1, "LOG", "LOG_2"),
+    DARK_OAK_WOOD(1, "LOG_2"),
     DARK_PRISMARINE(1, "PRISMARINE"),
     DARK_PRISMARINE_SLAB(13),
     DARK_PRISMARINE_STAIRS(13),
@@ -385,6 +423,23 @@ public enum OMaterial {
     DEAD_TUBE_CORAL_FAN(13),
     DEAD_TUBE_CORAL_WALL_FAN(13),
     DEBUG_STICK(0, 13),
+    DEEPSLATE,
+    DEEPSLATE_BRICKS,
+    DEEPSLATE_BRICK_SLAB,
+    DEEPSLATE_BRICK_STAIRS,
+    DEEPSLATE_BRICK_WALL,
+    DEEPSLATE_COAL_ORE,
+    DEEPSLATE_COPPER_ORE,
+    DEEPSLATE_DIAMOND_ORE,
+    DEEPSLATE_EMERALD_ORE,
+    DEEPSLATE_GOLD_ORE,
+    DEEPSLATE_IRON_ORE,
+    DEEPSLATE_LAPIS_ORE,
+    DEEPSLATE_REDSTONE_ORE,
+    DEEPSLATE_TILES,
+    DEEPSLATE_TILE_SLAB,
+    DEEPSLATE_TILE_STAIRS,
+    DEEPSLATE_TILE_WALL,
     DETECTOR_RAIL,
     DIAMOND,
     DIAMOND_AXE,
@@ -404,6 +459,10 @@ public enum OMaterial {
     DIORITE_STAIRS,
     DIORITE_WALL,
     DIRT,
+    /**
+     * Changed in 1.17
+     */
+    DIRT_PATH("GRASS_PATH"),
     DISPENSER,
     DOLPHIN_SPAWN_EGG(0, 13),
     DONKEY_SPAWN_EGG(32, "MONSTER_EGG"),
@@ -413,6 +472,7 @@ public enum OMaterial {
     DRAGON_WALL_HEAD(5, "SKULL", "SKULL_ITEM"),
     DRIED_KELP(13),
     DRIED_KELP_BLOCK(13),
+    DRIPSTONE_BLOCK,
     DROPPER,
     DROWNED_SPAWN_EGG(0, 13),
     EGG,
@@ -441,6 +501,10 @@ public enum OMaterial {
     END_STONE_BRICK_WALL,
     EVOKER_SPAWN_EGG(34, "MONSTER_EGG"),
     EXPERIENCE_BOTTLE("EXP_BOTTLE"),
+    EXPOSED_COPPER,
+    EXPOSED_CUT_COPPER,
+    EXPOSED_CUT_COPPER_SLAB,
+    EXPOSED_CUT_COPPER_STAIRS,
     FARMLAND("SOIL"),
     FEATHER,
     FERMENTED_SPIDER_EYE,
@@ -464,6 +528,8 @@ public enum OMaterial {
     FLETCHING_TABLE(0, 14),
     FLINT,
     FLINT_AND_STEEL,
+    FLOWERING_AZALEA,
+    FLOWERING_AZALEA_LEAVES,
     FLOWER_BANNER_PATTERN,
     FLOWER_POT("FLOWER_POT", "FLOWER_POT_ITEM"),
     FOX_SPAWN_EGG(14),
@@ -483,6 +549,12 @@ public enum OMaterial {
     GLOBE_BANNER_PATTERN,
     GLOWSTONE,
     GLOWSTONE_DUST,
+    GLOW_BERRIES,
+    GLOW_INK_SAC,
+    GLOW_ITEM_FRAME,
+    GLOW_LICHEN,
+    GLOW_SQUID_SPAWN_EGG,
+    GOAT_SPAWN_EGG,
     GOLDEN_APPLE,
     GOLDEN_AXE("GOLD_AXE"),
     GOLDEN_BOOTS("GOLD_BOOTS"),
@@ -505,10 +577,11 @@ public enum OMaterial {
     GRANITE_WALL,
     GRASS(1, "LONG_GRASS"),
     GRASS_BLOCK("GRASS"),
-    GRASS_PATH,
     GRAVEL,
     GRAY_BANNER(8, "STANDING_BANNER", "BANNER"),
     GRAY_BED(7, "BED_BLOCK", "BED"),
+    GRAY_CANDLE,
+    GRAY_CANDLE_CAKE,
     GRAY_CARPET(7, "CARPET"),
     GRAY_CONCRETE(7, "CONCRETE"),
     GRAY_CONCRETE_POWDER(7, "CONCRETE_POWDER"),
@@ -522,6 +595,8 @@ public enum OMaterial {
     GRAY_WOOL(7, "WOOL"),
     GREEN_BANNER(2, "STANDING_BANNER", "BANNER"),
     GREEN_BED(13, "BED_BLOCK", "BED"),
+    GREEN_CANDLE,
+    GREEN_CANDLE_CAKE,
     GREEN_CARPET(13, "CARPET"),
     GREEN_CONCRETE(13, "CONCRETE"),
     GREEN_CONCRETE_POWDER(13, "CONCRETE_POWDER"),
@@ -536,6 +611,7 @@ public enum OMaterial {
     GRINDSTONE(0, 14),
     GUARDIAN_SPAWN_EGG(68, "MONSTER_EGG"),
     GUNPOWDER("SULPHUR"),
+    HANGING_ROOTS,
     HAY_BLOCK,
     HEART_OF_THE_SEA(13),
     HEAVY_WEIGHTED_PRESSURE_PLATE("IRON_PLATE"),
@@ -556,6 +632,7 @@ public enum OMaterial {
     INFESTED_CHISELED_STONE_BRICKS(5, "MONSTER_EGGS"),
     INFESTED_COBBLESTONE(1, "MONSTER_EGGS"),
     INFESTED_CRACKED_STONE_BRICKS(4, "MONSTER_EGGS"),
+    INFESTED_DEEPSLATE,
     INFESTED_MOSSY_STONE_BRICKS(3, "MONSTER_EGGS"),
     INFESTED_STONE("MONSTER_EGGS"),
     INFESTED_STONE_BRICKS(2, "MONSTER_EGGS"),
@@ -610,9 +687,11 @@ public enum OMaterial {
     LAPIS_BLOCK,
     LAPIS_LAZULI(4, "INK_SACK"),
     LAPIS_ORE,
+    LARGE_AMETHYST_BUD,
     LARGE_FERN(3, "DOUBLE_PLANT"),
     LAVA("STATIONARY_LAVA"),
     LAVA_BUCKET,
+    LAVA_CAULDRON,
     LEAD("LEASH"),
     LEATHER,
     LEATHER_BOOTS,
@@ -622,8 +701,12 @@ public enum OMaterial {
     LEATHER_LEGGINGS,
     LECTERN(0, 14),
     LEVER,
+    LIGHT,
+    LIGHTNING_ROD,
     LIGHT_BLUE_BANNER(12, "STANDING_BANNER", "BANNER"),
     LIGHT_BLUE_BED(3, "BED_BLOCK", "BED"),
+    LIGHT_BLUE_CANDLE,
+    LIGHT_BLUE_CANDLE_CAKE,
     LIGHT_BLUE_CARPET(3, "CARPET"),
     LIGHT_BLUE_CONCRETE(3, "CONCRETE"),
     LIGHT_BLUE_CONCRETE_POWDER(3, "CONCRETE_POWDER"),
@@ -637,6 +720,8 @@ public enum OMaterial {
     LIGHT_BLUE_WOOL(3, "WOOL"),
     LIGHT_GRAY_BANNER(7, "STANDING_BANNER", "BANNER"),
     LIGHT_GRAY_BED(8, "BED_BLOCK", "BED"),
+    LIGHT_GRAY_CANDLE,
+    LIGHT_GRAY_CANDLE_CAKE,
     LIGHT_GRAY_CARPET(8, "CARPET"),
     LIGHT_GRAY_CONCRETE(8, "CONCRETE"),
     LIGHT_GRAY_CONCRETE_POWDER(8, "CONCRETE_POWDER"),
@@ -658,6 +743,8 @@ public enum OMaterial {
     LILY_PAD("WATER_LILY"),
     LIME_BANNER(10, "STANDING_BANNER", "BANNER"),
     LIME_BED(5, "BED_BLOCK", "BED"),
+    LIME_CANDLE,
+    LIME_CANDLE_CAKE,
     LIME_CARPET(5, "CARPET"),
     LIME_CONCRETE(5, "CONCRETE"),
     LIME_CONCRETE_POWDER(5, "CONCRETE_POWDER"),
@@ -675,6 +762,8 @@ public enum OMaterial {
     LOOM(14),
     MAGENTA_BANNER(13, "STANDING_BANNER", "BANNER"),
     MAGENTA_BED(2, "BED_BLOCK", "BED"),
+    MAGENTA_CANDLE,
+    MAGENTA_CANDLE_CAKE,
     MAGENTA_CARPET(2, "CARPET"),
     MAGENTA_CONCRETE(2, "CONCRETE"),
     MAGENTA_CONCRETE_POWDER(2, "CONCRETE_POWDER"),
@@ -697,6 +786,7 @@ public enum OMaterial {
      * until I can come up with something to fix it.
      */
     MAP("EMPTY_MAP"),
+    MEDIUM_AMETHYST_BUD,
     MELON("MELON_BLOCK"),
     MELON_SEEDS,
     MELON_SLICE("MELON"),
@@ -713,7 +803,9 @@ public enum OMaterial {
     MOSSY_STONE_BRICK_SLAB(5, "STEP"),
     MOSSY_STONE_BRICK_STAIRS("SMOOTH_STAIRS"),
     MOSSY_STONE_BRICK_WALL,
-    MOVING_PISTON("PISTON_BASE", "PISTON_MOVING_PIECE"),
+    MOSS_BLOCK,
+    MOSS_CARPET,
+    MOVING_PISTON("PISTON_MOVING_PIECE"),
     MULE_SPAWN_EGG(32, "MONSTER_EGG"),
     MUSHROOM_STEM("BROWN_MUSHROOM"),
     MUSHROOM_STEW("MUSHROOM_SOUP"),
@@ -771,7 +863,7 @@ public enum OMaterial {
     OAK_DOOR("WOODEN_DOOR", "WOOD_DOOR"),
     OAK_FENCE("FENCE"),
     OAK_FENCE_GATE("FENCE_GATE"),
-    OAK_LEAVES(0,"LEAVES"),
+    OAK_LEAVES("LEAVES"),
     OAK_LOG("LOG"),
     OAK_PLANKS("WOOD"),
     OAK_PRESSURE_PLATE("WOOD_PLATE"),
@@ -787,6 +879,8 @@ public enum OMaterial {
     OCELOT_SPAWN_EGG(98, "MONSTER_EGG"),
     ORANGE_BANNER(14, "STANDING_BANNER", "BANNER"),
     ORANGE_BED(1, "BED_BLOCK", "BED"),
+    ORANGE_CANDLE,
+    ORANGE_CANDLE_CAKE,
     ORANGE_CARPET(1, "CARPET"),
     ORANGE_CONCRETE(1, "CONCRETE"),
     ORANGE_CONCRETE_POWDER(1, "CONCRETE_POWDER"),
@@ -800,6 +894,10 @@ public enum OMaterial {
     ORANGE_WALL_BANNER(14, "WALL_BANNER"),
     ORANGE_WOOL(1, "WOOL"),
     OXEYE_DAISY(8, "RED_ROSE"),
+    OXIDIZED_COPPER,
+    OXIDIZED_CUT_COPPER,
+    OXIDIZED_CUT_COPPER_SLAB,
+    OXIDIZED_CUT_COPPER_STAIRS,
     PACKED_ICE,
     PAINTING,
     PANDA_SPAWN_EGG(14),
@@ -816,6 +914,8 @@ public enum OMaterial {
     PILLAGER_SPAWN_EGG(14),
     PINK_BANNER(9, "STANDING_BANNER", "BANNER"),
     PINK_BED(6, "BED_BLOCK", "BED"),
+    PINK_CANDLE,
+    PINK_CANDLE_CAKE,
     PINK_CARPET(6, "CARPET"),
     PINK_CONCRETE(6, "CONCRETE"),
     PINK_CONCRETE_POWDER(6, "CONCRETE_POWDER"),
@@ -833,6 +933,7 @@ public enum OMaterial {
     PLAYER_HEAD(3, "SKULL", "SKULL_ITEM"),
     PLAYER_WALL_HEAD(3, "SKULL", "SKULL_ITEM"),
     PODZOL(2, "DIRT"),
+    POINTED_DRIPSTONE,
     POISONOUS_POTATO,
     POLAR_BEAR_SPAWN_EGG(102, "MONSTER_EGG"),
     POLISHED_ANDESITE(6, "STONE"),
@@ -849,6 +950,10 @@ public enum OMaterial {
     POLISHED_BLACKSTONE_SLAB(16),
     POLISHED_BLACKSTONE_STAIRS(16),
     POLISHED_BLACKSTONE_WALL(16),
+    POLISHED_DEEPSLATE,
+    POLISHED_DEEPSLATE_SLAB,
+    POLISHED_DEEPSLATE_STAIRS,
+    POLISHED_DEEPSLATE_WALL,
     POLISHED_DIORITE(4, "STONE"),
     POLISHED_DIORITE_SLAB,
     POLISHED_DIORITE_STAIRS,
@@ -863,6 +968,7 @@ public enum OMaterial {
     POTION,
     POTTED_ACACIA_SAPLING(4, "SAPLING", "FLOWER_POT"),
     POTTED_ALLIUM(2, "RED_ROSE", "FLOWER_POT"),
+    POTTED_AZALEA_BUSH,
     POTTED_AZURE_BLUET(3, "RED_ROSE", "FLOWER_POT"),
     POTTED_BAMBOO,
     POTTED_BIRCH_SAPLING(2, "SAPLING", "FLOWER_POT"),
@@ -876,6 +982,7 @@ public enum OMaterial {
     POTTED_DARK_OAK_SAPLING(5, "SAPLING", "FLOWER_POT"),
     POTTED_DEAD_BUSH("FLOWER_POT"),
     POTTED_FERN(2, "LONG_GRASS", "FLOWER_POT"),
+    POTTED_FLOWERING_AZALEA_BUSH,
     POTTED_JUNGLE_SAPLING(3, "SAPLING", "FLOWER_POT"),
     POTTED_LILY_OF_THE_VALLEY,
     POTTED_OAK_SAPLING("SAPLING", "FLOWER_POT"),
@@ -890,6 +997,9 @@ public enum OMaterial {
     POTTED_WARPED_ROOTS(16),
     POTTED_WHITE_TULIP(6, "RED_ROSE", "FLOWER_POT"),
     POTTED_WITHER_ROSE,
+    POWDER_SNOW,
+    POWDER_SNOW_BUCKET,
+    POWDER_SNOW_CAULDRON,
     POWERED_RAIL,
     PRISMARINE,
     PRISMARINE_BRICKS(2, "PRISMARINE"),
@@ -909,6 +1019,8 @@ public enum OMaterial {
     PUMPKIN_STEM,
     PURPLE_BANNER(5, "STANDING_BANNER", "BANNER"),
     PURPLE_BED(10, "BED_BLOCK", "BED"),
+    PURPLE_CANDLE,
+    PURPLE_CANDLE_CAKE,
     PURPLE_CARPET(10, "CARPET"),
     PURPLE_CONCRETE(10, "CONCRETE"),
     PURPLE_CONCRETE_POWDER(10, "CONCRETE_POWDER"),
@@ -937,6 +1049,12 @@ public enum OMaterial {
     RABBIT_STEW,
     RAIL("RAILS"),
     RAVAGER_SPAWN_EGG(14),
+    RAW_COPPER,
+    RAW_COPPER_BLOCK,
+    RAW_GOLD,
+    RAW_GOLD_BLOCK,
+    RAW_IRON,
+    RAW_IRON_BLOCK,
     REDSTONE,
     REDSTONE_BLOCK,
     /**
@@ -959,7 +1077,9 @@ public enum OMaterial {
     /**
      * Data value 14 or 0
      */
-    RED_BED(0, "BED_BLOCK", "BED"),
+    RED_BED(14, "BED_BLOCK", "BED"),
+    RED_CANDLE,
+    RED_CANDLE_CAKE,
     RED_CARPET(14, "CARPET"),
     RED_CONCRETE(14, "CONCRETE"),
     RED_CONCRETE_POWDER(14, "CONCRETE_POWDER"),
@@ -986,6 +1106,7 @@ public enum OMaterial {
     REPEATER("DIODE_BLOCK_ON", "DIODE_BLOCK_OFF", "DIODE"),
     REPEATING_COMMAND_BLOCK("COMMAND", "COMMAND_REPEATING"),
     RESPAWN_ANCHOR(16),
+    ROOTED_DIRT,
     ROSE_BUSH(4, "DOUBLE_PLANT"),
     ROTTEN_FLESH,
     SADDLE,
@@ -998,6 +1119,7 @@ public enum OMaterial {
     SANDSTONE_STAIRS,
     SANDSTONE_WALL,
     SCAFFOLDING(0, 14),
+    SCULK_SENSOR,
     SCUTE(13),
     SEAGRASS(0, 13),
     SEA_LANTERN,
@@ -1018,8 +1140,11 @@ public enum OMaterial {
     SLIME_BALL,
     SLIME_BLOCK,
     SLIME_SPAWN_EGG(55, "MONSTER_EGG"),
+    SMALL_AMETHYST_BUD,
+    SMALL_DRIPLEAF,
     SMITHING_TABLE,
     SMOKER(0, 14),
+    SMOOTH_BASALT,
     SMOOTH_QUARTZ(0, 13),
     SMOOTH_QUARTZ_SLAB(7, "STEP"),
     SMOOTH_QUARTZ_STAIRS,
@@ -1047,6 +1172,7 @@ public enum OMaterial {
     SPIDER_SPAWN_EGG(52, "MONSTER_EGG"),
     SPLASH_POTION,
     SPONGE,
+    SPORE_BLOSSOM,
     SPRUCE_BOAT("BOAT_SPRUCE"),
     SPRUCE_BUTTON("WOOD_BUTTON"),
     SPRUCE_DOOR("SPRUCE_DOOR", "SPRUCE_DOOR_ITEM"),
@@ -1063,6 +1189,7 @@ public enum OMaterial {
     SPRUCE_TRAPDOOR("TRAP_DOOR"),
     SPRUCE_WALL_SIGN("WALL_SIGN"),
     SPRUCE_WOOD(1, "LOG"),
+    SPYGLASS,
     SQUID_SPAWN_EGG(94, "MONSTER_EGG"),
     STICK,
     STICKY_PISTON("PISTON_BASE", "PISTON_STICKY_BASE"),
@@ -1119,6 +1246,7 @@ public enum OMaterial {
     TALL_SEAGRASS(2, 13),
     TARGET(16),
     TERRACOTTA("STAINED_CLAY"),
+    TINTED_GLASS,
     TIPPED_ARROW(0, 9),
     TNT,
     TNT_MINECART("EXPLOSIVE_MINECART"),
@@ -1136,6 +1264,7 @@ public enum OMaterial {
     TUBE_CORAL_BLOCK(13),
     TUBE_CORAL_FAN(13),
     TUBE_CORAL_WALL_FAN,
+    TUFF,
     TURTLE_EGG(0, 13),
     TURTLE_HELMET(0, 13),
     TURTLE_SPAWN_EGG(0, 13),
@@ -1179,6 +1308,27 @@ public enum OMaterial {
      */
     WATER("STATIONARY_WATER"),
     WATER_BUCKET,
+    WATER_CAULDRON,
+    WAXED_COPPER_BLOCK,
+    WAXED_CUT_COPPER,
+    WAXED_CUT_COPPER_SLAB,
+    WAXED_CUT_COPPER_STAIRS,
+    WAXED_EXPOSED_COPPER,
+    WAXED_EXPOSED_CUT_COPPER,
+    WAXED_EXPOSED_CUT_COPPER_SLAB,
+    WAXED_EXPOSED_CUT_COPPER_STAIRS,
+    WAXED_OXIDIZED_COPPER,
+    WAXED_OXIDIZED_CUT_COPPER,
+    WAXED_OXIDIZED_CUT_COPPER_SLAB,
+    WAXED_OXIDIZED_CUT_COPPER_STAIRS,
+    WAXED_WEATHERED_COPPER,
+    WAXED_WEATHERED_CUT_COPPER,
+    WAXED_WEATHERED_CUT_COPPER_SLAB,
+    WAXED_WEATHERED_CUT_COPPER_STAIRS,
+    WEATHERED_COPPER,
+    WEATHERED_CUT_COPPER,
+    WEATHERED_CUT_COPPER_SLAB,
+    WEATHERED_CUT_COPPER_STAIRS,
     WEEPING_VINES(16),
     WEEPING_VINES_PLANT(16),
     WET_SPONGE(1, "SPONGE"),
@@ -1189,6 +1339,8 @@ public enum OMaterial {
     WHEAT_SEEDS("SEEDS"),
     WHITE_BANNER(15, "STANDING_BANNER", "BANNER"),
     WHITE_BED("BED_BLOCK", "BED"),
+    WHITE_CANDLE,
+    WHITE_CANDLE_CAKE,
     WHITE_CARPET("CARPET"),
     WHITE_CONCRETE("CONCRETE"),
     WHITE_CONCRETE_POWDER("CONCRETE_POWDER"),
@@ -1216,6 +1368,8 @@ public enum OMaterial {
     WRITTEN_BOOK,
     YELLOW_BANNER(11, "STANDING_BANNER", "BANNER"),
     YELLOW_BED(4, "BED_BLOCK", "BED"),
+    YELLOW_CANDLE,
+    YELLOW_CANDLE_CAKE,
     YELLOW_CARPET(4, "CARPET"),
     YELLOW_CONCRETE(4, "CONCRETE"),
     YELLOW_CONCRETE_POWDER(4, "CONCRETE_POWDER"),
@@ -1242,7 +1396,7 @@ public enum OMaterial {
      *
      * @since 2.0.0
      */
-    public static final LinkedList<OMaterial> VALUES;
+    public static final OMaterial[] VALUES = values();
 
     /**
      * We don't want to use {@link Enums#getIfPresent(Class, String)} to avoid a few checks.
@@ -1253,7 +1407,7 @@ public enum OMaterial {
 
     /**
      * Guava (Google Core Libraries for Java)'s cache for performance and timed caches.
-     * For strings that match a certain XMaterial. Mostly cached for configs.
+     * For strings that match a certain OMaterial. Mostly cached for configs.
      *
      * @since 1.0.0
      */
@@ -1262,6 +1416,7 @@ public enum OMaterial {
             .build();
 
     /**
+     * This is used for {@link #isOneOf(Collection)}
      *
      * @since 3.4.0
      */
@@ -1282,7 +1437,7 @@ public enum OMaterial {
      * The maximum data value in the pre-flattening update which belongs to {@link #VILLAGER_SPAWN_EGG}<br>
      * https://minecraftitemids.com/types/spawn-egg
      *
-     * @see #matchXMaterialWithData(String)
+     * @see #matchOMaterialWithData(String)
      * @since 8.0.0
      */
     private static final byte MAX_DATA_VALUE = 120;
@@ -1299,9 +1454,8 @@ public enum OMaterial {
      * @since 8.1.0
      */
     private static final short MAX_ID = 2267;
-
     /**
-     * <b>XMaterial Paradox (Duplication Check)</b>
+     * <b>OMaterial Paradox (Duplication Check)</b>
      * <p>
      * A set of duplicated material names in 1.13 and 1.12 that will conflict with the legacy names.
      * Values are the new material names. This map also contains illegal elements. Check the static initializer for more info.
@@ -1314,15 +1468,13 @@ public enum OMaterial {
     private static final Set<String> DUPLICATED;
 
     static {
-        VALUES = new LinkedList<>(Arrays.asList(values()));
-        VALUES.sort(Comparator.comparingInt(OMaterial::getData));
-
         for (OMaterial material : VALUES) NAMES.put(material.name(), material);
+    }
 
+    static {
         if (Data.ISFLAT) {
             // It's not needed at all if it's the newer version. We can save some memory.
             DUPLICATED = null;
-
         } else {
             // MELON_SLICE, CARROTS, POTATOES, BEETROOTS, GRASS_BLOCK, BRICKS, NETHER_BRICKS, BROWN_MUSHROOM
             // Using the constructor to add elements will decide to allocate more size which we don't need.
@@ -1341,7 +1493,6 @@ public enum OMaterial {
      * @see #getData()
      */
     private final byte data;
-
     /**
      * The version that this material was added in, otherwise 0 if the version is not recorded.
      *
@@ -1349,7 +1500,6 @@ public enum OMaterial {
      * @since 7.0.0
      */
     private final byte version;
-
     /**
      * A list of material names that was being used for older verions.
      *
@@ -1357,7 +1507,6 @@ public enum OMaterial {
      */
     @Nonnull
     private final String[] legacy;
-
     /**
      * The cached Bukkit parsed material.
      *
@@ -1367,7 +1516,7 @@ public enum OMaterial {
     @Nullable
     private final Material material;
 
-    private int combinedId = -1;
+    private int combinedId;
 
     OMaterial(int data, int version, @Nonnull String... legacy) {
         this.data = (byte) data;
@@ -1400,19 +1549,49 @@ public enum OMaterial {
         this(0, 0, legacy);
     }
 
+    /**
+     * Checks if the version is 1.13 Aquatic Update or higher.
+     * An invocation of this method yields the cached result from the expression:
+     * <p>
+     * <blockquote>
+     * {@link #supports(int) 13}}
+     * </blockquote>
+     *
+     * @return true if 1.13 or higher.
+     * @see #getVersion()
+     * @see #supports(int)
+     * @since 1.0.0
+     * @deprecated Use {@code OMaterial.supports(13)} instead. This method name can be confusing.
+     */
+    @Deprecated
     public static boolean isNewVersion() {
         return Data.ISFLAT;
     }
 
+    /**
+     * This is just an extra method that can be used for many cases.
+     * It can be used in {@link org.bukkit.event.player.PlayerInteractEvent}
+     * or when accessing {@link org.bukkit.entity.Player#getMainHand()},
+     * or other compatibility related methods.
+     * <p>
+     * An invocation of this method yields exactly the same result as the expression:
+     * <p>
+     * <blockquote>
+     * !{@link #supports(int)} 9
+     * </blockquote>
+     *
+     * @since 2.0.0
+     */
     public static boolean isOneEight() {
         return !supports(9);
     }
 
     /**
-     * Gets the XMaterial with this name similar to {@link #valueOf(String)}
+     * Gets the OMaterial with this name similar to {@link #valueOf(String)}
      * without throwing an exception.
      *
      * @param name the name of the material.
+     *
      * @return an optional that can be empty.
      * @since 5.1.0
      */
@@ -1425,7 +1604,7 @@ public enum OMaterial {
      * The current version of the server.
      *
      * @return the current server version minor number.
-     * @see #isNewVersion()
+     * @see #supports(int)
      * @since 2.0.0
      */
     public static int getVersion() {
@@ -1433,14 +1612,14 @@ public enum OMaterial {
     }
 
     /**
-     * When using newer versions of Minecraft ({@link #isNewVersion()}), helps
-     * to find the old material name with its data value using a cached search for optimization.
+     * When using 1.13+, this helps to find the old material name
+     * with its data value using a cached search for optimization.
      *
-     * @see #matchDefinedXMaterial(String, byte)
+     * @see #matchDefinedOMaterial(String, byte)
      * @since 1.0.0
      */
     @Nullable
-    private static OMaterial requestOldXMaterial(@Nonnull String name, byte data) {
+    private static OMaterial requestOldOMaterial(@Nonnull String name, byte data) {
         String holder = name + data;
         OMaterial cache = NAME_CACHE.getIfPresent(holder);
         if (cache != null) return cache;
@@ -1457,18 +1636,18 @@ public enum OMaterial {
     }
 
     /**
-     * Parses the given material name as an XMaterial with a given data
-     * value in the string if attached. Check {@link #matchXMaterialWithData(String)} for more info.
+     * Parses the given material name as an OMaterial with a given data
+     * value in the string if attached. Check {@link #matchOMaterialWithData(String)} for more info.
      *
-     * @see #matchXMaterialWithData(String)
-     * @see #matchDefinedXMaterial(String, byte)
+     * @see #matchOMaterialWithData(String)
+     * @see #matchDefinedOMaterial(String, byte)
      * @since 2.0.0
      */
     @Nonnull
-    public static OMaterial matchMaterial(@Nonnull String name) {
+    public static Optional<OMaterial> matchMaterial(@Nonnull String name) {
         Validate.notEmpty(name, "Cannot match a material with null or empty material name");
-        Optional<OMaterial> oldMatch = matchXMaterialWithData(name);
-        return (oldMatch.isPresent() ? oldMatch : matchDefinedXMaterial(format(name), UNKNOWN_DATA_VALUE)).orElseThrow(() -> new IllegalStateException("Failed to find material by name (" + name + ")"));
+        Optional<OMaterial> oldMatch = matchOMaterialWithData(name);
+        return oldMatch.isPresent() ? oldMatch : matchDefinedOMaterial(format(name), UNKNOWN_DATA_VALUE);
     }
 
     /**
@@ -1483,21 +1662,22 @@ public enum OMaterial {
      * </pre>
      *
      * @param name the material string that consists of the material name, data and separator character.
-     * @return the parsed XMaterial.
+     *
+     * @return the parsed OMaterial.
      * @see #matchMaterial(String)
      * @since 3.0.0
      */
     @Nonnull
-    private static Optional<OMaterial> matchXMaterialWithData(@Nonnull String name) {
+    private static Optional<OMaterial> matchOMaterialWithData(@Nonnull String name) {
         int index = name.indexOf(':');
         if (index != -1) {
             String mat = format(name.substring(0, index));
             try {
                 // We don't use Byte.parseByte because we have our own range check.
                 byte data = (byte) Integer.parseInt(StringUtils.deleteWhitespace(name.substring(index + 1)));
-                return data >= 0 && data < MAX_DATA_VALUE ? matchDefinedXMaterial(mat, data) : matchDefinedXMaterial(mat, UNKNOWN_DATA_VALUE);
+                return data >= 0 && data < MAX_DATA_VALUE ? matchDefinedOMaterial(mat, data) : matchDefinedOMaterial(mat, UNKNOWN_DATA_VALUE);
             } catch (NumberFormatException ignored) {
-                return matchDefinedXMaterial(mat, UNKNOWN_DATA_VALUE);
+                return matchDefinedOMaterial(mat, UNKNOWN_DATA_VALUE);
             }
         }
 
@@ -1505,26 +1685,27 @@ public enum OMaterial {
     }
 
     /**
-     * Parses the given material as an XMaterial.
+     * Parses the given material as an OMaterial.
      *
      * @throws IllegalArgumentException may be thrown as an unexpected exception.
-     * @see #matchDefinedXMaterial(String, byte)
+     * @see #matchDefinedOMaterial(String, byte)
      * @see #matchMaterial(ItemStack)
      * @since 2.0.0
      */
     @Nonnull
     public static OMaterial matchMaterial(@Nonnull Material material) {
         Objects.requireNonNull(material, "Cannot match null material");
-        return matchDefinedXMaterial(material.name(), UNKNOWN_DATA_VALUE)
+        return matchDefinedOMaterial(material.name(), UNKNOWN_DATA_VALUE)
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported material with no data value: " + material.name()));
     }
 
     /**
-     * Parses the given item as an XMaterial using its material and data value (durability)
+     * Parses the given item as an OMaterial using its material and data value (durability)
      * if not a damageable item {@link ItemStack#getDurability()}.
      *
      * @param item the ItemStack to match.
-     * @return an XMaterial if matched any.
+     *
+     * @return an OMaterial if matched any.
      * @throws IllegalArgumentException may be thrown as an unexpected exception.
      * @see #matchMaterial(Material)
      * @since 2.0.0
@@ -1536,55 +1717,43 @@ public enum OMaterial {
         String material = item.getType().name();
         byte data = (byte) (Data.ISFLAT || item.getType().getMaxDurability() > 0 ? 0 : item.getDurability());
 
-        return matchDefinedXMaterial(material, data)
+        // Check FILLED_MAP enum for more info.
+        //if (!Data.ISFLAT && item.hasItemMeta() && item.getItemMeta() instanceof org.bukkit.inventory.meta.MapMeta) return FILLED_MAP;
+
+        return matchDefinedOMaterial(material, data)
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported material from item: " + material + " (" + data + ')'));
     }
 
-    public static OMaterial matchMaterial(@NonNull Block block) {
-        if (block.getType().name().contains("DOUBLE_PLANT"))
-            return TALL_GRASS;
-
-        if (block.getType().name().contains("LEAVES"))
-            return matchDefinedXMaterial(block.getType().name(), Data.ISFLAT ? 0 : (byte) (block.getState().getRawData() % 4))
-                    .orElseThrow(() -> new IllegalArgumentException("Unsupported material from item: " + block.getType().name() + " (" + block.getData() + ')'));
-
-        OMaterial material =  matchDefinedXMaterial(block.getType().name(), Data.ISFLAT ? 0 : block.getState().getRawData())
-                .orElseGet(() -> matchDefinedXMaterial(block.getType().name(), (byte) 0).orElse(null));
-
-        return Objects.requireNonNull(material, "Unsupported material from item: " + block.getType().name() + " (r: " + block.getState().getRawData() + "s: " + block.getState().getRawData() + ")");
-    }
-
     /**
-     * The main method that parses the given material name and data value as an XMaterial.
+     * The main method that parses the given material name and data value as an OMaterial.
      * All the values passed to this method will not be null or empty and are formatted correctly.
      *
      * @param name the formatted name of the material.
      * @param data the data value of the material. Is always 0 or {@link #UNKNOWN_DATA_VALUE} when {@link Data#ISFLAT}
-     * @return an XMaterial (with the same data value if specified)
+     *
+     * @return an OMaterial (with the same data value if specified)
      * @see #matchMaterial(Material)
      * @see #matchMaterial(int, byte)
      * @see #matchMaterial(ItemStack)
      * @since 3.0.0
      */
     @Nonnull
-    protected static Optional<OMaterial> matchDefinedXMaterial(@Nonnull String name, byte data) {
-        if (name.startsWith("LEGACY"))
-            name = name.substring("LEGACY_".length());
-
+    protected static Optional<OMaterial> matchDefinedOMaterial(@Nonnull String name, byte data) {
         // if (!Boolean.valueOf(Boolean.getBoolean(Boolean.TRUE.toString())).equals(Boolean.FALSE.booleanValue())) return null;
         Boolean duplicated = null;
+        boolean isAMap = name.equalsIgnoreCase("MAP");
 
         // Do basic number and boolean checks before accessing more complex enum stuff.
-        if (Data.ISFLAT || (data <= 0 && !(duplicated = isDuplicated(name)))) {
-            Optional<OMaterial> xMaterial = getIfPresent(name);
-            if (xMaterial.isPresent()) return xMaterial;
+        if (Data.ISFLAT || (!isAMap && data <= 0 && !(duplicated = isDuplicated(name)))) {
+            Optional<OMaterial> OMaterial = getIfPresent(name);
+            if (OMaterial.isPresent()) return OMaterial;
         }
-
         // Usually flat versions wouldn't pass this point, but some special materials do.
-        OMaterial oldOMaterial = requestOldXMaterial(name, data);
+
+        OMaterial oldOMaterial = requestOldOMaterial(name, data);
         if (oldOMaterial == null) {
             // Special case. Refer to FILLED_MAP for more info.
-            return data > 0 && name.endsWith("MAP") ? Optional.of(FILLED_MAP) : Optional.empty();
+            return (data >= 0 && isAMap) ? Optional.of(FILLED_MAP) : Optional.empty();
         }
 
         if (!Data.ISFLAT && oldOMaterial.isPlural() && (duplicated == null ? isDuplicated(name) : duplicated)) return getIfPresent(name);
@@ -1592,31 +1761,33 @@ public enum OMaterial {
     }
 
     /**
-     * <b>XMaterial Paradox (Duplication Check)</b>
+     * <b>OMaterial Paradox (Duplication Check)</b>
      * Checks if the material has any duplicates.
      * <p>
      * <b>Example:</b>
      * <p>{@code MELON, CARROT, POTATO, BEETROOT -> true}
      *
      * @param name the name of the material to check.
+     *
      * @return true if there's a duplicated material for this material, otherwise false.
      * @since 2.0.0
      */
     private static boolean isDuplicated(@Nonnull String name) {
-        // Don't use matchXMaterial() since this method is being called from matchXMaterial() itself and will cause a StackOverflowError.
+        // Don't use matchMaterial() since this method is being called from matchMaterial() itself and will cause a StackOverflowError.
         return DUPLICATED.contains(name);
     }
 
     /**
-     * Gets the XMaterial based on the material's ID (Magic Value) and data value.<br>
+     * Gets the OMaterial based on the material's ID (Magic Value) and data value.<br>
      * You should avoid using this for performance issues.
      *
      * @param id   the ID (Magic value) of the material.
      * @param data the data value of the material.
-     * @return a parsed XMaterial with the same ID and data value.
+     *
+     * @return a parsed OMaterial with the same ID and data value.
      * @see #matchMaterial(ItemStack)
      * @since 2.0.0
-     * @deprecated this method loops through all the available materials and matches their ID using {@link #getCombinedId()}
+     * @deprecated this method loops through all the available materials and matches their ID using {@link #getId()}
      * which takes a really long time. Plugins should no longer support IDs. If you want, you can make a {@link Map} cache yourself.
      * This method obviously doesn't work for 1.13+ and will not be supported. This is only here for debugging purposes.
      */
@@ -1637,6 +1808,7 @@ public enum OMaterial {
      * the normal RegEx + String Methods approach for both formatted and unformatted material names.
      *
      * @param name the material name to modify.
+     *
      * @return an enum name.
      * @since 2.0.0
      */
@@ -1674,6 +1846,7 @@ public enum OMaterial {
      * Checks if the specified version is the same version or higher than the current server version.
      *
      * @param version the major version to be checked. "1." is ignored. E.g. 1.12 = 12 | 1.9 = 9
+     *
      * @return true of the version is equal or higher than the current version.
      * @since 2.0.0
      */
@@ -1686,6 +1859,7 @@ public enum OMaterial {
      * In most cases, you shouldn't be using this method.
      *
      * @param version Supports {@link Bukkit#getVersion()}, {@link Bukkit#getBukkitVersion()} and normal formats such as "1.14"
+     *
      * @return the exact major version.
      * @see #supports(int)
      * @see #getVersion()
@@ -1718,12 +1892,12 @@ public enum OMaterial {
     }
 
     /**
-     * XMaterial Paradox (Duplication Check)
+     * OMaterial Paradox (Duplication Check)
      * I've concluded that this is just an infinite loop that keeps
      * going around the Singular Form and the Plural Form materials. A waste of brain cells and a waste of time.
      * This solution works just fine anyway.
      * <p>
-     * A solution for XMaterial Paradox.
+     * A solution for OMaterial Paradox.
      * Manually parses the duplicated materials to find the exact material based on the server version.
      * If the name ends with "S" -> Plural Form Material.
      * Plural methods are only plural if they're also {@link #DUPLICATED}
@@ -1746,7 +1920,7 @@ public enum OMaterial {
      * <p>
      * <b>Example:</b>
      * <blockquote><pre>
-     *     XMaterial material = {@link #matchMaterial(ItemStack)};
+     *     OMaterial material = {@link #matchMaterial(ItemStack)};
      *     if (material.isOneOf(plugin.getConfig().getStringList("disabled-items")) return;
      * </pre></blockquote>
      * <br>
@@ -1772,6 +1946,7 @@ public enum OMaterial {
      * Want to learn RegEx? You can mess around in <a href="https://regexr.com/">RegExr</a> website.
      *
      * @param materials the material names to check base material on.
+     *
      * @return true if one of the given material names is similar to the base material.
      * @since 3.1.1
      */
@@ -1794,8 +1969,8 @@ public enum OMaterial {
             }
 
             // Direct Object Equals
-            OMaterial xMat = matchMaterial(comp);
-            if (xMat == this) return true;
+            Optional<OMaterial> xMat = matchMaterial(comp);
+            if (xMat.isPresent() && xMat.get() == this) return true;
         }
         return false;
     }
@@ -1807,6 +1982,7 @@ public enum OMaterial {
      * Use {@link #parseItem()} instead when creating new ItemStacks.
      *
      * @param item the item to change its type.
+     *
      * @see #parseItem()
      * @since 3.0.0
      */
@@ -1823,10 +1999,11 @@ public enum OMaterial {
     }
 
     /**
-     * Checks if the given material name matches any of this xmaterial's legacy material names.
+     * Checks if the given material name matches any of this OMaterial's legacy material names.
      * All the values passed to this method will not be null or empty and are formatted correctly.
      *
      * @param name the material name to check.
+     *
      * @return true if it's one of the legacy names, otherwise false.
      * @since 2.0.0
      */
@@ -1857,43 +2034,21 @@ public enum OMaterial {
         return WordUtils.capitalize(this.name().replace('_', ' ').toLowerCase(Locale.ENGLISH));
     }
 
+    /**
+     * Gets the ID (Magic value) of the material.
+     * https://www.minecraftinfo.com/idlist.htm
+     *
+     * @return the ID of the material or <b>-1</b> if it's not a legacy material or the server doesn't support the material.
+     * @see #matchMaterial(int, byte)
+     * @since 2.2.0
+     */
     @SuppressWarnings("deprecation")
     public int getId() {
         if (this.data != 0 || this.version >= 13) return -1;
-
         Material material = this.parseMaterial();
-        if (material == null || Data.ISFLAT) return -1;
-
+        if (material == null) return -1;
+        if (Data.ISFLAT) return -1;
         return material.getId();
-    }
-
-    @SuppressWarnings("deprecation")
-    public int getCombinedId() {
-        if (combinedId != -1) return combinedId;
-
-        Material material = this.parseMaterial();
-        if (material == null || Data.ISFLAT) return name().hashCode();
-
-        combinedId = material.getId() + (data << 12);
-        return combinedId;
-    }
-
-    private static final OCache<Integer, OMaterial> COMBINED_ID_TO_OMATERIAL_CACHE = OCache.builder()
-            .expireAfter(5, TimeUnit.MINUTES)
-            .resetExpireAfterAccess(true)
-            .concurrencyLevel(1)
-            .build();
-
-    public static OMaterial byCombinedId(int combinedData) {
-        OMaterial cache = COMBINED_ID_TO_OMATERIAL_CACHE.get(combinedData);
-        if (cache != null) return cache;
-
-        cache = VALUES.stream()
-                .filter(m -> m.getCombinedId() != -1 || m.getCombinedId() == Integer.MAX_VALUE)
-                .filter(m -> m.getCombinedId() == combinedData)
-                .findFirst().orElse(null);
-        COMBINED_ID_TO_OMATERIAL_CACHE.put(combinedData, cache);
-        return cache;
     }
 
     /**
@@ -1911,7 +2066,7 @@ public enum OMaterial {
     }
 
     /**
-     * Parses an item from this XMaterial.
+     * Parses an item from this OMaterial.
      * Uses data values on older versions.
      *
      * @return an ItemStack with the same material (and data value if in older versions.)
@@ -1923,21 +2078,13 @@ public enum OMaterial {
     public ItemStack parseItem() {
         Material material = this.parseMaterial();
         if (material == null) return null;
-
         return Data.ISFLAT ? new ItemStack(material) : new ItemStack(material, 1, this.data);
     }
 
-    public ItemStack parseItem(int amount) {
-        Material material = this.parseMaterial();
-        if (material == null) return null;
-
-        return Data.ISFLAT ? new ItemStack(material, amount) : new ItemStack(material, amount, this.data);
-    }
-
     /**
-     * Parses the material of this XMaterial.
+     * Parses the material of this OMaterial.
      *
-     * @return the material related to this XMaterial based on the server version.
+     * @return the material related to this OMaterial based on the server version.
      * @since 1.0.0
      */
     @Nullable
@@ -1949,6 +2096,7 @@ public enum OMaterial {
      * Checks if an item has the same material (and data value on older versions).
      *
      * @param item item to check.
+     *
      * @return true if the material is the same as the item's material (and data value if on older versions), otherwise false.
      * @since 1.0.0
      */
@@ -1956,7 +2104,7 @@ public enum OMaterial {
     public boolean isSimilar(@Nonnull ItemStack item) {
         Objects.requireNonNull(item, "Cannot compare with null ItemStack");
         if (item.getType() != this.parseMaterial()) return false;
-        return Data.ISFLAT || item.getDurability() == this.data || item.getType().getMaxDurability() <= 0;
+        return Data.ISFLAT || item.getDurability() == this.data || item.getType().getMaxDurability() > 0;
     }
 
     /**
@@ -2004,9 +2152,9 @@ public enum OMaterial {
             case "NETHER_BRICK":
 
                 // Illegal Elements
-                // Since both 1.12 and 1.13 have <type>_DOOR XMaterial will use it
+                // Since both 1.12 and 1.13 have <type>_DOOR OMaterial will use it
                 // for 1.12 to parse the material, but it needs <type>_DOOR_ITEM.
-                // We'll trick XMaterial into thinking this needs to be parsed
+                // We'll trick OMaterial into thinking this needs to be parsed
                 // using the old methods.
                 // Some of these materials have their enum name added to the legacy list as well.
             case "DARK_OAK_DOOR":
@@ -2044,4 +2192,48 @@ public enum OMaterial {
          */
         private static final boolean ISFLAT = supports(13);
     }
+
+    @SuppressWarnings("deprecation")
+    public int getCombinedId() {
+        if (combinedId != -1) return combinedId;
+
+        Material material = this.parseMaterial();
+        if (material == null || Data.ISFLAT) return name().hashCode();
+
+        combinedId = material.getId() + (data << 12);
+        return combinedId;
+    }
+
+    private static final OCache<Integer, OMaterial> COMBINED_ID_TO_OMATERIAL_CACHE = OCache.builder()
+            .expireAfter(5, TimeUnit.MINUTES)
+            .resetExpireAfterAccess(true)
+            .concurrencyLevel(1)
+            .build();
+
+    public static OMaterial byCombinedId(int combinedData) {
+        OMaterial cache = COMBINED_ID_TO_OMATERIAL_CACHE.get(combinedData);
+        if (cache != null) return cache;
+
+        cache = Arrays.stream(VALUES)
+                .filter(m -> m.getCombinedId() != -1 || m.getCombinedId() == Integer.MAX_VALUE)
+                .filter(m -> m.getCombinedId() == combinedData)
+                .findFirst().orElse(null);
+        COMBINED_ID_TO_OMATERIAL_CACHE.put(combinedData, cache);
+        return cache;
+    }
+
+    public static OMaterial matchMaterial(@Nonnull Block block) {
+        if (block.getType().name().contains("DOUBLE_PLANT"))
+            return TALL_GRASS;
+
+        if (block.getType().name().contains("LEAVES"))
+            return matchDefinedOMaterial(block.getType().name(), Data.ISFLAT ? 0 : (byte) (block.getState().getRawData() % 4))
+                    .orElseThrow(() -> new IllegalArgumentException("Unsupported material from item: " + block.getType().name() + " (" + block.getData() + ')'));
+
+        OMaterial material =  matchDefinedOMaterial(block.getType().name(), Data.ISFLAT ? 0 : block.getState().getRawData())
+                .orElseGet(() -> matchDefinedOMaterial(block.getType().name(), (byte) 0).orElse(null));
+
+        return Objects.requireNonNull(material, "Unsupported material from item: " + block.getType().name() + " (r: " + block.getState().getRawData() + "s: " + block.getState().getRawData() + ")");
+    }
+
 }
